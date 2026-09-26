@@ -1,0 +1,1383 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
+</head>
+<body>
+<title>Nof1 Oncology</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=IBM+Plex+Mono:wght@400;500&family=IBM+Plex+Sans:wght@400;500;600&family=Newsreader:ital,opsz,wght@0,6..72,400;0,6..72,500;1,6..72,400&display=swap">
+<style>
+:root{
+  --bg:#F2F5F4; --surface:#FFFFFF; --surface-2:#E8EEEC; --ink:#122120; --ink-2:#4B5C59; --ink-3:#6F7F7C; --line:#D2DCD9;
+  --brand:#0B5D57; --brand-ink:#FFFFFF; --brand-soft:#DAECE8;
+  --accent:#A95A06; --accent-soft:#F6E8D5;
+  --ok:#1D7443; --ok-soft:#DCEFE2; --warn:#8A5F00; --warn-soft:#F5ECCD; --bad:#B42318; --bad-soft:#F8DFDB; --info:#2C5AA3; --info-soft:#DFE7F6;
+  --shadow:0 1px 2px rgba(18,33,32,.06),0 6px 20px rgba(18,33,32,.06);
+  --serif:"Newsreader",Georgia,"Times New Roman",serif;
+  --sans:"IBM Plex Sans",system-ui,-apple-system,"Segoe UI",Roboto,sans-serif;
+  --mono:"IBM Plex Mono",ui-monospace,SFMono-Regular,Menlo,Consolas,monospace;
+  --tabbar-h:64px;
+}
+@media (prefers-color-scheme: dark){
+  :root:not([data-theme="light"]){
+    color-scheme:dark;
+    --bg:#0B1211; --surface:#111B1A; --surface-2:#182624; --ink:#E3ECEA; --ink-2:#A2B5B1; --ink-3:#7E918D; --line:#263735;
+    --brand:#52C2B4; --brand-ink:#05201C; --brand-soft:#123531;
+    --accent:#E8A650; --accent-soft:#3A2913;
+    --ok:#62CC8F; --ok-soft:#123020; --warn:#E3BE58; --warn-soft:#342A10; --bad:#F08A7E; --bad-soft:#3B1814; --info:#8AAAEA; --info-soft:#17243B;
+    --shadow:0 1px 2px rgba(0,0,0,.3),0 8px 24px rgba(0,0,0,.25);
+  }
+}
+:root[data-theme="dark"]{
+  color-scheme:dark;
+  --bg:#0B1211; --surface:#111B1A; --surface-2:#182624; --ink:#E3ECEA; --ink-2:#A2B5B1; --ink-3:#7E918D; --line:#263735;
+  --brand:#52C2B4; --brand-ink:#05201C; --brand-soft:#123531;
+  --accent:#E8A650; --accent-soft:#3A2913;
+  --ok:#62CC8F; --ok-soft:#123020; --warn:#E3BE58; --warn-soft:#342A10; --bad:#F08A7E; --bad-soft:#3B1814; --info:#8AAAEA; --info-soft:#17243B;
+  --shadow:0 1px 2px rgba(0,0,0,.3),0 8px 24px rgba(0,0,0,.25);
+}
+*{box-sizing:border-box}
+html,body{background:var(--bg)}
+body{margin:0;color:var(--ink);font:15px/1.55 var(--sans);-webkit-font-smoothing:antialiased}
+h1,h2,h3,h4{margin:0;text-wrap:balance;font-weight:500}
+p{margin:0}
+a{color:var(--brand)}
+button,input,select,textarea{font:inherit;color:inherit}
+:focus-visible{outline:2px solid var(--brand);outline-offset:2px;border-radius:6px}
+.mono{font-family:var(--mono);font-size:.92em}
+.muted{color:var(--ink-2)}
+.small{font-size:13px}
+.tnum{font-variant-numeric:tabular-nums}
+.eyebrow{font-size:12px;letter-spacing:.08em;text-transform:uppercase;color:var(--ink-2);font-weight:500}
+
+/* Shell */
+.topbar{position:sticky;top:env(safe-area-inset-top,0px);z-index:20;background:color-mix(in srgb,var(--bg) 88%,transparent);backdrop-filter:blur(10px);-webkit-backdrop-filter:blur(10px);border-bottom:1px solid var(--line)}
+.topbar-in{max-width:1120px;margin:0 auto;padding:10px 16px;display:flex;align-items:center;gap:16px}
+.brand{display:flex;align-items:center;gap:10px;text-decoration:none;color:var(--ink);background:none;border:0;padding:0;cursor:pointer}
+.brand-mark{width:30px;height:30px;border-radius:8px;background:var(--brand);color:var(--brand-ink);display:grid;place-items:center;font-family:var(--serif);font-size:16px;font-style:italic}
+.brand-name{font-family:var(--serif);font-size:21px;letter-spacing:-.01em}
+.brand-name i{color:var(--brand)}
+.topnav{display:flex;gap:2px;margin-left:auto}
+.topnav button{border:0;background:none;padding:8px 12px;border-radius:8px;color:var(--ink-2);cursor:pointer;font-weight:500;font-size:14px}
+.topnav button:hover{background:var(--surface-2);color:var(--ink)}
+.topnav button[aria-current="page"]{color:var(--ink);background:var(--surface-2)}
+.tabbar{display:none}
+main{max-width:1120px;margin:0 auto;padding-inline:16px;padding-block:24px 64px}
+.demo-strip{background:var(--accent-soft);color:var(--ink);font-size:12.5px;text-align:center;padding:6px 16px}
+.demo-strip b{color:var(--accent);font-weight:600}
+@media (max-width:760px){
+  .topnav{display:none}
+  .tabbar{display:grid;grid-template-columns:repeat(5,1fr);position:fixed;left:0;right:0;bottom:0;z-index:30;background:var(--surface);border-top:1px solid var(--line);padding-bottom:env(safe-area-inset-bottom,0px)}
+  .tabbar button{border:0;background:none;height:var(--tabbar-h);display:flex;flex-direction:column;align-items:center;justify-content:center;gap:3px;color:var(--ink-3);font-size:11px;font-weight:500;cursor:pointer}
+  .tabbar button svg{width:22px;height:22px}
+  .tabbar button[aria-current="page"]{color:var(--brand)}
+  main{padding-block:18px calc(var(--tabbar-h) + 32px)}
+}
+
+/* Controls */
+.btn{display:inline-flex;align-items:center;justify-content:center;gap:8px;border:1px solid var(--line);background:var(--surface);color:var(--ink);padding:10px 16px;border-radius:10px;font-weight:500;cursor:pointer;text-decoration:none;min-height:42px;transition:background .15s,border-color .15s}
+.btn:hover{border-color:var(--ink-3)}
+.btn.primary{background:var(--brand);border-color:var(--brand);color:var(--brand-ink)}
+.btn.primary:hover{filter:brightness(1.07)}
+.btn.ghost{background:transparent;border-color:transparent;color:var(--brand)}
+.btn.ghost:hover{background:var(--brand-soft)}
+.btn.sm{padding:6px 11px;min-height:34px;font-size:13.5px;border-radius:8px}
+.btn[disabled]{opacity:.45;cursor:not-allowed;filter:none}
+.row{display:flex;gap:10px;flex-wrap:wrap;align-items:center}
+.spread{display:flex;gap:12px;flex-wrap:wrap;align-items:center;justify-content:space-between}
+.field{display:flex;flex-direction:column;gap:6px;min-width:0}
+.field>span{font-size:13px;font-weight:500;color:var(--ink-2)}
+.field small{color:var(--ink-3);font-size:12px}
+input[type=text],input[type=number],input[type=month],select,textarea{width:100%;background:var(--surface);border:1px solid var(--line);border-radius:10px;padding:10px 12px;min-height:44px;outline:none}
+input:focus,select:focus,textarea:focus{border-color:var(--brand);box-shadow:0 0 0 3px var(--brand-soft)}
+textarea{min-height:96px;resize:vertical;line-height:1.5}
+textarea.mono{font-size:12.5px}
+.grid2{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:14px}
+.grid3{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:14px}
+@media (max-width:640px){.grid2,.grid3{grid-template-columns:1fr}}
+.checks{display:flex;flex-wrap:wrap;gap:8px}
+.check{display:inline-flex;align-items:center;gap:7px;border:1px solid var(--line);background:var(--surface);border-radius:999px;padding:6px 12px;font-size:13.5px;cursor:pointer;user-select:none}
+.check input{accent-color:var(--brand);margin:0}
+.check:has(input:checked){border-color:var(--brand);background:var(--brand-soft)}
+.panel{background:var(--surface);border:1px solid var(--line);border-radius:14px;padding:20px}
+@media (max-width:640px){.panel{padding:16px}}
+.stack{display:flex;flex-direction:column;gap:14px}
+.stack-lg{display:flex;flex-direction:column;gap:28px}
+
+/* Pills & badges */
+.pill{display:inline-flex;align-items:center;gap:6px;font-size:12px;font-weight:500;padding:3px 9px;border-radius:999px;white-space:nowrap;line-height:1.5}
+.pill::before{content:"";width:6px;height:6px;border-radius:50%;background:currentColor}
+.pill.ok{background:var(--ok-soft);color:var(--ok)}
+.pill.warn{background:var(--warn-soft);color:var(--warn)}
+.pill.bad{background:var(--bad-soft);color:var(--bad)}
+.pill.info{background:var(--info-soft);color:var(--info)}
+.pill.neutral{background:var(--surface-2);color:var(--ink-2)}
+.tier{font-family:var(--mono);font-size:11.5px;font-weight:500;padding:2px 7px;border-radius:6px;border:1px solid currentColor;white-space:nowrap}
+.tier.t1{color:var(--ok)} .tier.t2{color:var(--info)} .tier.t3{color:var(--warn)} .tier.t4{color:var(--ink-3)}
+.variant{font-family:var(--mono);font-size:13px;background:var(--accent-soft);color:var(--accent);border-radius:6px;padding:2px 7px;white-space:nowrap}
+
+/* Home */
+.hero{display:grid;grid-template-columns:1.25fr 1fr;gap:40px;align-items:center;padding-block:28px 12px}
+@media (max-width:900px){.hero{grid-template-columns:1fr;gap:28px;padding-block:8px 0}}
+.hero h1{font-family:var(--serif);font-weight:400;font-size:clamp(40px,7vw,68px);line-height:1.02;letter-spacing:-.02em}
+.hero h1 em{color:var(--brand)}
+.hero .lede{font-size:17px;color:var(--ink-2);max-width:56ch;margin-top:18px}
+.hero .row{margin-top:24px}
+.specimen{background:var(--surface);border:1px solid var(--line);border-radius:16px;box-shadow:var(--shadow);padding:18px;font-size:13.5px;position:relative;overflow:hidden}
+.specimen-head{display:flex;justify-content:space-between;gap:8px;align-items:baseline;border-bottom:1px solid var(--line);padding-bottom:10px;margin-bottom:12px}
+.specimen-head b{font-family:var(--serif);font-weight:500;font-size:17px}
+.specimen .line{display:flex;justify-content:space-between;align-items:center;gap:10px;padding:8px 0;border-bottom:1px dashed var(--line)}
+.specimen .line:last-of-type{border-bottom:0}
+.specimen .sig{margin-top:12px;padding-top:12px;border-top:1px solid var(--line);display:flex;align-items:center;gap:10px}
+.sig-script{font-family:var(--serif);font-style:italic;font-size:20px;color:var(--brand)}
+.facts{display:grid;grid-template-columns:repeat(4,minmax(0,1fr));gap:1px;background:var(--line);border:1px solid var(--line);border-radius:14px;overflow:hidden;margin-top:36px}
+.facts div{background:var(--surface);padding:16px}
+.facts b{display:block;font-family:var(--serif);font-weight:500;font-size:26px;letter-spacing:-.01em}
+.facts span{color:var(--ink-2);font-size:13px}
+@media (max-width:760px){.facts{grid-template-columns:repeat(2,minmax(0,1fr))}}
+.section-h{display:flex;flex-direction:column;gap:6px;margin-bottom:16px}
+.section-h h2{font-family:var(--serif);font-weight:400;font-size:clamp(26px,4vw,34px);letter-spacing:-.01em}
+.steps{display:grid;grid-template-columns:repeat(4,minmax(0,1fr));gap:14px;counter-reset:s}
+@media (max-width:900px){.steps{grid-template-columns:repeat(2,minmax(0,1fr))}}
+@media (max-width:520px){.steps{grid-template-columns:1fr}}
+.step{border-top:2px solid var(--brand);padding-top:12px;counter-increment:s}
+.step::before{content:counter(s,decimal-leading-zero);font-family:var(--mono);font-size:12px;color:var(--brand)}
+.step h3{font-size:16px;font-weight:600;margin:4px 0 6px}
+.step p{color:var(--ink-2);font-size:14px}
+.price-grid{display:grid;grid-template-columns:1.2fr 1fr;gap:14px}
+@media (max-width:760px){.price-grid{grid-template-columns:1fr}}
+.price{font-family:var(--serif);font-size:44px;line-height:1;letter-spacing:-.02em}
+.ticks{list-style:none;padding:0;margin:0;display:flex;flex-direction:column;gap:8px}
+.ticks li{display:flex;gap:10px;align-items:flex-start}
+.ticks li::before{content:"";flex:none;width:16px;height:16px;margin-top:3px;border-radius:50%;background:var(--brand-soft) url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 16 16'%3E%3Cpath d='M4.5 8.3l2.2 2.2 4.8-5' fill='none' stroke='%230B5D57' stroke-width='1.8' stroke-linecap='round' stroke-linejoin='round'/%3E%3C/svg%3E") center/100% no-repeat}
+.callout{border:1px solid var(--line);border-left:3px solid var(--info);background:var(--info-soft);border-radius:10px;padding:14px 16px;font-size:14px}
+.callout.warn{border-left-color:var(--warn);background:var(--warn-soft)}
+
+/* Intake */
+.stepper{display:grid;grid-template-columns:repeat(4,minmax(0,1fr));gap:6px;margin-bottom:18px}
+.stepper button{border:0;background:none;padding:0;text-align:left;cursor:pointer;color:var(--ink-3);font-size:12.5px;font-weight:500;display:flex;flex-direction:column;gap:6px}
+.stepper button::before{content:"";height:4px;border-radius:4px;background:var(--line)}
+.stepper button.done{color:var(--ink-2)}
+.stepper button.done::before{background:var(--brand)}
+.stepper button[aria-current="step"]{color:var(--ink)}
+.stepper button[aria-current="step"]::before{background:var(--brand)}
+@media (max-width:520px){.stepper button span{display:none}.stepper button[aria-current="step"] span{display:inline}}
+.examples{display:flex;gap:8px;overflow-x:auto;padding-bottom:4px;scrollbar-width:none}
+.examples::-webkit-scrollbar{display:none}
+.examples .btn{white-space:nowrap}
+.varlist{display:flex;flex-direction:column;border:1px solid var(--line);border-radius:10px;overflow:hidden}
+.varrow{display:grid;grid-template-columns:auto 1fr auto auto;gap:10px;align-items:center;padding:10px 12px;background:var(--surface);border-bottom:1px solid var(--line)}
+.varrow:last-child{border-bottom:0}
+.varrow .g{font-family:var(--mono);font-weight:500;min-width:54px}
+.iconbtn{border:0;background:none;width:32px;height:32px;border-radius:8px;display:grid;place-items:center;color:var(--ink-3);cursor:pointer}
+.iconbtn:hover{background:var(--surface-2);color:var(--bad)}
+.addvar{display:grid;grid-template-columns:120px 1fr 90px auto;gap:8px}
+@media (max-width:560px){.addvar{grid-template-columns:1fr 1fr}.addvar .btn{grid-column:1/-1}}
+.hist{border:1px solid var(--line);border-radius:12px;padding:14px;background:var(--surface);display:grid;grid-template-columns:2fr 1fr 1fr 1fr 1fr auto;gap:10px;align-items:end}
+@media (max-width:860px){.hist{grid-template-columns:1fr 1fr}.hist .field:first-child{grid-column:1/-1}}
+.formnav{display:flex;justify-content:space-between;gap:10px;margin-top:22px;padding-top:18px;border-top:1px solid var(--line)}
+.summary-dl{display:grid;grid-template-columns:160px 1fr;gap:8px 16px;margin:0}
+.summary-dl dt{color:var(--ink-2);font-size:13px}
+.summary-dl dd{margin:0}
+@media (max-width:520px){.summary-dl{grid-template-columns:1fr}.summary-dl dt{margin-top:6px}}
+
+/* Pipeline */
+.pipe{max-width:620px;margin:24px auto;display:flex;flex-direction:column;gap:0}
+.pipe h2{font-family:var(--serif);font-weight:400;font-size:28px;margin-bottom:6px}
+.pipe-list{list-style:none;padding:0;margin:18px 0 0;border-left:2px solid var(--line);margin-left:9px}
+.pipe-list li{position:relative;padding:0 0 18px 22px;color:var(--ink-3)}
+.pipe-list li::before{content:"";position:absolute;left:-8px;top:4px;width:14px;height:14px;border-radius:50%;background:var(--bg);border:2px solid var(--line)}
+.pipe-list li.run{color:var(--ink)}
+.pipe-list li.run::before{border-color:var(--brand);animation:pulse 1s ease-in-out infinite}
+.pipe-list li.done{color:var(--ink)}
+.pipe-list li.done::before{background:var(--brand);border-color:var(--brand)}
+.pipe-list li b{font-weight:500;display:block}
+.pipe-list li small{font-family:var(--mono);font-size:12px;color:var(--ink-2)}
+@keyframes pulse{50%{box-shadow:0 0 0 5px var(--brand-soft)}}
+@media (prefers-reduced-motion:reduce){.pipe-list li.run::before{animation:none}}
+
+/* Report */
+.doc{background:var(--surface);border:1px solid var(--line);border-radius:16px;box-shadow:var(--shadow);overflow:hidden}
+.doc-head{padding:22px 24px;border-bottom:1px solid var(--line);display:grid;grid-template-columns:1fr auto;gap:16px;align-items:start}
+.doc-head h1{font-family:var(--serif);font-weight:400;font-size:clamp(26px,4vw,34px);letter-spacing:-.01em;line-height:1.15}
+.doc-meta{display:flex;flex-wrap:wrap;gap:6px 18px;margin-top:10px;font-size:13px;color:var(--ink-2)}
+.doc-meta b{color:var(--ink);font-weight:500}
+.doc-sec{padding:22px 24px;border-bottom:1px solid var(--line)}
+.doc-sec:last-child{border-bottom:0}
+.doc-sec>h2{font-family:var(--serif);font-weight:500;font-size:21px;margin-bottom:4px;display:flex;align-items:baseline;gap:10px}
+.doc-sec>h2 .sec-n{font-family:var(--mono);font-size:12px;color:var(--ink-3);font-weight:400}
+.doc-sec>.sec-sub{color:var(--ink-2);font-size:13.5px;margin-bottom:14px}
+@media (max-width:640px){.doc-head,.doc-sec{padding:18px 16px}.doc-head{grid-template-columns:1fr}}
+.summary-text{font-family:var(--serif);font-size:18.5px;line-height:1.5;max-width:68ch}
+.tbl-wrap{overflow-x:auto;border:1px solid var(--line);border-radius:10px}
+table{border-collapse:collapse;width:100%;font-size:14px}
+th,td{text-align:left;padding:10px 12px;border-bottom:1px solid var(--line);vertical-align:top}
+th{font-size:12px;letter-spacing:.06em;text-transform:uppercase;color:var(--ink-2);font-weight:500;background:var(--surface-2)}
+tr:last-child td{border-bottom:0}
+.rx{display:grid;grid-template-columns:28px 1fr;gap:12px;padding:14px 0;border-bottom:1px solid var(--line)}
+.rx:last-child{border-bottom:0}
+.rx-n{font-family:var(--mono);font-size:13px;color:var(--ink-3);padding-top:2px}
+.rx h3{font-size:16px;font-weight:600;line-height:1.35}
+.rx .row{margin-top:6px;gap:6px}
+.rx p{margin-top:8px;color:var(--ink-2);font-size:14px;max-width:72ch}
+.rx .evid{margin-top:8px;font-size:13px;display:flex;gap:8px;align-items:baseline;flex-wrap:wrap}
+.rx .evid .mono{color:var(--ink-2)}
+.reviewer-note{margin-top:8px;font-size:13.5px;border-left:3px solid var(--brand);padding:4px 10px;background:var(--brand-soft);border-radius:0 8px 8px 0}
+.consider{list-style:none;padding:0;margin:0;display:flex;flex-direction:column;gap:10px}
+.consider li{display:grid;grid-template-columns:auto 1fr;gap:10px;align-items:start;font-size:14.5px}
+.trial{border:1px solid var(--line);border-radius:12px;padding:14px 16px;display:flex;flex-direction:column;gap:10px}
+.trial+.trial{margin-top:10px}
+.trial h3{font-size:15.5px;font-weight:600;line-height:1.35}
+.crit{list-style:none;padding:0;margin:0;display:grid;gap:6px;font-size:13.5px}
+.crit li{display:grid;grid-template-columns:18px 1fr;gap:8px;align-items:start}
+.crit .m{font-family:var(--mono);font-weight:600;text-align:center}
+.crit .m.y{color:var(--ok)} .crit .m.n{color:var(--bad)} .crit .m.q{color:var(--warn)}
+.questions{margin:0;padding-left:22px;display:flex;flex-direction:column;gap:10px;font-family:var(--serif);font-size:17px;line-height:1.45}
+.questions li::marker{font-family:var(--mono);font-size:13px;color:var(--brand)}
+.signoff{display:grid;grid-template-columns:1fr auto;gap:14px;align-items:center;background:var(--surface-2);border-radius:12px;padding:16px}
+@media (max-width:640px){.signoff{grid-template-columns:1fr}}
+.legend{display:grid;grid-template-columns:repeat(auto-fit,minmax(200px,1fr));gap:8px 16px;font-size:13px;color:var(--ink-2)}
+.legend div{display:flex;gap:8px;align-items:baseline}
+.ai-box{border:1px solid var(--line);border-radius:12px;padding:16px;background:var(--surface-2)}
+.ai-out{font-size:14.5px;display:flex;flex-direction:column;gap:8px}
+.ai-out h4{font-size:14px;font-weight:600;margin-top:6px}
+.ai-out ul{margin:0;padding-left:20px;display:flex;flex-direction:column;gap:4px}
+
+/* Cases list */
+.case-list{display:flex;flex-direction:column;gap:10px}
+.case-card{display:grid;grid-template-columns:1fr auto;gap:10px 16px;align-items:center;background:var(--surface);border:1px solid var(--line);border-radius:12px;padding:14px 16px;cursor:pointer;text-align:left;width:100%}
+.case-card:hover{border-color:var(--ink-3)}
+.case-card h3{font-size:15.5px;font-weight:600}
+.case-card .muted{font-size:13px}
+.case-card .row{gap:6px;margin-top:6px}
+
+/* Review */
+.review-layout{display:grid;grid-template-columns:280px 1fr;gap:20px;align-items:start}
+@media (max-width:900px){.review-layout{grid-template-columns:1fr}}
+.queue{display:flex;flex-direction:column;gap:6px}
+.queue button{text-align:left;border:1px solid var(--line);background:var(--surface);border-radius:10px;padding:10px 12px;cursor:pointer;display:flex;flex-direction:column;gap:4px}
+.queue button[aria-current="true"]{border-color:var(--brand);box-shadow:0 0 0 2px var(--brand-soft)}
+.queue .mono{font-size:12px;color:var(--ink-2)}
+@media (max-width:900px){.queue{flex-direction:row;overflow-x:auto}.queue button{min-width:210px}}
+.rv-head{position:sticky;top:calc(env(safe-area-inset-top,0px) + 56px);z-index:5;background:var(--surface);border:1px solid var(--line);border-radius:12px;padding:12px 16px;display:flex;gap:14px;align-items:center;flex-wrap:wrap;justify-content:space-between}
+.progress{height:6px;border-radius:6px;background:var(--surface-2);overflow:hidden;flex:1;min-width:120px}
+.progress i{display:block;height:100%;background:var(--brand);transition:width .3s}
+.timer{font-family:var(--mono);font-size:14px}
+.claim-group h3{font-size:12px;letter-spacing:.08em;text-transform:uppercase;color:var(--ink-2);font-weight:500;margin:6px 0 8px}
+.claim{display:grid;grid-template-columns:1fr auto;gap:12px;padding:12px 14px;background:var(--surface);border:1px solid var(--line);border-radius:10px;align-items:start}
+.claim+.claim{margin-top:8px}
+.claim[data-state="verified"]{border-color:color-mix(in srgb,var(--ok) 45%,var(--line))}
+.claim[data-state="edited"]{border-color:color-mix(in srgb,var(--info) 45%,var(--line))}
+.claim[data-state="flagged"]{border-color:color-mix(in srgb,var(--bad) 45%,var(--line));background:color-mix(in srgb,var(--bad-soft) 45%,var(--surface))}
+.claim-title{font-weight:600;font-size:14.5px}
+.claim-meta{font-size:12.5px;color:var(--ink-2);margin-top:3px;display:flex;gap:6px;flex-wrap:wrap;align-items:center}
+.claim-note{font-size:13.5px;color:var(--ink-2);margin-top:6px}
+.claim-actions{display:flex;gap:6px}
+.claim-actions button{border:1px solid var(--line);background:var(--surface);border-radius:8px;padding:5px 10px;font-size:12.5px;font-weight:500;cursor:pointer;min-height:32px}
+.claim-actions button.on[data-set="verified"]{background:var(--ok-soft);color:var(--ok);border-color:var(--ok)}
+.claim-actions button.on[data-set="edited"]{background:var(--info-soft);color:var(--info);border-color:var(--info)}
+.claim-actions button.on[data-set="flagged"]{background:var(--bad-soft);color:var(--bad);border-color:var(--bad)}
+@media (max-width:560px){.claim{grid-template-columns:1fr}}
+.claim-edit{grid-column:1/-1;display:flex;flex-direction:column;gap:8px}
+
+/* Investors */
+.kpis{display:grid;grid-template-columns:repeat(4,minmax(0,1fr));gap:12px}
+@media (max-width:760px){.kpis{grid-template-columns:repeat(2,minmax(0,1fr))}}
+.kpi{background:var(--surface);border:1px solid var(--line);border-radius:12px;padding:14px}
+.kpi span{font-size:12.5px;color:var(--ink-2)}
+.kpi b{display:block;font-family:var(--serif);font-weight:500;font-size:28px;letter-spacing:-.01em;margin-top:2px}
+.kpi small{color:var(--ink-3);font-size:12px}
+.kpi.hl{background:var(--brand);border-color:var(--brand);color:var(--brand-ink)}
+.kpi.hl span,.kpi.hl small{color:inherit;opacity:.85}
+.slider{display:grid;grid-template-columns:1fr auto;gap:4px 12px;align-items:center}
+.slider label{font-size:13.5px;font-weight:500}
+.slider output{font-family:var(--mono);font-size:13.5px}
+.slider input{grid-column:1/-1;width:100%;accent-color:var(--brand)}
+.cost-bar{display:flex;height:34px;border-radius:8px;overflow:hidden;border:1px solid var(--line)}
+.cost-bar div{display:flex;align-items:center;justify-content:center;font-size:11.5px;font-weight:500;white-space:nowrap;overflow:hidden;min-width:0;transition:flex-basis .25s}
+.cost-legend{display:flex;flex-wrap:wrap;gap:6px 16px;font-size:12.5px;color:var(--ink-2);margin-top:8px}
+.cost-legend i{display:inline-block;width:10px;height:10px;border-radius:3px;margin-right:6px;vertical-align:-1px}
+.timeline{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:14px}
+@media (max-width:760px){.timeline{grid-template-columns:1fr}}
+.ms{border-top:2px solid var(--line);padding-top:12px}
+.ms.now{border-top-color:var(--brand)}
+.ms b{font-family:var(--mono);font-size:12px;color:var(--brand);font-weight:500}
+.ms h3{font-family:var(--serif);font-size:24px;font-weight:500;margin:4px 0 8px}
+.ms ul{margin:0;padding-left:18px;color:var(--ink-2);font-size:14px;display:flex;flex-direction:column;gap:4px}
+.two{display:grid;grid-template-columns:1fr 1fr;gap:14px}
+@media (max-width:760px){.two{grid-template-columns:1fr}}
+.toast{position:fixed;left:50%;transform:translateX(-50%);bottom:calc(var(--tabbar-h) + 24px + env(safe-area-inset-bottom,0px));background:var(--ink);color:var(--bg);padding:10px 16px;border-radius:10px;font-size:14px;z-index:50;box-shadow:var(--shadow)}
+@media (min-width:761px){.toast{bottom:24px}}
+footer.foot{max-width:1120px;margin:0 auto;padding:0 16px 40px;color:var(--ink-3);font-size:12.5px}
+@media (max-width:760px){footer.foot{display:none}}
+</style>
+
+<div class="demo-strip"><b>Investor demo</b> · Fictional patients · Decision support for physicians, not a diagnosis</div>
+<header class="topbar">
+  <div class="topbar-in">
+    <button class="brand" data-go="home" aria-label="Nof1 Oncology home">
+      <span class="brand-mark">n1</span>
+      <span class="brand-name">Nof1 <i>Oncology</i></span>
+    </button>
+    <nav class="topnav" id="topnav"></nav>
+  </div>
+</header>
+<main id="app"></main>
+<footer class="foot">Nof1 Oncology produces physician-reviewed clinical decision support. It does not diagnose, prescribe or replace the treating oncologist. This build uses fictional cases; trial listings are illustrative and would sync from ClinicalTrials.gov in production.</footer>
+<nav class="tabbar" id="tabbar"></nav>
+<div class="toast" id="toast" hidden></div>
+
+<script>
+"use strict";
+/* ============================ Utilities ============================ */
+const $ = (s, r = document) => r.querySelector(s);
+const esc = s => String(s ?? "").replace(/[&<>"']/g, c => ({"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;","'":"&#39;"}[c]));
+const fmt$ = n => "$" + Math.round(n).toLocaleString("en-US");
+const fmtK = n => n >= 1e6 ? "$" + (n/1e6).toFixed(n >= 1e7 ? 0 : 1) + "M" : n >= 1e3 ? "$" + Math.round(n/1e3) + "k" : fmt$(n);
+const pct = n => Math.round(n * 100) + "%";
+const today = () => new Date().toISOString().slice(0, 10);
+const store = {
+  get(k, d) { try { const v = localStorage.getItem(k); return v ? JSON.parse(v) : d; } catch { return d; } },
+  set(k, v) { try { localStorage.setItem(k, JSON.stringify(v)); } catch {} }
+};
+const reduceMotion = (() => { try { return matchMedia("(prefers-reduced-motion: reduce)").matches; } catch { return false; } })();
+function toast(msg) {
+  const t = $("#toast"); t.textContent = msg; t.hidden = false;
+  clearTimeout(toast._t); toast._t = setTimeout(() => { t.hidden = true; }, 2600);
+}
+
+/* ============================ Reference data ============================ */
+const CITIES = {
+  "Boston, MA":[42.36,-71.06],"New York, NY":[40.71,-74.01],"Philadelphia, PA":[39.95,-75.17],"Baltimore, MD":[39.29,-76.61],
+  "Atlanta, GA":[33.75,-84.39],"Miami, FL":[25.76,-80.19],"Nashville, TN":[36.16,-86.78],"Cleveland, OH":[41.50,-81.69],
+  "Chicago, IL":[41.88,-87.63],"Minneapolis, MN":[44.98,-93.27],"Houston, TX":[29.76,-95.37],"Dallas, TX":[32.78,-96.80],
+  "Denver, CO":[39.74,-104.99],"Phoenix, AZ":[33.45,-112.07],"Los Angeles, CA":[34.05,-118.24],"San Francisco, CA":[37.77,-122.42],
+  "Seattle, WA":[47.61,-122.33],"London, UK":[51.51,-0.13],"Mumbai, IN":[19.08,72.88],"New Delhi, IN":[28.61,77.21],
+  "Bengaluru, IN":[12.97,77.59],"Chennai, IN":[13.08,80.27],"Singapore":[1.35,103.82]
+};
+const isUS = city => /, [A-Z]{2}$/.test(city) && !/, (UK|IN)$/.test(city);
+function distance(a, b) {
+  const A = CITIES[a], B = CITIES[b]; if (!A || !B) return null;
+  const r = Math.PI / 180, dLat = (B[0]-A[0])*r, dLon = (B[1]-A[1])*r;
+  const h = Math.sin(dLat/2)**2 + Math.cos(A[0]*r)*Math.cos(B[0]*r)*Math.sin(dLon/2)**2;
+  return 6371 * 2 * Math.asin(Math.sqrt(h));
+}
+const GENES = ["EGFR","ALK","ROS1","KRAS","BRAF","MET","RET","NTRK1","NTRK2","NTRK3","ERBB2","NRG1","TP53","STK11","KEAP1","SMARCA4","CDKN2A","PIK3CA","Other"];
+const METS = ["Brain","Bone","Liver","Pleura","Adrenal","Contralateral lung","Lymph nodes"];
+const REGIMENS = ["Osimertinib","Osimertinib + carboplatin + pemetrexed","Amivantamab + lazertinib","Erlotinib","Gefitinib","Afatinib","Alectinib","Brigatinib","Lorlatinib","Crizotinib","Entrectinib","Repotrectinib","Sotorasib","Adagrasib","Dabrafenib + trametinib","Capmatinib","Tepotinib","Selpercatinib","Carboplatin + pemetrexed + pembrolizumab","Carboplatin + paclitaxel + pembrolizumab","Pembrolizumab","Docetaxel + ramucirumab","Chemoradiation → durvalumab","Stereotactic radiosurgery (brain)"];
+
+/* Therapy knowledge base. ESCAT = ESMO Scale for Clinical Actionability of molecular Targets. */
+const T = {
+  osi:{name:"Osimertinib",target:"EGFR",status:"FDA approved",tier:"I-A",setting:"First line",data:"FLAURA: median overall survival 38.6 vs 31.8 months against first-generation EGFR TKIs.",src:"Ramalingam et al., NEJM 2020",why:"Third-generation EGFR inhibitor with strong CNS penetration; the reference first-line standard."},
+  osiChemo:{name:"Osimertinib + platinum–pemetrexed",target:"EGFR",status:"FDA approved",tier:"I-A",setting:"First line",data:"FLAURA2: median progression-free survival 25.5 vs 16.7 months against osimertinib alone.",src:"Planchard et al., NEJM 2023",why:"Intensification option, most relevant with high disease burden, CNS disease or TP53 co-mutation."},
+  amiLaz:{name:"Amivantamab + lazertinib",target:"EGFR / MET",status:"FDA approved",tier:"I-A",setting:"First line",data:"MARIPOSA: median progression-free survival 23.7 vs 16.6 months against osimertinib.",src:"Cho et al., NEJM 2024",why:"Dual EGFR–MET blockade up front; higher rates of skin and infusion toxicity to weigh."},
+  osi2L:{name:"Osimertinib",target:"EGFR T790M",status:"FDA approved",tier:"I-A",setting:"After 1st/2nd-gen TKI",data:"AURA3: median progression-free survival 10.1 vs 4.4 months against platinum–pemetrexed.",src:"Mok et al., NEJM 2017",why:"Overcomes T790M-mediated resistance to earlier EGFR inhibitors."},
+  amiChemo:{name:"Amivantamab + carboplatin–pemetrexed",target:"EGFR / MET",status:"FDA approved",tier:"I-A",setting:"After osimertinib",data:"MARIPOSA-2: median progression-free survival 6.3 vs 4.2 months against chemotherapy alone.",src:"Passaro et al., Ann Oncol 2024",why:"Standard post-osimertinib option that keeps EGFR and MET pressure while adding chemotherapy."},
+  datoDxd:{name:"Datopotamab deruxtecan",target:"TROP2 (ADC)",status:"Accelerated approval",tier:"I-B",setting:"After EGFR TKI and platinum",data:"Pooled TROPION-Lung05/-Lung01 EGFR-mutated cohort: objective response rate about 45%.",src:"FDA label, 2025",why:"Antibody–drug conjugate for a later line once platinum chemotherapy has been used."},
+  platDoublet:{name:"Platinum doublet chemotherapy (± bevacizumab)",target:"Cytotoxic",status:"Guideline standard",tier:"I-A",setting:"After targeted therapy",data:"Guideline-endorsed subsequent therapy after targeted-therapy progression.",src:"NCCN NSCLC guideline",why:"Remains a reliable backbone when targeted options are exhausted or unavailable."},
+  osiSavo:{name:"Osimertinib + savolitinib",target:"EGFR + MET",status:"Investigational",tier:"II-B",setting:"MET-driven resistance",data:"SAVANNAH: objective response rate 49% in patients with high-level MET overexpression or amplification.",src:"Ahn et al., 2024",why:"Directly addresses MET amplification as the bypass resistance mechanism while keeping EGFR inhibition."},
+  osiTepo:{name:"Osimertinib + tepotinib",target:"EGFR + MET",status:"Investigational",tier:"II-B",setting:"MET-driven resistance",data:"INSIGHT 2: objective response rate about 50% in the tissue FISH MET-amplified cohort.",src:"Mazieres et al., 2023",why:"Alternative MET partner with an established safety profile in combination."},
+  amiChemo1L:{name:"Amivantamab + carboplatin–pemetrexed",target:"EGFR exon 20",status:"FDA approved",tier:"I-A",setting:"First line",data:"PAPILLON: median progression-free survival 11.4 vs 6.7 months against chemotherapy alone.",src:"Zhou et al., NEJM 2023",why:"First-line standard for exon 20 insertions, which respond poorly to classic EGFR TKIs."},
+  sunvo:{name:"Sunvozertinib",target:"EGFR exon 20",status:"Accelerated approval",tier:"I-B",setting:"After platinum",data:"WU-KONG1B: confirmed objective response rate about 46% after platinum chemotherapy.",src:"FDA label, 2025",why:"Oral exon 20-selective inhibitor for the post-platinum setting."},
+  lorla:{name:"Lorlatinib",target:"ALK",status:"FDA approved",tier:"I-A",setting:"First line",data:"CROWN: 5-year progression-free survival 60% vs 8% with crizotinib; marked intracranial control.",src:"Solomon et al., JCO 2024",why:"Most durable first-line ALK control reported, with strong CNS activity."},
+  alectinib:{name:"Alectinib",target:"ALK",status:"FDA approved",tier:"I-A",setting:"First line",data:"ALEX: median progression-free survival 34.8 vs 10.9 months against crizotinib.",src:"Mok et al., Ann Oncol 2020",why:"Well-tolerated first-line option with good CNS penetration."},
+  brigatinib:{name:"Brigatinib",target:"ALK",status:"FDA approved",tier:"I-A",setting:"First line",data:"ALTA-1L: median progression-free survival 24.0 vs 11.1 months against crizotinib.",src:"Camidge et al., JCO 2021",why:"Once-daily alternative with intracranial activity."},
+  lorla2L:{name:"Lorlatinib",target:"ALK",status:"FDA approved",tier:"I-A",setting:"After 2nd-gen ALK TKI",data:"Phase 2 (EXP3B–5): intracranial response in about 50–60% after second-generation ALK TKIs.",src:"Solomon et al., Lancet Oncol 2018",why:"Covers most on-target ALK resistance mutations including G1202R, with high CNS exposure."},
+  repotrec:{name:"Repotrectinib",target:"ROS1",status:"FDA approved",tier:"I-B",setting:"First line",data:"TRIDENT-1: objective response rate 79% in ROS1 TKI-naive patients.",src:"Drilon et al., NEJM 2024",why:"Next-generation ROS1 inhibitor active against G2032R and in the CNS."},
+  taletrec:{name:"Taletrectinib",target:"ROS1",status:"FDA approved",tier:"I-B",setting:"First line or after TKI",data:"TRUST-I/II: objective response rate about 89% TKI-naive and about 56% TKI-pretreated.",src:"FDA label, 2025",why:"Alternative next-generation ROS1 inhibitor with CNS activity."},
+  entrec:{name:"Entrectinib",target:"ROS1 / NTRK",status:"FDA approved",tier:"I-B",setting:"First line",data:"Integrated analysis: objective response rate about 68% in ROS1-positive NSCLC.",src:"Drilon et al., JTO 2022",why:"CNS-active first-generation option."},
+  sotorasib:{name:"Sotorasib",target:"KRAS G12C",status:"FDA approved",tier:"I-B",setting:"After prior therapy",data:"CodeBreaK 200: median progression-free survival 5.6 vs 4.5 months against docetaxel.",src:"de Langen et al., Lancet 2023",why:"Oral covalent G12C inhibitor; better tolerated than docetaxel."},
+  adagrasib:{name:"Adagrasib",target:"KRAS G12C",status:"FDA approved",tier:"I-B",setting:"After prior therapy",data:"KRYSTAL-12: median progression-free survival 5.5 vs 3.8 months against docetaxel.",src:"Mok et al., 2024",why:"G12C inhibitor with CNS penetration; relevant if brain disease emerges."},
+  chemoIO:{name:"Platinum doublet + pembrolizumab",target:"PD-1",status:"FDA approved",tier:"I-A",setting:"First line",data:"KEYNOTE-189: 5-year overall survival 19.4% vs 11.3% against chemotherapy alone.",src:"Garassino et al., JCO 2023",why:"Standard first-line backbone for non-squamous NSCLC without an actionable fusion or EGFR driver."},
+  pembroMono:{name:"Pembrolizumab monotherapy",target:"PD-1",status:"FDA approved",tier:"I-A",setting:"First line, PD-L1 ≥50%",data:"KEYNOTE-024: 5-year overall survival 31.9% vs 16.3% against chemotherapy.",src:"Reck et al., JCO 2021",why:"Chemotherapy-free option when PD-L1 expression is high and no targetable driver is present."},
+  docRam:{name:"Docetaxel + ramucirumab",target:"Cytotoxic / VEGFR2",status:"FDA approved",tier:"I-A",setting:"After chemo-immunotherapy",data:"REVEL: median overall survival 10.5 vs 9.1 months against docetaxel alone.",src:"Garon et al., Lancet 2014",why:"Standard later-line option; clinical trials are usually preferred at this point."},
+  dabTram:{name:"Dabrafenib + trametinib",target:"BRAF V600E",status:"FDA approved",tier:"I-B",setting:"Any line",data:"BRF113928: objective response rate 64% in treatment-naive patients.",src:"Planchard et al., JTO 2022",why:"Combined BRAF/MEK blockade for V600E-driven disease."},
+  encoBini:{name:"Encorafenib + binimetinib",target:"BRAF V600E",status:"FDA approved",tier:"I-B",setting:"Any line",data:"PHAROS: objective response rate 75% in treatment-naive patients.",src:"Riely et al., JCO 2023",why:"Alternative BRAF/MEK pair with a lower pyrexia rate."},
+  capmatinib:{name:"Capmatinib",target:"MET exon 14",status:"FDA approved",tier:"I-B",setting:"Any line",data:"GEOMETRY mono-1: objective response rate 68% in treatment-naive patients.",src:"Wolf et al., NEJM 2020",why:"Selective MET inhibitor for exon 14 skipping."},
+  tepotinib:{name:"Tepotinib",target:"MET exon 14",status:"FDA approved",tier:"I-B",setting:"Any line",data:"VISION: objective response rate about 57% in treatment-naive patients.",src:"Paik et al., NEJM 2020",why:"Once-daily selective MET inhibitor."},
+  metAmpTrial:{name:"MET inhibitor for high-level MET amplification",target:"MET amp",status:"Investigational",tier:"II-B",setting:"Trial / off-label",data:"Responses concentrated in high-level amplification (gene copy number ≥10).",src:"GEOMETRY mono-1 amplification cohorts",why:"Only reasonable when amplification is high-level and confirmed."},
+  selper:{name:"Selpercatinib",target:"RET",status:"FDA approved",tier:"I-A",setting:"First line",data:"LIBRETTO-431: median progression-free survival 24.8 vs 11.2 months against chemo-immunotherapy.",src:"Zhou et al., NEJM 2023",why:"Selective RET inhibitor; outperforms chemo-immunotherapy in RET fusion NSCLC."},
+  pralse:{name:"Pralsetinib",target:"RET",status:"FDA approved",tier:"I-B",setting:"First line",data:"ARROW: objective response rate about 72% in treatment-naive patients.",src:"Griesinger et al., Ann Oncol 2022",why:"Alternative selective RET inhibitor."},
+  laro:{name:"Larotrectinib",target:"NTRK",status:"FDA approved",tier:"I-C",setting:"Tumor-agnostic",data:"Pooled analysis: objective response rate about 73% in NTRK fusion-positive lung cancer.",src:"Drilon et al., JCO Precis Oncol 2022",why:"Tumor-agnostic TRK inhibitor with durable responses."},
+  tdxd:{name:"Trastuzumab deruxtecan",target:"HER2 mutation (ADC)",status:"Accelerated approval",tier:"I-B",setting:"After prior therapy",data:"DESTINY-Lung02: objective response rate 49% at 5.4 mg/kg.",src:"Goto et al., JCO 2023",why:"HER2-directed ADC; monitor closely for interstitial lung disease."},
+  zonger:{name:"Zongertinib",target:"HER2 mutation",status:"Accelerated approval",tier:"I-B",setting:"After prior therapy",data:"Beamion LUNG-1: objective response rate about 71% in pretreated HER2 TKD-mutant NSCLC.",src:"FDA label, 2025",why:"Oral HER2-selective TKI that spares wild-type EGFR."},
+  zeno:{name:"Zenocutuzumab",target:"NRG1 fusion",status:"Accelerated approval",tier:"I-B",setting:"After prior therapy",data:"eNRGy: objective response rate about 33% in NRG1 fusion-positive NSCLC.",src:"FDA label, 2024",why:"HER2×HER3 bispecific that blocks NRG1 signalling."}
+};
+
+const hasRe = (re) => (v) => re.test(v.alt);
+const RULES = [
+  {key:"EGFR_T790M",gene:"EGFR",test:hasRe(/T790M/i),role:"Resistance",tier:"I-A",
+    note:x=>x.priorOsi?"T790M after osimertinib is unusual. Often reflects tumour heterogeneity; confirm on tissue.":"Acquired resistance to 1st/2nd-generation EGFR inhibitors. Overcome by osimertinib."},
+  {key:"EGFR_C797S",gene:"EGFR",test:hasRe(/C797S/i),role:"Resistance",tier:"IV",note:()=>"On-target resistance to osimertinib. No approved targeted option; a strong reason to screen trials."},
+  {key:"EGFR_EX20",gene:"EGFR",test:hasRe(/exon ?20|ex20|ins(?!.*19)/i),role:"Primary driver",tier:"I-A",note:()=>"EGFR exon 20 insertion. Responds poorly to classic EGFR inhibitors.",
+    rx:x=>x.priorPlatinum?["sunvo","platDoublet"]:["amiChemo1L"]},
+  {key:"EGFR_SENS",gene:"EGFR",test:hasRe(/L858R|exon ?19|ex19|19 ?del|E746|L861Q|G719|S768I/i),role:"Primary driver",tier:"I-A",note:()=>"Sensitizing EGFR mutation. Predicts benefit from EGFR tyrosine kinase inhibitors.",
+    rx:x=>!x.priorEgfrTki?["osi","osiChemo","amiLaz"]:x.priorOsi?["amiChemo","datoDxd","platDoublet"]:(x.find("EGFR",/T790M/)?["osi2L"]:["amiChemo","platDoublet"])},
+  {key:"ALK_RES",gene:"ALK",test:hasRe(/G1202R|L1196M|I1171|G1269A|C1156Y|F1174|V1180L/i),role:"Resistance",tier:"II-B",note:()=>"On-target ALK resistance mutation. G1202R resists second-generation ALK inhibitors but remains sensitive to lorlatinib.",
+    rx:x=>x.priorAlk&&!x.priorLorla?["lorla2L"]:[]},
+  {key:"ALK",gene:"ALK",test:()=>true,role:"Primary driver",tier:"I-A",note:()=>"ALK fusion. Highly sensitive to ALK inhibitors; brain involvement is common.",
+    rx:x=>!x.priorAlk?["lorla","alectinib","brigatinib"]:x.priorLorla?["platDoublet"]:["lorla2L","platDoublet"]},
+  {key:"ROS1",gene:"ROS1",test:()=>true,role:"Primary driver",tier:"I-B",note:()=>"ROS1 fusion. Sensitive to ROS1-directed inhibitors.",
+    rx:x=>x.priorRos1?["taletrec","repotrec","platDoublet"]:["repotrec","taletrec","entrec"]},
+  {key:"KRAS_G12C",gene:"KRAS",test:hasRe(/G12C/i),role:"Primary driver",tier:"I-B",note:()=>"KRAS G12C. Targetable with covalent G12C inhibitors after first-line therapy.",
+    rx:x=>(x.priorPlatinum||x.priorIO)?(x.priorG12C?["docRam"]:["sotorasib","adagrasib","docRam"]):["chemoIO"]},
+  {key:"KRAS_OTHER",gene:"KRAS",test:()=>true,role:"Driver (not yet targetable)",tier:"III",note:()=>"Non-G12C KRAS mutation. No approved targeted therapy; RAS(ON) and G12D inhibitors are in trials."},
+  {key:"BRAF_V600E",gene:"BRAF",test:hasRe(/V600E/i),role:"Primary driver",tier:"I-B",note:()=>"BRAF V600E. Responds to combined BRAF and MEK inhibition.",rx:()=>["encoBini","dabTram"]},
+  {key:"MET_EX14",gene:"MET",test:hasRe(/exon ?14|ex14|skip/i),role:"Primary driver",tier:"I-B",note:()=>"MET exon 14 skipping. Responds to selective MET inhibitors.",rx:()=>["capmatinib","tepotinib"]},
+  {key:"MET_AMP",gene:"MET",test:hasRe(/amp|copy|CN/i),role:x=>x.egfrSens?"Resistance (acquired)":"Driver",tier:"II-B",
+    note:x=>x.egfrSens?"MET amplification is a leading bypass mechanism of resistance after osimertinib, seen in roughly 15% of cases.":"De novo MET amplification. Only high-level amplification predicts response.",
+    rx:x=>x.egfrSens&&x.priorOsi?["osiSavo","osiTepo"]:x.egfrSens?[]:["metAmpTrial"]},
+  {key:"RET",gene:"RET",test:()=>true,role:"Primary driver",tier:"I-A",note:()=>"RET fusion. Selective RET inhibitors outperform chemo-immunotherapy.",rx:()=>["selper","pralse"]},
+  {key:"NTRK",gene:/^NTRK/,test:()=>true,role:"Primary driver",tier:"I-C",note:()=>"NTRK fusion. Tumour-agnostic TRK inhibitors apply.",rx:()=>["laro","entrec"]},
+  {key:"HER2_MUT",gene:"ERBB2",test:v=>!/amp/i.test(v.alt),role:"Primary driver",tier:"I-B",note:()=>"HER2 (ERBB2) kinase-domain mutation. HER2-directed ADC and TKI options exist.",rx:()=>["zonger","tdxd"]},
+  {key:"HER2_AMP",gene:"ERBB2",test:()=>true,role:"Driver (context-dependent)",tier:"III",note:()=>"HER2 amplification. Check HER2 IHC; trastuzumab deruxtecan has a tumour-agnostic approval for IHC 3+."},
+  {key:"NRG1",gene:"NRG1",test:()=>true,role:"Primary driver",tier:"I-B",note:()=>"NRG1 fusion. Targetable with HER2×HER3 blockade.",rx:()=>["zeno"]},
+  {key:"STK11",gene:"STK11",test:()=>true,role:"Co-mutation",tier:"—",note:()=>"Associated with reduced benefit from PD-(L)1 monotherapy."},
+  {key:"KEAP1",gene:"KEAP1",test:()=>true,role:"Co-mutation",tier:"—",note:()=>"Associated with poorer outcomes on immunotherapy and chemotherapy."},
+  {key:"TP53",gene:"TP53",test:()=>true,role:"Co-mutation",tier:"—",note:x=>x.egfrSens?"In EGFR-mutant disease, linked to shorter benefit from TKI monotherapy (supports combination strategies).":"Common co-mutation; generally prognostic rather than predictive."},
+  {key:"SMARCA4",gene:"SMARCA4",test:()=>true,role:"Co-mutation",tier:"—",note:()=>"Associated with aggressive disease and reduced immunotherapy benefit."},
+  {key:"CDKN2A",gene:"CDKN2A",test:()=>true,role:"Co-mutation",tier:"—",note:()=>"Frequent co-alteration; CDK4/6 strategies are investigational only."}
+];
+
+/* Illustrative trial catalogue. In production this syncs from ClinicalTrials.gov. */
+const ecog01 = ["ECOG performance status 0–1", x => x.ecog <= 1];
+const noUntreatedBrain = ["No untreated symptomatic brain metastases", x => x.brain ? null : true];
+const TRIALS = [
+  {id:"ILL-EGFR-MET",phase:"Phase 2",title:"Osimertinib plus an oral MET inhibitor after progression on osimertinib",when:x=>x.egfrSens&&x.metAmp&&x.priorOsi,
+    crit:[["Progression on osimertinib",x=>x.priorOsi],["MET amplification on post-progression tissue",x=>x.metAmp&&x.rebiopsy?true:x.metAmp?null:false],ecog01,noUntreatedBrain],sites:["Boston, MA","New York, NY","Houston, TX","Seattle, WA","Singapore"]},
+  {id:"ILL-EGFR-ADC",phase:"Phase 3",title:"Next-generation antibody–drug conjugate vs platinum chemotherapy after a 3rd-generation EGFR inhibitor",when:x=>x.egfrSens&&x.priorOsi,
+    crit:[["Progression on osimertinib",x=>x.priorOsi],["No prior platinum chemotherapy for metastatic disease",x=>!x.priorPlatinum],ecog01,noUntreatedBrain],sites:["Boston, MA","Philadelphia, PA","Chicago, IL","Los Angeles, CA","Mumbai, IN"]},
+  {id:"ILL-EGFR-4G",phase:"Phase 1/2",title:"Fourth-generation EGFR inhibitor for C797S and other on-target resistance",when:x=>x.egfrSens&&x.priorOsi,
+    crit:[["EGFR C797S or other on-target resistance mutation",x=>x.find("EGFR",/C797S/)?true:x.rebiopsy?false:null],["Measurable disease (RECIST 1.1)",()=>null],ecog01],sites:["New York, NY","Nashville, TN","San Francisco, CA","London, UK"]},
+  {id:"ILL-EGFR-1L",phase:"Phase 3",title:"Osimertinib with or without a bispecific antibody in untreated EGFR-mutant NSCLC",when:x=>x.egfrSens&&!x.priorEgfrTki,
+    crit:[["No prior systemic therapy for advanced disease",x=>x.lines===0],ecog01,["Stable brain metastases allowed",()=>true]],sites:["Boston, MA","Houston, TX","Denver, CO","Bengaluru, IN","Singapore"]},
+  {id:"ILL-ALK-4G",phase:"Phase 2",title:"CNS-penetrant fourth-generation ALK inhibitor after at least one prior ALK inhibitor",when:x=>x.alk&&x.priorAlk,
+    crit:[["Progression on ≥1 ALK inhibitor",x=>x.priorAlk],["Brain metastases permitted if neurologically stable",x=>x.brain?true:true],ecog01],sites:["Boston, MA","New York, NY","Los Angeles, CA","Bengaluru, IN","New Delhi, IN"]},
+  {id:"ILL-ALK-1L",phase:"Phase 3",title:"Next-generation ALK inhibitor vs lorlatinib in untreated ALK-positive NSCLC",when:x=>x.alk&&!x.priorAlk,
+    crit:[["No prior ALK inhibitor",x=>!x.priorAlk],ecog01],sites:["Chicago, IL","Houston, TX","Mumbai, IN"]},
+  {id:"ILL-G12C-1L",phase:"Phase 3",title:"KRAS G12C inhibitor plus pembrolizumab vs chemo-immunotherapy, first line",when:x=>x.g12c&&!x.priorIO&&!x.priorPlatinum,
+    crit:[["No prior therapy for advanced disease",x=>x.lines===0],["PD-L1 result available",x=>x.pdl1!==null],ecog01],sites:["Chicago, IL","Cleveland, OH","Atlanta, GA","Dallas, TX"]},
+  {id:"ILL-G12C-NG",phase:"Phase 1/2",title:"Next-generation KRAS G12C (ON-state) inhibitor after prior chemo-immunotherapy",when:x=>x.g12c&&(x.priorIO||x.priorPlatinum),
+    crit:[["Prior platinum and/or PD-(L)1 therapy",x=>x.priorIO||x.priorPlatinum],["Prior G12C inhibitor allowed in expansion cohort",()=>true],ecog01,noUntreatedBrain],sites:["Chicago, IL","Minneapolis, MN","Houston, TX","San Francisco, CA"]},
+  {id:"ILL-STK11",phase:"Phase 2",title:"Immunotherapy combination for STK11/KEAP1-co-mutated NSCLC",when:x=>x.find("STK11")||x.find("KEAP1"),
+    crit:[["STK11 and/or KEAP1 alteration",()=>true],["Prior PD-(L)1 therapy allowed",()=>true],ecog01],sites:["New York, NY","Baltimore, MD","Chicago, IL","Phoenix, AZ"]},
+  {id:"ILL-RASON",phase:"Phase 1/2",title:"RAS(ON) multi-selective inhibitor in previously treated KRAS-mutant NSCLC",when:x=>x.find("KRAS")&&x.lines>0,
+    crit:[["KRAS mutation (any)",()=>true],["≥1 prior line of therapy",x=>x.lines>0],ecog01],sites:["Boston, MA","Nashville, TN","Los Angeles, CA"]},
+  {id:"ILL-BISPEC",phase:"Phase 3",title:"PD-1 × VEGF bispecific antibody plus chemotherapy after immunotherapy",when:x=>x.priorIO&&!x.anyTkiDriver,
+    crit:[["Progression after PD-(L)1 therapy",x=>x.priorIO],["No actionable EGFR/ALK driver",x=>!x.anyTkiDriver],ecog01],sites:["Atlanta, GA","Dallas, TX","Seattle, WA","Mumbai, IN"]},
+  {id:"ILL-BASKET",phase:"Phase 2",title:"Genomically matched basket study for rare or non-standard alterations",when:x=>x.rareVariant,
+    crit:[["Alteration on the study's actionable list",()=>null],["≥1 prior line of therapy",x=>x.lines>0],ecog01],sites:["Houston, TX","Boston, MA","New Delhi, IN"]}
+];
+
+/* ============================ Engine ============================ */
+function context(c) {
+  const prior = (c.history || []).map(h => h.regimen || "").join(" | ").toLowerCase();
+  const has = re => re.test(prior);
+  const vs = c.variants || [];
+  const geneMatch = (g, gene) => g instanceof RegExp ? g.test(gene) : g === gene;
+  const find = (g, re) => vs.find(v => v.gene === g && (!re || re.test(v.alt)));
+  const x = {
+    prior, vs, find,
+    priorOsi: has(/osimertinib|tagrisso/),
+    priorEgfrTki: has(/osimertinib|erlotinib|gefitinib|afatinib|dacomitinib|lazertinib|tagrisso|tarceva|iressa/),
+    priorAlk: has(/alectinib|brigatinib|ceritinib|crizotinib|lorlatinib|ensartinib/),
+    priorLorla: has(/lorlatinib/),
+    priorRos1: has(/crizotinib|entrectinib|repotrectinib|taletrectinib/),
+    priorIO: has(/pembrolizumab|nivolumab|atezolizumab|durvalumab|cemiplimab|ipilimumab|tremelimumab/),
+    priorPlatinum: has(/carboplatin|cisplatin|platinum/),
+    priorG12C: has(/sotorasib|adagrasib/),
+    lines: (c.history || []).filter(h => (h.regimen || "").trim()).length,
+    progressing: /progress/i.test(c.status?.current || "") || (c.history || []).some(h => h.stop === "Progression"),
+    brain: (c.dx?.mets || []).includes("Brain"),
+    ecog: Number(c.status?.ecog ?? 1),
+    pdl1: c.dx?.pdl1 === "" || c.dx?.pdl1 == null ? null : Number(c.dx.pdl1),
+    rebiopsy: !!c.status?.rebiopsy
+  };
+  x.egfrSens = !!vs.find(v => v.gene === "EGFR" && /L858R|exon ?19|ex19|19 ?del|E746|L861Q|G719|S768I/i.test(v.alt));
+  x.metAmp = !!find("MET", /amp|copy|CN/i);
+  x.alk = !!find("ALK"); x.g12c = !!find("KRAS", /G12C/i);
+  x.ruleFor = v => RULES.find(r => geneMatch(r.gene, v.gene) && r.test(v));
+  x.anyTkiDriver = vs.some(v => { const r = x.ruleFor(v); return r && r.role === "Primary driver" && !/KRAS/.test(r.key); });
+  x.rareVariant = vs.some(v => { const r = x.ruleFor(v); return !r || ["III","IV"].includes(r.tier); });
+  return x;
+}
+const val = (f, x) => typeof f === "function" ? f(x) : f;
+
+function analyze(c) {
+  const x = context(c);
+  const drivers = [], rxKeys = [];
+  for (const v of x.vs) {
+    const r = x.ruleFor(v);
+    if (!r) { drivers.push({id:"d-"+v.gene+"-"+v.alt, gene:v.gene, alt:v.alt, vaf:v.vaf, role:"Uncertain significance", tier:"—", note:"Not on the current actionability list. Flagged for reviewer interpretation."}); continue; }
+    drivers.push({id:"d-"+r.key+"-"+v.alt, key:r.key, gene:v.gene, alt:v.alt, vaf:v.vaf, role:val(r.role,x), tier:r.tier, note:val(r.note,x)});
+    if (r.rx) for (const k of r.rx(x)) if (!rxKeys.includes(k)) rxKeys.push(k);
+  }
+  // Resistance-directed options first when a bypass track is present
+  // A confirmed bypass track moves the resistance-directed option up to second place
+  if (x.egfrSens && x.metAmp && x.priorOsi && rxKeys.includes("osiSavo")) { rxKeys.splice(rxKeys.indexOf("osiSavo"), 1); rxKeys.splice(1, 0, "osiSavo"); }
+  const hasDriverRx = rxKeys.length > 0;
+  if (!hasDriverRx) {
+    if (!x.priorIO && !x.priorPlatinum) { if (x.pdl1 !== null && x.pdl1 >= 50) rxKeys.push("pembroMono"); rxKeys.push("chemoIO"); }
+    else rxKeys.push("docRam");
+  }
+  const therapies = rxKeys.slice(0, 6).map(k => ({id:"t-"+k, key:k, ...T[k]}));
+
+  const cons = [];
+  const push = (level, text, id) => cons.push({id:"c-"+id, level, text});
+  if (x.anyTkiDriver) push("warn","PD-(L)1 monotherapy offers limited benefit in this molecular subtype, and giving immunotherapy shortly before some TKIs (notably osimertinib) raises pneumonitis risk.","io");
+  if (x.progressing && x.lines > 0 && !x.rebiopsy && x.anyTkiDriver) push("info","Progression on targeted therapy without a post-progression biopsy. Tissue re-biopsy plus plasma ctDNA would define the resistance mechanism before choosing the next line.","rebx");
+  if (x.brain) push("warn","Brain metastases present. Prefer agents with proven intracranial activity, and coordinate with radiation oncology on whether local therapy is needed first.","cns");
+  if (x.find("STK11") || x.find("KEAP1")) push("info","STK11/KEAP1 co-mutation predicts weaker immunotherapy benefit. Trials combining immunotherapy with other agents are worth screening.","stk");
+  if (x.ecog >= 2) push("warn",`ECOG ${x.ecog}: many trials require ECOG 0–1, and treatment intensity should be matched to fitness.`,"ecog");
+  if (x.egfrSens && x.find("TP53") && !x.priorEgfrTki) push("info","EGFR + TP53 co-mutation: FLAURA2 subgroup data support discussing osimertinib plus chemotherapy rather than monotherapy.","tp53");
+  if (x.pdl1 === null) push("info","PD-L1 result missing. Needed for immunotherapy decisions and several trial criteria.","pdl1");
+  if (!x.vs.length) push("warn","No genomic results provided. Comprehensive NGS (tissue and/or plasma) is recommended before choosing therapy for advanced NSCLC.","nongs");
+  push("info","Comprehensive NGS coverage should include fusions (RNA-based where possible). Confirm the submitted panel covered ALK, ROS1, RET, NTRK and NRG1.","panel");
+
+  const trials = TRIALS.filter(t => t.when(x)).map(t => {
+    const crit = t.crit.map(([label, fn]) => ({label, r: fn(x)}));
+    const verdict = crit.some(k => k.r === false) ? "no" : crit.every(k => k.r === true) ? "yes" : "maybe";
+    const city = c.patient?.city;
+    const sites = t.sites.map(s => ({city:s, km: distance(city, s)})).sort((a,b)=>(a.km??1e9)-(b.km??1e9));
+    return {id:"tr-"+t.id, code:t.id, phase:t.phase, title:t.title, crit, verdict, sites};
+  }).sort((a,b)=>({yes:0,maybe:1,no:2}[a.verdict]-{yes:0,maybe:1,no:2}[b.verdict])).slice(0,4);
+
+  const top = therapies[0];
+  const qs = [];
+  if (x.progressing && x.lines > 0 && !x.rebiopsy && x.anyTkiDriver) qs.push("Should we re-biopsy or run a liquid biopsy to find out what is driving the progression before we pick the next treatment?");
+  if (top) qs.push(`Is ${top.name} an option for me now? If it stops working, what would we try next?`);
+  if (therapies[1]) qs.push(`How do you weigh ${top.name} against ${therapies[1].name} for someone in my situation?`);
+  const tYes = trials.find(t => t.verdict !== "no");
+  if (tYes) qs.push(`Would I qualify for a ${tYes.phase.toLowerCase()} trial of ${/^[A-Z][a-z]/.test(tYes.title) ? tYes.title.charAt(0).toLowerCase() + tYes.title.slice(1) : tYes.title}? Can your team contact the site in ${tYes.sites[0].city}?`);
+  if (x.anyTkiDriver) qs.push("Given my tumour's driver mutation, should immunotherapy be avoided or deferred?");
+  if (x.brain) qs.push("How will we monitor the brain metastases, and does the treatment you recommend reach the brain?");
+  qs.push("Has my case been discussed at a molecular tumour board?");
+  qs.push("Which side effects should make me call you straight away, and which ones would make us change treatment?");
+
+  const sx = c.patient || {}, dx = c.dx || {};
+  const primary = drivers.filter(d => /driver|Resistance/i.test(d.role) && !/Uncertain/.test(d.role));
+  const lastLine = (c.history || []).filter(h => h.regimen).slice(-1)[0];
+  let summary = `${sx.age || "—"}-year-old ${String(sx.sex || "patient").toLowerCase()} with stage ${dx.stage || "—"} ${String(dx.histology || "NSCLC").toLowerCase()}`;
+  summary += primary.length ? `, driven by ${primary.map(d => `${d.gene} ${d.alt}`).join(" with ")}.` : ", with no actionable driver identified in the submitted data.";
+  if (lastLine) summary += ` Most recent therapy: ${lastLine.regimen}${lastLine.months ? ` for ${lastLine.months} months` : ""}${lastLine.stop ? ` (${lastLine.stop.toLowerCase()})` : ""}.`;
+  if (top) summary += ` The leading option to discuss is ${top.name} (ESCAT ${top.tier}, ${top.status.toLowerCase()}).`;
+  const eligibleN = trials.filter(t => t.verdict !== "no").length;
+  if (eligibleN) summary += ` ${eligibleN} clinical trial${eligibleN > 1 ? "s" : ""} may be open to this patient.`;
+
+  return {generatedAt:new Date().toISOString(), summary, drivers, therapies, considerations:cons, trials, questions:qs.slice(0,7), stats:{variants:x.vs.length, lines:x.lines, pdl1:x.pdl1}};
+}
+function claimsOf(r) {
+  return [
+    ...r.drivers.map(d => ({id:d.id, group:"Molecular findings", title:`${d.gene} ${d.alt}`, meta:[d.role, d.tier !== "—" ? "ESCAT " + d.tier : null], note:d.note})),
+    ...r.therapies.map(t => ({id:t.id, group:"Matched therapies", title:t.name, meta:["ESCAT " + t.tier, t.status, t.setting], note:t.data + " (" + t.src + ")"})),
+    ...r.considerations.map(k => ({id:k.id, group:"Clinical considerations", title:k.text.split(". ")[0] + ".", meta:[k.level === "warn" ? "Caution" : "Note"], note:k.text.split(". ").slice(1).join(". ")})),
+    ...r.trials.map(t => ({id:t.id, group:"Clinical trials", title:t.title, meta:[t.phase, t.verdict === "yes" ? "Likely eligible" : t.verdict === "maybe" ? "Needs confirmation" : "Not eligible"], note:"Nearest site: " + t.sites[0].city}))
+  ];
+}
+
+/* ============================ NGS text parser ============================ */
+const PARSERS = [
+  ["EGFR",/\bEGFR\b[^\n]{0,60}?\b(L858R|T790M|C797S|L861Q|S768I|G719[ACSD]?|exon\s*19\s*del\w*|ex19del|E746_A750del|exon\s*20\s*ins\w*|ex20ins)/gi, m=>/19|E746/i.test(m)?"Exon 19 deletion":/20/i.test(m)?"Exon 20 insertion":m.toUpperCase()],
+  ["ALK",/\b(EML4[-:\s]*ALK(?:\s*v\d)?|\w+[-:]ALK\b|ALK\s+(?:fusion|rearrangement))/gi, m=>/EML4/i.test(m)?"EML4-ALK fusion"+((m.match(/v\d/i)||[""])[0]?" "+m.match(/v\d/i)[0]:""):"ALK fusion"],
+  ["ROS1",/\b(CD74[-:\s]*ROS1|\w+[-:]ROS1\b|ROS1\s+(?:fusion|rearrangement))/gi, m=>/CD74/i.test(m)?"CD74-ROS1 fusion":"ROS1 fusion"],
+  ["KRAS",/\bKRAS\b[^\n]{0,30}?\b(G12[CDVARS]|G13[CD]|Q61[HLKR])/gi, m=>m.toUpperCase()],
+  ["BRAF",/\bBRAF\b[^\n]{0,30}?\b(V600E|G469[AV]|K601E|D594G)/gi, m=>m.toUpperCase()],
+  ["MET",/\bMET\b[^\n]{0,40}?\b(exon\s*14\s*skip\w*|ex14|amplification|amplified|copy number\s*(?:gain)?\s*[:=]?\s*\d+)/gi, m=>/14/.test(m)?"Exon 14 skipping":"Amplification"+((m.match(/\d+/)||[])[0]?` (CN ${m.match(/\d+/)[0]})`:"")],
+  ["RET",/\b(KIF5B[-:\s]*RET|CCDC6[-:\s]*RET|RET\s+(?:fusion|rearrangement))/gi, m=>/KIF5B/i.test(m)?"KIF5B-RET fusion":/CCDC6/i.test(m)?"CCDC6-RET fusion":"RET fusion"],
+  ["NTRK1",/\b(\w+[-:]NTRK[123]|NTRK[123]?\s+fusion)/gi, ()=>"NTRK fusion"],
+  ["ERBB2",/\b(?:ERBB2|HER2)\b[^\n]{0,40}?\b(exon\s*20\s*ins\w*|Y772_A775dup\w*|G776\w+|amplification)/gi, m=>/amp/i.test(m)?"Amplification":"Exon 20 insertion"],
+  ["NRG1",/\b(\w+[-:]NRG1|NRG1\s+fusion)/gi, ()=>"NRG1 fusion"],
+  ["TP53",/\bTP53\b[^\n]{0,20}?\b([A-Z]\d{2,3}[A-Z*]|loss|splice)/g, m=>m],
+  ["STK11",/\bSTK11\b[^\n]{0,20}?\b([A-Z]\d{2,3}[A-Z*]|loss|deletion)/gi, m=>/loss|del/i.test(m)?"Loss":m],
+  ["KEAP1",/\bKEAP1\b[^\n]{0,20}?\b([A-Z]\d{2,3}[A-Z*])/g, m=>m],
+  ["SMARCA4",/\bSMARCA4\b[^\n]{0,20}?\b([A-Z]\d{2,4}[A-Z*]|loss)/gi, m=>m],
+  ["CDKN2A",/\bCDKN2A\b[^\n]{0,20}?\b(loss|deletion)/gi, ()=>"Loss"]
+];
+function parseNGS(text) {
+  const out = [];
+  for (const [gene, re, norm] of PARSERS) {
+    re.lastIndex = 0; let m;
+    while ((m = re.exec(text))) {
+      const alt = norm(m[1]);
+      const tail = text.slice(m.index, m.index + 140);
+      const vaf = (tail.match(/(?:VAF|AF|allele (?:freq(?:uency)?|fraction))\s*[:=]?\s*(\d{1,2}(?:\.\d+)?)\s*%/i) || [])[1] || "";
+      const g = gene === "NTRK1" ? ((m[0].match(/NTRK[123]/i) || ["NTRK1"])[0].toUpperCase()) : gene;
+      if (!out.some(v => v.gene === g && v.alt === alt)) out.push({gene:g, alt, vaf});
+    }
+  }
+  const pdl1 = (text.match(/PD-?L1[^\n]{0,40}?(?:TPS)?\s*[:=]?\s*(\d{1,3})\s*%/i) || [])[1];
+  const tmb = (text.match(/TMB[^\n]{0,20}?(\d{1,3}(?:\.\d)?)\s*(?:mut|muts)\/?Mb/i) || [])[1];
+  return {variants:out, pdl1: pdl1 ?? null, tmb: tmb ?? null};
+}
+
+/* ============================ Example cases (fictional) ============================ */
+const NGS_EGFR = `COMPREHENSIVE GENOMIC PROFILE — tissue (liver core, post-progression)
+Specimen collected 2026-08-19 · Tumour content 40%
+Genomic alterations identified:
+  EGFR  L858R (exon 21)          VAF 34.1%
+  MET   amplification, copy number 9
+  TP53  R273H                    VAF 29.8%
+Biomarkers: TMB 4 muts/Mb · MSI stable
+PD-L1 (22C3) TPS 10%`;
+const NGS_KRAS = `NGS PANEL (tissue, 324 genes) — lung core biopsy
+KRAS G12C  VAF 22.0%
+STK11 loss (homozygous deletion)
+KEAP1 G333C  VAF 18.4%
+TMB 11 muts/Mb · PD-L1 TPS 5%`;
+const NGS_ALK = `RNA fusion panel + DNA NGS (plasma ctDNA, at progression)
+EML4-ALK v3 fusion detected
+ALK G1202R  AF 1.9%
+TP53 splice-site variant  AF 2.4%
+PD-L1 TPS 0%`;
+const EXAMPLES = {
+  egfr:{label:"EGFR · progressed on osimertinib",
+    patient:{initials:"R.M.",age:58,sex:"Female",smoking:"Never",city:"Boston, MA",submitter:"Patient"},
+    dx:{histology:"Lung adenocarcinoma",stage:"IVA",dxDate:"2024-09",pdl1:10,tmb:4,mets:["Pleura","Bone","Liver"]},
+    ngsText:NGS_EGFR,
+    variants:[{gene:"EGFR",alt:"L858R",vaf:"34.1"},{gene:"MET",alt:"Amplification (CN 9)",vaf:""},{gene:"TP53",alt:"R273H",vaf:"29.8"}],
+    history:[{regimen:"Osimertinib",start:"2024-10",months:22,response:"PR",stop:"Progression"}],
+    status:{ecog:1,rebiopsy:true,current:"New liver lesions and enlarging pleural disease on CT (Aug 2026). Post-progression liver biopsy sequenced.",goals:"Prefers to avoid IV chemotherapy if a reasonable option exists. Willing to travel within the Northeast for a trial."}},
+  kras:{label:"KRAS G12C · after chemo-IO",
+    patient:{initials:"D.K.",age:67,sex:"Male",smoking:"Former",city:"Chicago, IL",submitter:"Family"},
+    dx:{histology:"Lung adenocarcinoma",stage:"IVB",dxDate:"2025-06",pdl1:5,tmb:11,mets:["Bone","Adrenal","Lymph nodes"]},
+    ngsText:NGS_KRAS,
+    variants:[{gene:"KRAS",alt:"G12C",vaf:"22.0"},{gene:"STK11",alt:"Loss",vaf:""},{gene:"KEAP1",alt:"G333C",vaf:"18.4"}],
+    history:[{regimen:"Carboplatin + pemetrexed + pembrolizumab",start:"2025-07",months:4,response:"PR",stop:"Completed"},{regimen:"Pemetrexed + pembrolizumab maintenance",start:"2025-11",months:9,response:"SD",stop:"Progression"}],
+    status:{ecog:1,rebiopsy:false,current:"Progression in bone and adrenal on PET-CT (Aug 2026). Mild neuropathy.",goals:"Daughter asking whether targeted pills are an option before docetaxel."}},
+  alk:{label:"ALK · brain progression",
+    patient:{initials:"A.S.",age:41,sex:"Female",smoking:"Never",city:"Bengaluru, IN",submitter:"Oncologist"},
+    dx:{histology:"Lung adenocarcinoma",stage:"IVB",dxDate:"2024-11",pdl1:0,tmb:2,mets:["Brain","Bone"]},
+    ngsText:NGS_ALK,
+    variants:[{gene:"ALK",alt:"EML4-ALK fusion v3",vaf:""},{gene:"ALK",alt:"G1202R",vaf:"1.9"},{gene:"TP53",alt:"Splice-site",vaf:"2.4"}],
+    history:[{regimen:"Alectinib",start:"2024-12",months:19,response:"PR",stop:"Progression"},{regimen:"Stereotactic radiosurgery (brain)",start:"2026-07",months:"",response:"",stop:"Completed"}],
+    status:{ecog:0,rebiopsy:true,current:"Two new brain lesions treated with SRS (Jul 2026); slow systemic progression. Plasma ctDNA shows ALK G1202R.",goals:"Referring oncologist requests a second opinion on next-line sequencing and trial options in India or Singapore."}}
+};
+const blankCase = () => ({patient:{initials:"",age:"",sex:"Female",smoking:"Never",city:"Boston, MA",submitter:"Patient"},dx:{histology:"Lung adenocarcinoma",stage:"IVA",dxDate:"",pdl1:"",tmb:"",mets:[]},ngsText:"",variants:[],history:[{regimen:"",start:"",months:"",response:"",stop:""}],status:{ecog:1,rebiopsy:false,current:"",goals:""}});
+const clone = o => JSON.parse(JSON.stringify(o));
+
+/* ============================ State ============================ */
+const KEY = "nof1.v2";
+const S = store.get(KEY, null) || {cases:[], seq:140, draft:blankCase(), step:0, consent:false};
+S.view = "home"; S.currentId = S.currentId || null; S.reviewId = null; S.editing = null; S.pipe = null;
+function save() { const {view, pipe, editing, reviewId, ...rest} = S; store.set(KEY, rest); }
+function makeCase(src, opts = {}) {
+  S.seq += 1;
+  const d = new Date();
+  const c = {...clone(src), id:`N1-${String(d.getFullYear()).slice(2)}${String(d.getMonth()+1).padStart(2,"0")}-${String(S.seq).padStart(4,"0")}`, created: opts.created || today(), status:"in_review"};
+  delete c.label;
+  c.report = analyze(c);
+  c.claims = Object.fromEntries(claimsOf(c.report).map(k => [k.id, {state:"pending", note:""}]));
+  return c;
+}
+if (!S.cases.length) {
+  const a = makeCase(EXAMPLES.alk, {created:"2026-09-11"});
+  for (const id in a.claims) a.claims[id].state = "verified";
+  const edit = Object.keys(a.claims).find(id => id.startsWith("t-lorla2L"));
+  if (edit) a.claims[edit] = {state:"edited", note:"Agree. G1202R on ctDNA supports lorlatinib; repeat brain MRI at 6–8 weeks given recent SRS."};
+  a.status = "signed"; a.signed = {name:"Dr. Elena Varga", cred:"MD, Medical Oncology (demo reviewer)", at:"2026-09-12", minutes:14};
+  const e = makeCase(EXAMPLES.egfr, {created:"2026-09-24"});
+  S.cases = [e, a];
+  save();
+}
+const current = () => S.cases.find(c => c.id === S.currentId);
+
+/* ============================ Live model (Claude, when available) ============================ */
+let SAMPLE = null;
+if (window.claude && typeof window.claude.use === "function") {
+  window.claude.use("sample").then(s => { SAMPLE = s; if (s) render(); }).catch(() => {});
+}
+const AI = {out:{}, busy:null, ctl:null, err:{}};
+function sampleErr(e) {
+  const code = e && e.code;
+  if (["not_granted","sampling_disabled","not_declared","capability_disabled","capability_removed"].includes(code)) { SAMPLE = null; return "Live reasoning isn't available in this view."; }
+  if (code === "rate_limited") return "Too many requests right now. Try again in a minute.";
+  if (code === "session_expired") return "Sign in to Claude again to use live reasoning.";
+  if (code === "cancelled") return "";
+  return "The model didn't finish. Try again.";
+}
+function caseForPrompt(c) {
+  return JSON.stringify({patient:{age:c.patient.age,sex:c.patient.sex,smoking:c.patient.smoking},diagnosis:c.dx,variants:c.variants,history:c.history.filter(h=>h.regimen),status:c.status,draft:{summary:c.report.summary,therapies:c.report.therapies.map(t=>t.name+" ("+t.tier+", "+t.status+")"),trials:c.report.trials.map(t=>t.title+" ["+t.verdict+"]")}}, null, 1);
+}
+async function runAI(kind, c, question) {
+  if (!SAMPLE || AI.busy) return;
+  const key = kind + ":" + c.id;
+  AI.busy = key; AI.err[key] = ""; AI.out[key] = ""; AI.ctl = new AbortController(); render();
+  const prompt = kind === "second"
+    ? `You are the second-reader in a physician-reviewed precision-oncology decision-support service. A board-certified oncologist will review your output; you do not diagnose or prescribe. Review this fictional NSCLC case and the rule-based draft below.\n\nWrite a concise brief for the reviewing oncologist (under 320 words) in Markdown with exactly these headings:\n## Agreement with draft\n## Alternative interpretations\n## Missing data that would change the plan\n## Suggested edits\nUse short bullets. Cite named trials or guidelines where relevant. Say plainly when evidence is thin.\n\nCASE:\n${caseForPrompt(c)}`
+    : `You support a board-certified oncologist reviewing a fictional NSCLC decision-support report. Answer the oncologist's question in under 180 words, plain Markdown bullets allowed, citing trials or guidelines where relevant, and note uncertainty. You provide decision support only.\n\nCASE:\n${caseForPrompt(c)}\n\nQUESTION: ${question}`;
+  try {
+    await SAMPLE(prompt, {signal:AI.ctl.signal, cache: kind === "second" ? true : false, onText:({text}) => { AI.out[key] = text; const el = document.getElementById("ai-"+kind); if (el) el.innerHTML = md(text); }});
+  } catch (e) { AI.err[key] = sampleErr(e); if (e && e.text) AI.out[key] = e.text; }
+  AI.busy = null; AI.ctl = null; render();
+}
+function md(t) {
+  const inl = s => s.replace(/\*\*(.+?)\*\*/g, "<strong>$1</strong>").replace(/`([^`]+)`/g, '<span class="mono">$1</span>');
+  let out = "", list = false;
+  for (const l of esc(t).split("\n")) {
+    const b = l.match(/^\s*[-*•]\s+(.*)/);
+    if (b) { if (!list) { out += "<ul>"; list = true; } out += "<li>" + inl(b[1]) + "</li>"; continue; }
+    if (list) { out += "</ul>"; list = false; }
+    const h = l.match(/^#{1,4}\s+(.*)/);
+    if (h) { out += "<h4>" + inl(h[1]) + "</h4>"; continue; }
+    if (l.trim()) out += "<p>" + inl(l) + "</p>";
+  }
+  return out + (list ? "</ul>" : "");
+}
+
+/* ============================ Navigation ============================ */
+const ICONS = {
+  home:'<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M3 10.5 12 3l9 7.5V20a1 1 0 0 1-1 1h-5v-6H9v6H4a1 1 0 0 1-1-1z"/></svg>',
+  intake:'<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round"><circle cx="12" cy="12" r="9"/><path d="M12 8v8M8 12h8"/></svg>',
+  cases:'<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M14 3H6a1 1 0 0 0-1 1v16a1 1 0 0 0 1 1h12a1 1 0 0 0 1-1V8z"/><path d="M14 3v5h5M8.5 13h7M8.5 17h5"/></svg>',
+  review:'<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M9 11l2 2 4-4"/><path d="M12 21s-7-4.4-7-10V5l7-2 7 2v6c0 5.6-7 10-7 10z"/></svg>',
+  investors:'<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M4 20V10M10 20V4M16 20v-7M22 20H2"/></svg>'
+};
+const NAV = [["home","Home"],["intake","New case"],["cases","Reports"],["review","Review"],["investors","Investors"]];
+function go(view, opts = {}) {
+  S.view = view; if (opts.id) S.currentId = opts.id;
+  if (view === "review" && opts.id) S.reviewId = opts.id;
+  try { history.replaceState(null, "", "#" + view); } catch {}
+  render(); window.scrollTo({top:0, behavior: reduceMotion ? "auto" : "smooth"});
+}
+function renderNav() {
+  const reviewCount = S.cases.filter(c => c.status === "in_review").length;
+  const item = ([v, l], tab) => `<button data-go="${v}" ${S.view === v || (v === "cases" && S.view === "report") ? 'aria-current="page"' : ""}>${tab ? ICONS[v] : ""}<span>${l}${!tab && v === "review" && reviewCount ? ` <span class="pill warn" style="padding:0 7px">${reviewCount}</span>` : ""}</span></button>`;
+  $("#topnav").innerHTML = NAV.map(n => item(n, false)).join("");
+  $("#tabbar").innerHTML = NAV.map(n => item(n, true)).join("");
+}
+
+/* ============================ Views ============================ */
+function statusPill(c) {
+  if (c.status === "signed") return '<span class="pill ok">Signed</span>';
+  if (c.status === "in_review") return '<span class="pill warn">In oncologist review</span>';
+  return '<span class="pill neutral">Draft</span>';
+}
+const tierClass = t => /^I-/.test(t) ? "t1" : /^II/.test(t) ? "t2" : /^III/.test(t) ? "t3" : "t4";
+const statusTone = s => /FDA approved|Guideline/.test(s) ? "ok" : /Accelerated/.test(s) ? "info" : "warn";
+
+function viewHome() {
+  const sample = S.cases.find(c => c.status === "signed") || S.cases[0];
+  const r = sample.report;
+  return `
+  <section class="hero">
+    <div>
+      <p class="eyebrow">Precision oncology second opinion · Non-small-cell lung cancer</p>
+      <h1>One patient.<br><em>One protocol.</em></h1>
+      <p class="lede">Send your pathology, genomic sequencing and treatment history. Nof1 reasons across the whole record, current literature and open trials. A board-certified oncologist reviews and signs every report before you see it.</p>
+      <div class="row">
+        <button class="btn primary" data-go="intake">Start a case</button>
+        <button class="btn" data-open="${sample.id}">Open a sample report</button>
+      </div>
+    </div>
+    <aside class="specimen" aria-label="Sample report preview">
+      <div class="specimen-head"><b>Report ${esc(sample.id)}</b><span class="muted small">${esc(sample.patient.initials)} · ${esc(sample.patient.age)}${esc(sample.patient.sex[0])}</span></div>
+      ${r.drivers.slice(0,2).map(d => `<div class="line"><span class="variant">${esc(d.gene)} ${esc(d.alt)}</span><span class="tier ${tierClass(d.tier)}">${esc(d.role)}</span></div>`).join("")}
+      ${r.therapies.slice(0,2).map(t => `<div class="line"><span>${esc(t.name)}</span><span class="tier ${tierClass(t.tier)}">ESCAT ${esc(t.tier)}</span></div>`).join("")}
+      <div class="line"><span>Trials screened for eligibility</span><span class="mono">${r.trials.length}</span></div>
+      <div class="sig"><span class="sig-script">${sample.signed ? esc(sample.signed.name) : "Pending review"}</span><span class="muted small">${sample.signed ? esc(sample.signed.cred) : ""}</span></div>
+    </aside>
+  </section>
+  <div class="facts">
+    <div><b>72 h</b><span>Target turnaround from complete records</span></div>
+    <div><b>100%</b><span>Reports signed by a board-certified oncologist</span></div>
+    <div><b>$1,950</b><span>Flat fee, cash-pay, per comprehensive report</span></div>
+    <div><b>Every</b><span>recommendation shows its evidence and source</span></div>
+  </div>
+
+  <section style="margin-top:56px">
+    <div class="section-h"><p class="eyebrow">How it works</p><h2>From a stack of records to a plan you can take to your oncologist</h2></div>
+    <div class="steps">
+      <div class="step"><h3>Submit the full picture</h3><p>Pathology, NGS report (tissue or liquid biopsy), PD-L1, every line of treatment, and how you are doing now.</p></div>
+      <div class="step"><h3>Molecular reasoning</h3><p>Each alteration is classified as driver, resistance or co-mutation, then matched to therapies graded on the ESMO ESCAT scale.</p></div>
+      <div class="step"><h3>Oncologist verification</h3><p>A board-certified oncologist checks each claim, edits or withholds it, and signs. Nothing reaches you unsigned.</p></div>
+      <div class="step"><h3>Report and follow-up</h3><p>Drivers, matched therapies, trials near you, and the questions to bring to your next appointment. We follow up at 90 days.</p></div>
+    </div>
+  </section>
+
+  <section style="margin-top:56px" class="price-grid">
+    <div class="panel stack">
+      <p class="eyebrow">For patients and families</p>
+      <div class="row" style="align-items:baseline"><span class="price">$1,950</span><span class="muted">per comprehensive report</span></div>
+      <ul class="ticks">
+        <li>Molecular drivers and resistance mechanisms explained in plain language</li>
+        <li>Therapies matched to your drivers, with evidence grade and source trial</li>
+        <li>Clinical trials you may qualify for, ranked by eligibility and distance</li>
+        <li>Questions to ask your oncologist, written for your case</li>
+        <li>One follow-up update if your situation changes within 6 months</li>
+      </ul>
+      <div class="row"><button class="btn primary" data-go="intake">Start a case</button></div>
+    </div>
+    <div class="panel stack">
+      <p class="eyebrow">For community oncology practices</p>
+      <div class="row" style="align-items:baseline"><span class="price" style="font-size:34px">$3–8k</span><span class="muted">per month, unlimited cases</span></div>
+      <p class="muted">A molecular tumour board for practices that don't have one. Submit from your EHR export; receive a signed, citable report your team can review in minutes.</p>
+      <div class="callout"><b>Decision support, not diagnosis.</b> Every recommendation carries its basis so the treating physician can review it independently. Nof1 does not prescribe.</div>
+    </div>
+  </section>`;
+}
+
+function viewIntake() {
+  const d = S.draft, st = S.step;
+  const labels = ["Patient","Diagnosis & genomics","Treatment history","Review & submit"];
+  const f = (label, html, hint) => `<label class="field"><span>${label}</span>${html}${hint ? `<small>${hint}</small>` : ""}</label>`;
+  const inp = (path, type = "text", attrs = "") => `<input id="f-${path.replace(/\./g,"-")}" type="${type}" data-bind="${path}" value="${esc(getPath(d, path))}" ${attrs}>`;
+  const sel = (path, opts) => `<select id="f-${path.replace(/\./g,"-")}" data-bind="${path}">${opts.map(o => `<option ${String(getPath(d, path)) === String(o) ? "selected" : ""}>${esc(o)}</option>`).join("")}</select>`;
+  let body = "";
+  if (st === 0) body = `
+    <div class="grid3">
+      ${f("Patient initials", inp("patient.initials","text",'maxlength="6" placeholder="e.g. R.M."'))}
+      ${f("Age", inp("patient.age","number",'min="18" max="110" inputmode="numeric"'))}
+      ${f("Sex", sel("patient.sex",["Female","Male","Intersex / other"]))}
+      ${f("Smoking history", sel("patient.smoking",["Never","Former","Current"]))}
+      ${f("Nearest city", sel("patient.city",Object.keys(CITIES)), "Used to rank trial sites by distance")}
+      ${f("Submitted by", sel("patient.submitter",["Patient","Family","Oncologist"]))}
+    </div>`;
+  if (st === 1) body = `
+    <div class="grid3">
+      ${f("Histology", sel("dx.histology",["Lung adenocarcinoma","Squamous cell carcinoma","NSCLC, not otherwise specified","Large cell carcinoma"]))}
+      ${f("Stage", sel("dx.stage",["IIIB","IIIC","IVA","IVB","Recurrent"]))}
+      ${f("Diagnosed", inp("dx.dxDate","month"))}
+      ${f("PD-L1 TPS (%)", inp("dx.pdl1","number",'min="0" max="100" inputmode="numeric"'))}
+      ${f("TMB (mut/Mb)", inp("dx.tmb","number",'min="0" max="200" inputmode="decimal"'))}
+    </div>
+    <div class="field"><span>Sites of disease</span><div class="checks">${METS.map(m => `<label class="check"><input type="checkbox" data-met="${m}" ${d.dx.mets.includes(m) ? "checked" : ""}>${m}</label>`).join("")}</div></div>
+    <div class="field">
+      <span>Genomic report</span>
+      <textarea id="f-ngs" class="mono" data-bind="ngsText" rows="7" placeholder="Paste the text of your NGS report (Foundation, Guardant, Tempus, Caris or in-house panel)…">${esc(d.ngsText)}</textarea>
+      <div class="row">
+        <button class="btn sm" data-action="parse">Detect alterations</button>
+        ${SAMPLE ? `<button class="btn sm ghost" data-action="ai-extract" ${AI.busy ? "disabled" : ""}>${AI.busy === "extract" ? "Reading report…" : "Extract with AI"}</button>` : ""}
+        <label class="btn sm ghost" for="f-file">Upload .txt / .csv<input id="f-file" type="file" accept=".txt,.csv,.tsv,.vcf,text/plain" hidden></label>
+      </div>
+      ${AI.err.extract ? `<small style="color:var(--bad)">${esc(AI.err.extract)}</small>` : ""}
+    </div>
+    <div class="field">
+      <span>Alterations on file (${d.variants.length})</span>
+      ${d.variants.length ? `<div class="varlist">${d.variants.map((v,i) => `<div class="varrow"><span class="g">${esc(v.gene)}</span><span>${esc(v.alt)}</span><span class="muted small mono">${v.vaf ? esc(v.vaf) + "%" : ""}</span><button class="iconbtn" data-action="delvar" data-i="${i}" aria-label="Remove ${esc(v.gene)} ${esc(v.alt)}">✕</button></div>`).join("")}</div>` : `<p class="muted small">None yet. Paste a report above or add one below.</p>`}
+      <div class="addvar">
+        <select id="nv-gene" aria-label="Gene">${GENES.map(g => `<option>${g}</option>`).join("")}</select>
+        <input id="nv-alt" type="text" placeholder="Alteration, e.g. L858R" aria-label="Alteration">
+        <input id="nv-vaf" type="number" placeholder="VAF %" aria-label="Variant allele frequency" inputmode="decimal">
+        <button class="btn sm" data-action="addvar">Add</button>
+      </div>
+    </div>`;
+  if (st === 2) body = `
+    <datalist id="regimens">${REGIMENS.map(r => `<option value="${esc(r)}">`).join("")}</datalist>
+    <div class="stack">
+      ${d.history.map((h,i) => `<div class="hist">
+        ${f(`Line ${i+1} regimen`, `<input id="h-${i}-regimen" type="text" list="regimens" data-hist="${i}.regimen" value="${esc(h.regimen)}" placeholder="Start typing a drug">`)}
+        ${f("Started", `<input id="h-${i}-start" type="month" data-hist="${i}.start" value="${esc(h.start)}">`)}
+        ${f("Months", `<input id="h-${i}-months" type="number" min="0" data-hist="${i}.months" value="${esc(h.months)}" inputmode="numeric">`)}
+        ${f("Best response", `<select id="h-${i}-response" data-hist="${i}.response">${["","CR","PR","SD","PD"].map(o => `<option ${h.response === o ? "selected" : ""}>${o}</option>`).join("")}</select>`)}
+        ${f("Stopped due to", `<select id="h-${i}-stop" data-hist="${i}.stop">${["","Progression","Toxicity","Completed","Ongoing"].map(o => `<option ${h.stop === o ? "selected" : ""}>${o}</option>`).join("")}</select>`)}
+        <button class="iconbtn" data-action="delhist" data-i="${i}" aria-label="Remove line ${i+1}">✕</button>
+      </div>`).join("")}
+      <div><button class="btn sm" data-action="addhist">Add a line of therapy</button></div>
+      <div class="grid2">
+        ${f("ECOG performance status", sel("status.ecog",[0,1,2,3]), "0 = fully active · 1 = light work · 2 = up and about >50% of day")}
+        <div class="field"><span>Biopsy after latest progression?</span><label class="check" style="align-self:flex-start"><input type="checkbox" data-bind-check="status.rebiopsy" ${d.status.rebiopsy ? "checked" : ""}>Yes, the genomic report above is post-progression</label></div>
+      </div>
+      ${f("Current status", `<textarea id="f-current" data-bind="status.current" rows="3" placeholder="Latest scans, symptoms, what changed">${esc(d.status.current)}</textarea>`)}
+      ${f("Goals and preferences", `<textarea id="f-goals" data-bind="status.goals" rows="2" placeholder="What matters most: travel, side effects, oral vs IV…">${esc(d.status.goals)}</textarea>`)}
+    </div>`;
+  if (st === 3) {
+    const p = parseDraftPreview(d);
+    body = `
+    <dl class="summary-dl">
+      <dt>Patient</dt><dd>${esc(d.patient.initials || "—")} · ${esc(d.patient.age || "—")} · ${esc(d.patient.sex)} · ${esc(d.patient.smoking)} smoker · ${esc(d.patient.city)}</dd>
+      <dt>Diagnosis</dt><dd>Stage ${esc(d.dx.stage)} ${esc(d.dx.histology)}${d.dx.dxDate ? " · diagnosed " + esc(d.dx.dxDate) : ""}</dd>
+      <dt>Biomarkers</dt><dd>PD-L1 ${d.dx.pdl1 === "" ? "not provided" : esc(d.dx.pdl1) + "%"} · TMB ${d.dx.tmb === "" ? "not provided" : esc(d.dx.tmb) + " mut/Mb"}</dd>
+      <dt>Alterations</dt><dd class="row" style="gap:6px">${d.variants.length ? d.variants.map(v => `<span class="variant">${esc(v.gene)} ${esc(v.alt)}</span>`).join("") : '<span class="muted">None provided</span>'}</dd>
+      <dt>Treatment lines</dt><dd>${d.history.filter(h => h.regimen).map(h => esc(h.regimen) + (h.months ? ` (${esc(h.months)} mo)` : "")).join(" → ") || '<span class="muted">Treatment-naive</span>'}</dd>
+      <dt>Sites of disease</dt><dd>${esc(d.dx.mets.join(", ") || "Not specified")}</dd>
+    </dl>
+    ${p.warn.length ? `<div class="callout warn" style="margin-top:16px">${p.warn.map(esc).join("<br>")}</div>` : ""}
+    <label class="check" style="margin-top:18px;border-radius:12px;align-items:flex-start;padding:12px 14px"><input type="checkbox" id="f-consent" data-action="consent" ${S.consent ? "checked" : ""} style="margin-top:3px"><span>I understand Nof1 provides decision support reviewed by a board-certified oncologist. It is not a diagnosis or a prescription, and treatment decisions stay with my treating physician.</span></label>`;
+  }
+  return `
+  <div class="spread" style="margin-bottom:14px">
+    <div><p class="eyebrow">New case · NSCLC</p><h1 style="font-family:var(--serif);font-weight:400;font-size:clamp(28px,4.5vw,38px)">Tell us about the case</h1></div>
+  </div>
+  <div class="stack" style="margin-bottom:16px">
+    <div class="examples" role="group" aria-label="Load an example case">
+      <span class="muted small" style="align-self:center;white-space:nowrap">Try an example:</span>
+      ${Object.entries(EXAMPLES).map(([k,e]) => `<button class="btn sm" data-example="${k}">${esc(e.label)}</button>`).join("")}
+      <button class="btn sm ghost" data-example="clear">Clear</button>
+    </div>
+  </div>
+  <div class="panel">
+    <nav class="stepper" aria-label="Intake steps">${labels.map((l,i) => `<button data-step="${i}" class="${i < st ? "done" : ""}" ${i === st ? 'aria-current="step"' : ""}><span>${i+1}. ${l}</span></button>`).join("")}</nav>
+    <h2 style="font-size:18px;font-weight:600;margin-bottom:14px">${labels[st]}</h2>
+    <div class="stack">${body}</div>
+    <div class="formnav">
+      <button class="btn" data-step="${Math.max(0, st-1)}" ${st === 0 ? "disabled" : ""}>Back</button>
+      ${st < 3 ? `<button class="btn primary" data-step="${st+1}">Continue</button>` : `<button class="btn primary" data-action="submit" ${S.consent ? "" : "disabled"}>Submit for analysis</button>`}
+    </div>
+  </div>`;
+}
+function parseDraftPreview(d) {
+  const warn = [];
+  if (!d.patient.age) warn.push("Age is missing.");
+  if (!d.variants.length) warn.push("No genomic alterations entered. The report will recommend comprehensive NGS first.");
+  if (d.dx.pdl1 === "") warn.push("PD-L1 is missing. Some immunotherapy and trial guidance will be marked as unconfirmed.");
+  return {warn};
+}
+const getPath = (o, p) => p.split(".").reduce((a, k) => a == null ? a : a[k], o) ?? "";
+const setPath = (o, p, v) => { const ks = p.split("."); const last = ks.pop(); ks.reduce((a, k) => a[k], o)[last] = v; };
+
+function viewPipeline(c) {
+  const r = c.report, n = S.pipe.step;
+  const mainLine = c.history.filter(h => h.regimen).slice(-1)[0];
+  const steps = [
+    ["Parsing pathology and genomic report", `${r.stats.variants} alterations · PD-L1 ${r.stats.pdl1 ?? "n/a"}${r.stats.pdl1 != null ? "%" : ""}`],
+    ["Classifying drivers, resistance and co-mutations", r.drivers.map(d => d.gene + " " + d.alt).slice(0,3).join(" · ") || "no alterations"],
+    ["Reconciling treatment history", `${r.stats.lines} prior line${r.stats.lines === 1 ? "" : "s"}${mainLine ? " · latest " + mainLine.regimen : ""}`],
+    ["Matching therapies and grading evidence (ESCAT)", `${r.therapies.length} options graded`],
+    ["Screening open trials against eligibility", `${r.trials.length} trials · ${r.trials.filter(t => t.verdict === "yes").length} likely eligible`],
+    ["Drafting report and oncologist questions", `${r.questions.length} questions`],
+    ["Queued for board-certified oncologist review", "Nothing is released until signed"]
+  ];
+  return `<div class="pipe">
+    <p class="eyebrow">Case ${esc(c.id)}</p>
+    <h2>Building the case picture</h2>
+    <p class="muted">Every step below is logged so the reviewing oncologist can trace how each recommendation was reached.</p>
+    <ol class="pipe-list">${steps.map(([t, s], i) => `<li class="${i < n ? "done" : i === n ? "run" : ""}"><b>${t}</b>${i < n ? `<small>${esc(s)}</small>` : ""}</li>`).join("")}</ol>
+  </div>`;
+}
+
+function viewReport() {
+  const c = current();
+  if (!c) return viewCases();
+  if (S.pipe && S.pipe.id === c.id) return viewPipeline(c);
+  const r = c.report, signed = c.status === "signed";
+  const cl = id => c.claims[id] || {state:"pending"};
+  const visible = id => !(signed && cl(id).state === "flagged");
+  const withheld = Object.values(c.claims).filter(k => k.state === "flagged").length;
+  const note = id => cl(id).state === "edited" && cl(id).note ? `<div class="reviewer-note"><b>Reviewer note:</b> ${esc(cl(id).note)}</div>` : "";
+  const dist = km => km == null ? "" : isUS(c.patient.city) ? `${Math.round(km * 0.621).toLocaleString()} mi` : `${Math.round(km).toLocaleString()} km`;
+  const aiKey = "second:" + c.id;
+  return `
+  <div class="spread" style="margin-bottom:14px">
+    <button class="btn sm ghost" data-go="cases">← All reports</button>
+    <div class="row">
+      ${!signed ? `<button class="btn sm primary" data-review="${c.id}">Open in review console</button>` : ""}
+    </div>
+  </div>
+  ${!signed ? `<div class="callout warn" style="margin-bottom:14px"><b>Draft awaiting oncologist review.</b> In production the patient sees this report only after it is signed. You're viewing the draft as the clinical team would.</div>` : ""}
+  <article class="doc">
+    <header class="doc-head">
+      <div>
+        <p class="eyebrow">Precision oncology report · NSCLC</p>
+        <h1>${esc(c.patient.initials || "Patient")}, ${esc(c.patient.age)} · Stage ${esc(c.dx.stage)} ${esc(c.dx.histology)}</h1>
+        <div class="doc-meta">
+          <span>Case <b class="mono">${esc(c.id)}</b></span>
+          <span>Submitted <b>${esc(c.created)}</b></span>
+          <span>PD-L1 <b>${c.dx.pdl1 === "" ? "n/a" : esc(c.dx.pdl1) + "%"}</b></span>
+          <span>TMB <b>${c.dx.tmb === "" ? "n/a" : esc(c.dx.tmb)}</b></span>
+          <span>ECOG <b>${esc(c.status.ecog)}</b></span>
+        </div>
+      </div>
+      ${statusPill(c)}
+    </header>
+    <section class="doc-sec">
+      <h2><span class="sec-n">A</span>Summary</h2>
+      <p class="summary-text">${esc(r.summary)}</p>
+    </section>
+    <section class="doc-sec">
+      <h2><span class="sec-n">B</span>Molecular findings</h2>
+      <p class="sec-sub">Each alteration classified by its role in this tumour and its clinical actionability.</p>
+      <div class="tbl-wrap"><table>
+        <thead><tr><th>Alteration</th><th>Role</th><th>ESCAT</th><th>Interpretation</th></tr></thead>
+        <tbody>${r.drivers.filter(d => visible(d.id)).map(d => `<tr><td><span class="variant">${esc(d.gene)} ${esc(d.alt)}</span>${d.vaf ? `<div class="muted small mono" style="margin-top:4px">VAF ${esc(d.vaf)}%</div>` : ""}</td><td>${esc(d.role)}</td><td>${d.tier === "—" ? '<span class="muted">—</span>' : `<span class="tier ${tierClass(d.tier)}">${esc(d.tier)}</span>`}</td><td style="min-width:220px">${esc(d.note)}${note(d.id)}</td></tr>`).join("") || `<tr><td colspan="4" class="muted">No alterations submitted.</td></tr>`}</tbody>
+      </table></div>
+    </section>
+    <section class="doc-sec">
+      <h2><span class="sec-n">C</span>Therapies matched to these findings</h2>
+      <p class="sec-sub">Ranked for discussion with the treating oncologist. Evidence grade, regulatory status and source trial shown for each.</p>
+      ${r.therapies.filter(t => visible(t.id)).map((t,i) => `<div class="rx">
+        <span class="rx-n">${String(i+1).padStart(2,"0")}</span>
+        <div>
+          <h3>${esc(t.name)}</h3>
+          <div class="row"><span class="tier ${tierClass(t.tier)}">ESCAT ${esc(t.tier)}</span><span class="pill ${statusTone(t.status)}">${esc(t.status)}</span><span class="pill neutral">${esc(t.setting)}</span><span class="muted small">Target: ${esc(t.target)}</span></div>
+          <p>${esc(t.why)}</p>
+          <div class="evid"><span>${esc(t.data)}</span><span class="mono small">${esc(t.src)}</span></div>
+          ${note(t.id)}
+        </div>
+      </div>`).join("")}
+    </section>
+    <section class="doc-sec">
+      <h2><span class="sec-n">D</span>Clinical considerations</h2>
+      <ul class="consider">${r.considerations.filter(k => visible(k.id)).map(k => `<li><span class="pill ${k.level === "warn" ? "warn" : "info"}">${k.level === "warn" ? "Caution" : "Note"}</span><span>${esc(k.text)}${note(k.id)}</span></li>`).join("")}</ul>
+    </section>
+    <section class="doc-sec">
+      <h2><span class="sec-n">E</span>Clinical trials to ask about</h2>
+      <p class="sec-sub">Screened against the submitted record. Listings in this demo are illustrative; production syncs live from ClinicalTrials.gov.</p>
+      ${r.trials.filter(t => visible(t.id)).map(t => `<div class="trial">
+        <div class="spread"><span class="row" style="gap:6px"><span class="pill neutral">${esc(t.phase)}</span><span class="pill ${t.verdict === "yes" ? "ok" : t.verdict === "maybe" ? "warn" : "bad"}">${t.verdict === "yes" ? "Likely eligible" : t.verdict === "maybe" ? "Needs confirmation" : "Not eligible"}</span></span><span class="mono small muted">${esc(t.code)}</span></div>
+        <h3>${esc(t.title)}</h3>
+        <ul class="crit">${t.crit.map(k => `<li><span class="m ${k.r === true ? "y" : k.r === false ? "n" : "q"}">${k.r === true ? "✓" : k.r === false ? "✕" : "?"}</span><span>${esc(k.label)}</span></li>`).join("")}</ul>
+        <div class="small muted">Nearest site: <b style="color:var(--ink)">${esc(t.sites[0].city)}</b>${t.sites[0].km != null ? " · " + dist(t.sites[0].km) : ""}${t.sites.length > 1 ? ` · also ${t.sites.slice(1).map(s => esc(s.city)).join(", ")}` : ""}</div>
+        ${note(t.id)}
+      </div>`).join("") || '<p class="muted">No matching trials in the current catalogue.</p>'}
+    </section>
+    <section class="doc-sec">
+      <h2><span class="sec-n">F</span>Questions to ask your oncologist</h2>
+      <ol class="questions">${r.questions.map(q => `<li>${esc(q)}</li>`).join("")}</ol>
+    </section>
+    ${SAMPLE && !signed ? `<section class="doc-sec">
+      <h2><span class="sec-n">G</span>Second-reader reasoning</h2>
+      <p class="sec-sub">A live language model challenges the rule-based draft before the oncologist signs. Visible to the clinical team only.</p>
+      <div class="ai-box">
+        <div class="ai-out" id="ai-second">${AI.out[aiKey] ? md(AI.out[aiKey]) : AI.busy === aiKey ? '<p class="muted">Thinking…</p>' : '<p class="muted">Not run yet for this case.</p>'}</div>
+        ${AI.err[aiKey] ? `<p class="small" style="color:var(--bad);margin-top:8px">${esc(AI.err[aiKey])}</p>` : ""}
+        <div class="row" style="margin-top:12px">${AI.busy === aiKey ? `<button class="btn sm" data-action="ai-stop">Stop</button>` : `<button class="btn sm primary" data-action="ai-second" ${AI.busy ? "disabled" : ""}>${AI.out[aiKey] ? "Run again" : "Run second reader"}</button>`}</div>
+      </div>
+    </section>` : ""}
+    <section class="doc-sec">
+      <div class="signoff">
+        ${signed ? `<div><p class="eyebrow">Reviewed and signed</p><p class="sig-script" style="font-size:26px">${esc(c.signed.name)}</p><p class="muted small">${esc(c.signed.cred)} · ${esc(c.signed.at)} · review time ${esc(c.signed.minutes)} min${withheld ? ` · ${withheld} item${withheld > 1 ? "s" : ""} withheld by reviewer` : ""}</p></div><span class="pill ok">Released to patient</span>`
+        : `<div><p class="eyebrow">Physician sign-off</p><p class="muted">Awaiting review by a board-certified medical oncologist. ${Object.values(c.claims).filter(k => k.state !== "pending").length} of ${Object.keys(c.claims).length} claims checked.</p></div><button class="btn primary" data-review="${c.id}">Review and sign</button>`}
+      </div>
+      <div class="legend" style="margin-top:16px">
+        <div><span class="tier t1">I-A/B/C</span>Ready for routine use; proven in trials</div>
+        <div><span class="tier t2">II-B</span>Investigational; benefit likely, data maturing</div>
+        <div><span class="tier t3">III</span>Evidence from another tumour type</div>
+        <div><span class="tier t4">IV</span>Preclinical or hypothetical</div>
+      </div>
+      <p class="muted small" style="margin-top:14px">This report is clinical decision support for the treating physician. It is not a diagnosis or a treatment order. Evidence grades use the ESMO Scale for Clinical Actionability of molecular Targets (ESCAT). Fictional demonstration case.</p>
+    </section>
+  </article>`;
+}
+
+function viewCases() {
+  const list = [...S.cases].sort((a, b) => b.created.localeCompare(a.created) || b.id.localeCompare(a.id));
+  return `
+  <div class="spread" style="margin-bottom:16px">
+    <div><p class="eyebrow">Reports</p><h1 style="font-family:var(--serif);font-weight:400;font-size:clamp(28px,4.5vw,38px)">Cases on this device</h1></div>
+    <button class="btn primary" data-go="intake">New case</button>
+  </div>
+  <div class="case-list">${list.map(c => {
+    const top = c.report.therapies[0];
+    return `<button class="case-card" data-open="${c.id}">
+      <div><h3>${esc(c.patient.initials || "Patient")} · ${esc(c.patient.age)} · Stage ${esc(c.dx.stage)} ${esc(c.dx.histology)}</h3>
+        <div class="muted"><span class="mono">${esc(c.id)}</span> · submitted ${esc(c.created)}${top ? " · leading option: " + esc(top.name) : ""}</div>
+        <div class="row">${c.variants.slice(0,3).map(v => `<span class="variant">${esc(v.gene)} ${esc(v.alt)}</span>`).join("")}</div>
+      </div>
+      ${statusPill(c)}
+    </button>`;
+  }).join("")}</div>
+  <p class="muted small" style="margin-top:14px">Cases are stored in this browser only. <button class="btn sm ghost" data-action="reset">Reset demo data</button></p>`;
+}
+
+function viewReview() {
+  const queue = [...S.cases].sort((a, b) => (a.status === "in_review" ? 0 : 1) - (b.status === "in_review" ? 0 : 1));
+  if (!S.reviewId || !S.cases.find(c => c.id === S.reviewId)) S.reviewId = (queue.find(c => c.status === "in_review") || queue[0])?.id;
+  const c = S.cases.find(x => x.id === S.reviewId);
+  if (!c) return `<p class="muted">No cases yet.</p>`;
+  if (!c.reviewStart && c.status !== "signed") { c.reviewStart = Date.now(); save(); }
+  const claims = claimsOf(c.report);
+  const done = claims.filter(k => c.claims[k.id]?.state !== "pending").length;
+  const signed = c.status === "signed";
+  const groups = [...new Set(claims.map(k => k.group))];
+  const qaKey = "qa:" + c.id;
+  return `
+  <div class="spread" style="margin-bottom:16px">
+    <div><p class="eyebrow">Oncologist review console</p><h1 style="font-family:var(--serif);font-weight:400;font-size:clamp(28px,4.5vw,38px)">Verify, edit, sign</h1></div>
+    <span class="muted small" style="max-width:44ch">Every claim is checked before release. Edits and flags become training signal and the validation record.</span>
+  </div>
+  <div class="review-layout">
+    <aside class="queue" aria-label="Review queue">${queue.map(q => `<button data-review="${q.id}" aria-current="${q.id === c.id}"><span class="mono">${esc(q.id)}</span><b style="font-size:14px">${esc(q.patient.initials)} · ${esc(q.variants[0] ? q.variants[0].gene + " " + q.variants[0].alt : "No NGS")}</b>${statusPill(q)}</button>`).join("")}</aside>
+    <div class="stack">
+      <div class="rv-head">
+        <div class="stack" style="gap:2px"><b>${esc(c.patient.initials)}, ${esc(c.patient.age)} · Stage ${esc(c.dx.stage)}</b><span class="muted small"><span class="tnum">${done}</span> of <span class="tnum">${claims.length}</span> claims checked</span></div>
+        <div class="progress" aria-hidden="true"><i style="width:${claims.length ? done / claims.length * 100 : 0}%"></i></div>
+        <span class="timer tnum" id="timer" aria-label="Review time">${signed ? c.signed.minutes + " min" : "00:00"}</span>
+      </div>
+      ${signed ? `<div class="callout">Signed by <b>${esc(c.signed.name)}</b> on ${esc(c.signed.at)} after ${esc(c.signed.minutes)} minutes of review. <button class="btn sm ghost" data-open="${c.id}">View released report</button></div>` : ""}
+      ${!signed ? `<div class="row"><button class="btn sm" data-action="verify-all">Verify all remaining</button><button class="btn sm ghost" data-open="${c.id}">Preview report</button></div>` : ""}
+      ${groups.map(g => `<div class="claim-group"><h3>${g}</h3>${claims.filter(k => k.group === g).map(k => {
+        const s = c.claims[k.id] || {state:"pending", note:""};
+        const editing = S.editing === k.id;
+        return `<div class="claim" data-state="${s.state}">
+          <div><div class="claim-title">${esc(k.title)}</div><div class="claim-meta">${k.meta.filter(Boolean).map(m => `<span class="pill neutral">${esc(m)}</span>`).join("")}</div>${k.note ? `<div class="claim-note">${esc(k.note)}</div>` : ""}${s.note && !editing ? `<div class="reviewer-note">${esc(s.note)}</div>` : ""}</div>
+          ${signed ? `<span class="pill ${s.state === "verified" ? "ok" : s.state === "edited" ? "info" : s.state === "flagged" ? "bad" : "neutral"}">${s.state}</span>` : `<div class="claim-actions">
+            <button data-claim="${k.id}" data-set="verified" class="${s.state === "verified" ? "on" : ""}">Verify</button>
+            <button data-claim="${k.id}" data-set="edited" class="${s.state === "edited" ? "on" : ""}">Edit</button>
+            <button data-claim="${k.id}" data-set="flagged" class="${s.state === "flagged" ? "on" : ""}">Withhold</button>
+          </div>`}
+          ${editing ? `<div class="claim-edit"><textarea id="edit-${k.id}" rows="3" placeholder="Reviewer note shown to the patient with this item">${esc(s.note)}</textarea><div class="row"><button class="btn sm primary" data-action="save-edit" data-id="${k.id}">Save note</button><button class="btn sm ghost" data-action="cancel-edit">Cancel</button></div></div>` : ""}
+        </div>`;
+      }).join("")}</div>`).join("")}
+      ${SAMPLE && !signed ? `<div class="panel stack">
+        <div><h3 style="font-size:16px;font-weight:600">Ask about this case</h3><p class="muted small">Live model with the full case in context. For the reviewer only.</p></div>
+        <div class="row" style="flex-wrap:nowrap"><input id="qa-input" type="text" placeholder="e.g. Would you rebiopsy before amivantamab here?" style="flex:1"><button class="btn primary" data-action="ai-qa" ${AI.busy ? "disabled" : ""}>Ask</button></div>
+        <div class="ai-out" id="ai-qa">${AI.out[qaKey] ? md(AI.out[qaKey]) : AI.busy === qaKey ? '<p class="muted">Thinking…</p>' : ""}</div>
+        ${AI.err[qaKey] ? `<p class="small" style="color:var(--bad)">${esc(AI.err[qaKey])}</p>` : ""}
+      </div>` : ""}
+      ${!signed ? `<div class="panel stack">
+        <h3 style="font-size:16px;font-weight:600">Sign and release</h3>
+        <div class="grid2">
+          <label class="field"><span>Reviewing oncologist</span><input id="sig-name" type="text" value="${esc(S.sigName || "")}" placeholder="Dr. Full Name"></label>
+          <label class="field"><span>Credentials</span><input id="sig-cred" type="text" value="${esc(S.sigCred || "MD, Medical Oncology")}"></label>
+        </div>
+        <label class="check" style="border-radius:12px;align-items:flex-start;padding:12px 14px"><input type="checkbox" id="sig-attest" style="margin-top:3px"><span>I have independently reviewed the basis for each recommendation and agree to release this decision-support report to the patient and treating physician.</span></label>
+        <div class="row"><button class="btn primary" data-action="sign" ${done < claims.length ? "disabled" : ""}>Sign and release report</button>${done < claims.length ? `<span class="muted small">${claims.length - done} claims left to check</span>` : ""}</div>
+      </div>` : ""}
+    </div>
+  </div>`;
+}
+
+function viewInvestors() {
+  const E = S.econ || (S.econ = {price:1950, minutes:60, rate:400, infer:40, ops:250, cases:40});
+  const clin = E.minutes / 60 * E.rate;
+  const cost = clin + E.infer + E.ops;
+  const gm = (E.price - cost) / E.price;
+  const all = S.cases, signed = all.filter(c => c.status === "signed");
+  const claimStates = all.flatMap(c => Object.values(c.claims));
+  const reviewed = claimStates.filter(k => k.state !== "pending");
+  const agree = reviewed.length ? reviewed.filter(k => k.state === "verified").length / reviewed.length : 0;
+  const avgMin = signed.length ? signed.reduce((a, c) => a + Number(c.signed.minutes || 0), 0) / signed.length : 0;
+  const sl = (id, label, min, max, step, fmtv) => `<div class="slider"><label for="e-${id}">${label}</label><output id="o-${id}">${fmtv(E[id])}</output><input id="e-${id}" type="range" min="${min}" max="${max}" step="${step}" value="${E[id]}" data-econ="${id}"></div>`;
+  const seg = (v, color, label) => `<div style="flex-basis:${Math.max(0, v / E.price * 100)}%;background:${color};color:var(--brand-ink)" title="${label}">${v / E.price > .09 ? label : ""}</div>`;
+  return `
+  <div class="stack-lg">
+    <div>
+      <p class="eyebrow">For investors</p>
+      <h1 style="font-family:var(--serif);font-weight:400;font-size:clamp(30px,5vw,46px);line-height:1.08;max-width:22ch">The interpretation layer for precision oncology</h1>
+      <p class="muted" style="max-width:62ch;margin-top:12px">Sequencing is cheap. Interpreting it across a patient's full history, the literature and open trials is not, and most community oncologists lack a molecular tumour board. Nof1 sells that interpretation, physician-signed, at $1,500–2,500 per case.</p>
+    </div>
+
+    <section class="stack">
+      <div class="section-h" style="margin:0"><p class="eyebrow">Pilot telemetry · live from this demo</p></div>
+      <div class="kpis">
+        <div class="kpi"><span>Cases submitted</span><b class="tnum">${all.length}</b><small>${signed.length} signed and released</small></div>
+        <div class="kpi"><span>Reviewer agreement</span><b class="tnum">${reviewed.length ? pct(agree) : "—"}</b><small>claims verified unchanged</small></div>
+        <div class="kpi"><span>Avg. review time</span><b class="tnum">${avgMin ? Math.round(avgMin) + " min" : "—"}</b><small>per signed report</small></div>
+        <div class="kpi hl"><span>Gross margin at current inputs</span><b class="tnum" id="k-gm">${pct(gm)}</b><small>per comprehensive report</small></div>
+      </div>
+      <p class="muted small">Agreement rate and review time are the moat metrics: they show how far the model drafts and how narrow the clinician's verification step has become.</p>
+    </section>
+
+    <section class="two">
+      <div class="panel stack">
+        <div><h2 style="font-size:18px;font-weight:600">Unit economics per report</h2><p class="muted small">Drag to model automation. As review time falls from ~60 to ~20 minutes, margin moves from mid-60s toward 80%+.</p></div>
+        ${sl("price","Price per report",500,2500,50,v => fmt$(v))}
+        ${sl("minutes","Oncologist review time",10,90,5,v => v + " min")}
+        ${sl("rate","Oncologist cost per hour",200,600,25,v => fmt$(v))}
+        ${sl("infer","Inference per case",5,100,5,v => fmt$(v))}
+        ${sl("ops","Operations per case",50,400,10,v => fmt$(v))}
+      </div>
+      <div class="panel stack">
+        <h2 style="font-size:18px;font-weight:600">Where each dollar goes</h2>
+        <div>
+          <div class="cost-bar" id="costbar">${seg(clin,"var(--info)","Clinician")}${seg(E.infer,"var(--accent)","AI")}${seg(E.ops,"var(--ink-3)","Ops")}${seg(E.price - cost,"var(--brand)","Gross profit")}</div>
+          <div class="cost-legend"><span><i style="background:var(--info)"></i>Clinician <b class="tnum" id="l-clin">${fmt$(clin)}</b></span><span><i style="background:var(--accent)"></i>Inference <b class="tnum" id="l-inf">${fmt$(E.infer)}</b></span><span><i style="background:var(--ink-3)"></i>Operations <b class="tnum" id="l-ops">${fmt$(E.ops)}</b></span><span><i style="background:var(--brand)"></i>Gross profit <b class="tnum" id="l-gp">${fmt$(E.price - cost)}</b></span></div>
+        </div>
+        ${sl("cases","Cases per month",10,1000,10,v => v)}
+        <div class="kpis" style="grid-template-columns:repeat(2,minmax(0,1fr))">
+          <div class="kpi"><span>Monthly revenue</span><b class="tnum" id="k-rev">${fmtK(E.price * E.cases)}</b><small>annualised <span id="k-arr">${fmtK(E.price * E.cases * 12)}</span></small></div>
+          <div class="kpi"><span>Monthly gross profit</span><b class="tnum" id="k-gp">${fmtK((E.price - cost) * E.cases)}</b><small>before fixed costs</small></div>
+        </div>
+      </div>
+    </section>
+
+    <section>
+      <div class="section-h"><p class="eyebrow">Plan</p><h2>Milestones</h2></div>
+      <div class="timeline">
+        <div class="ms now"><b>Month 0–3 · wedge</b><h3>50 NSCLC cases</h3><ul><li>Every case reviewed and followed up</li><li>Patient advocacy partnerships (lung cancer communities)</li><li>Regulatory counsel engaged before launch</li></ul></div>
+        <div class="ms"><b>Month 6</b><h3>100 cases</h3><ul><li>Clinical advisory board</li><li>Documented cases where the report changed treatment</li><li>Oncologist referral channel opens</li></ul></div>
+        <div class="ms"><b>Month 12 → 18</b><h3>$2M → $6M revenue</h3><ul><li>500 cases and a published case series</li><li>Practice subscriptions at $3–8k/month</li><li>Prospective outcome study underway</li></ul></div>
+      </div>
+    </section>
+
+    <section class="two">
+      <div class="panel stack">
+        <h2 style="font-size:18px;font-weight:600">Why now</h2>
+        <ul class="ticks">
+          <li>Sequencing and multi-omic diagnostics are cheap enough to run routinely.</li>
+          <li>Models can hold a patient's entire longitudinal record, which no clinician has time to read end to end.</li>
+          <li>NSCLC now has more than ten targetable drivers, and new approvals arrive every year. Community oncologists can't track them all.</li>
+          <li>Second opinions are an established, cash-pay behaviour among patients facing a serious diagnosis.</li>
+        </ul>
+      </div>
+      <div class="panel stack">
+        <h2 style="font-size:18px;font-weight:600">Regulatory and risk posture</h2>
+        <ul class="ticks">
+          <li>Built as clinical decision support for physicians: every recommendation displays its basis for independent review.</li>
+          <li>A board-certified oncologist signs every report; nothing is released unsigned.</li>
+          <li>No diagnosis, no prescribing, careful claims. Regulatory counsel before launch, not after.</li>
+          <li>Path to reimbursement: outcome data from followed-up cases, then payer and self-insured employer contracts.</li>
+        </ul>
+      </div>
+    </section>
+
+    <section class="panel stack">
+      <h2 style="font-size:18px;font-weight:600">Moat</h2>
+      <p class="muted" style="max-width:72ch">Clinical validation data that links each recommendation to what happened next, and a review workflow that lets one oncologist verify a complex case in minutes. The review console in this demo is that workflow: each verify, edit and withhold is logged as ground truth.</p>
+      <div class="row"><button class="btn primary" data-go="review">Open the review console</button><button class="btn" data-go="intake">Run a case end to end</button></div>
+    </section>
+  </div>`;
+}
+function updateEcon() {
+  const E = S.econ, clin = E.minutes / 60 * E.rate, cost = clin + E.infer + E.ops, gp = E.price - cost;
+  const set = (id, v) => { const el = document.getElementById(id); if (el) el.textContent = v; };
+  set("o-price", fmt$(E.price)); set("o-minutes", E.minutes + " min"); set("o-rate", fmt$(E.rate)); set("o-infer", fmt$(E.infer)); set("o-ops", fmt$(E.ops)); set("o-cases", E.cases);
+  set("k-gm", pct(gp / E.price)); set("k-rev", fmtK(E.price * E.cases)); set("k-arr", fmtK(E.price * E.cases * 12)); set("k-gp", fmtK(gp * E.cases));
+  set("l-clin", fmt$(clin)); set("l-inf", fmt$(E.infer)); set("l-ops", fmt$(E.ops)); set("l-gp", fmt$(gp));
+  const bar = document.getElementById("costbar");
+  if (bar) { const parts = [clin, E.infer, E.ops, gp]; const labels = ["Clinician","AI","Ops","Gross profit"]; [...bar.children].forEach((d, i) => { d.style.flexBasis = Math.max(0, parts[i] / E.price * 100) + "%"; d.textContent = parts[i] / E.price > .09 ? labels[i] : ""; }); }
+}
+
+/* ============================ Render ============================ */
+let timerInt = null;
+function render() {
+  renderNav();
+  const app = $("#app");
+  const views = {home:viewHome, intake:viewIntake, cases:viewCases, report:viewReport, review:viewReview, investors:viewInvestors};
+  app.innerHTML = (views[S.view] || viewHome)();
+  clearInterval(timerInt);
+  if (S.view === "review") {
+    const c = S.cases.find(x => x.id === S.reviewId);
+    if (c && c.status !== "signed" && c.reviewStart) {
+      const tick = () => { const s = Math.floor((Date.now() - c.reviewStart) / 1000); const el = $("#timer"); if (el) el.textContent = String(Math.floor(s / 60)).padStart(2, "0") + ":" + String(s % 60).padStart(2, "0"); };
+      tick(); timerInt = setInterval(tick, 1000);
+    }
+  }
+}
+function runPipeline(c) {
+  S.pipe = {id:c.id, step:0}; S.view = "report"; S.currentId = c.id; render();
+  const dt = reduceMotion ? 120 : 520;
+  const next = () => {
+    if (!S.pipe || S.pipe.id !== c.id) return;
+    S.pipe.step += 1;
+    if (S.pipe.step > 6) { S.pipe = null; render(); toast("Draft ready. Queued for oncologist review."); return; }
+    if (S.view === "report") render();
+    setTimeout(next, dt);
+  };
+  setTimeout(next, dt);
+}
+
+/* ============================ Events ============================ */
+document.addEventListener("click", e => {
+  const t = e.target.closest("button,[data-go],[data-open]");
+  if (!t) return;
+  const d = t.dataset;
+  if (d.go) return go(d.go);
+  if (d.open) return go("report", {id:d.open});
+  if (d.review) { S.editing = null; return go("review", {id:d.review}); }
+  if (d.example) {
+    S.draft = d.example === "clear" ? blankCase() : clone(EXAMPLES[d.example]);
+    delete S.draft.label; S.step = d.example === "clear" ? 0 : 3; S.consent = false; save(); render();
+    if (d.example !== "clear") toast("Example loaded. Review the summary, then submit.");
+    return;
+  }
+  if (d.step !== undefined && !t.disabled) { S.step = Number(d.step); save(); render(); window.scrollTo({top:0}); return; }
+  if (d.claim) {
+    const c = S.cases.find(x => x.id === S.reviewId); if (!c) return;
+    const cur = c.claims[d.claim] || (c.claims[d.claim] = {state:"pending", note:""});
+    if (d.set === "edited") { S.editing = d.claim; }
+    else { cur.state = cur.state === d.set ? "pending" : d.set; S.editing = null; }
+    save(); render(); return;
+  }
+  switch (d.action) {
+    case "parse": {
+      const res = parseNGS(S.draft.ngsText || "");
+      let added = 0;
+      for (const v of res.variants) if (!S.draft.variants.some(x => x.gene === v.gene && x.alt === v.alt)) { S.draft.variants.push(v); added++; }
+      if (res.pdl1 != null && S.draft.dx.pdl1 === "") S.draft.dx.pdl1 = Number(res.pdl1);
+      if (res.tmb != null && S.draft.dx.tmb === "") S.draft.dx.tmb = Number(res.tmb);
+      save(); render(); toast(added ? `Detected ${added} alteration${added > 1 ? "s" : ""}.` : "No new alterations found. Add them manually below."); return;
+    }
+    case "ai-extract": return aiExtract();
+    case "addvar": {
+      const gene = $("#nv-gene").value, alt = $("#nv-alt").value.trim(), vaf = $("#nv-vaf").value;
+      if (!alt) { toast("Enter the alteration, for example L858R."); $("#nv-alt").focus(); return; }
+      S.draft.variants.push({gene, alt, vaf}); save(); render(); return;
+    }
+    case "delvar": S.draft.variants.splice(Number(d.i), 1); save(); render(); return;
+    case "addhist": S.draft.history.push({regimen:"", start:"", months:"", response:"", stop:""}); save(); render(); return;
+    case "delhist": S.draft.history.splice(Number(d.i), 1); if (!S.draft.history.length) S.draft.history.push({regimen:"",start:"",months:"",response:"",stop:""}); save(); render(); return;
+    case "submit": {
+      if (!S.consent) return;
+      const c = makeCase(S.draft); S.cases.unshift(c);
+      S.draft = blankCase(); S.step = 0; S.consent = false; save(); runPipeline(c); return;
+    }
+    case "verify-all": {
+      const c = S.cases.find(x => x.id === S.reviewId);
+      for (const id in c.claims) if (c.claims[id].state === "pending") c.claims[id].state = "verified";
+      save(); render(); return;
+    }
+    case "save-edit": {
+      const c = S.cases.find(x => x.id === S.reviewId), note = $("#edit-" + CSS.escape(d.id)).value.trim();
+      c.claims[d.id] = {state:"edited", note}; S.editing = null; save(); render(); return;
+    }
+    case "cancel-edit": S.editing = null; render(); return;
+    case "sign": {
+      const c = S.cases.find(x => x.id === S.reviewId);
+      const name = $("#sig-name").value.trim(), cred = $("#sig-cred").value.trim();
+      if (!name) { toast("Enter the reviewing oncologist's name."); $("#sig-name").focus(); return; }
+      if (!$("#sig-attest").checked) { toast("Confirm the attestation to sign."); return; }
+      S.sigName = name; S.sigCred = cred;
+      c.status = "signed"; c.signed = {name, cred: cred || "MD", at: today(), minutes: Math.max(1, Math.round((Date.now() - (c.reviewStart || Date.now())) / 60000))};
+      save(); toast("Signed. Report released to the patient."); go("report", {id:c.id}); return;
+    }
+    case "reset": S.cases = []; try { localStorage.removeItem(KEY); } catch {} location.reload(); return;
+    case "ai-second": return runAI("second", current());
+    case "ai-stop": AI.ctl?.abort(); return;
+    case "ai-qa": {
+      const q = $("#qa-input").value.trim(); if (!q) return;
+      return runAI("qa", S.cases.find(x => x.id === S.reviewId), q);
+    }
+  }
+});
+document.addEventListener("change", e => {
+  const t = e.target;
+  if (t.id === "f-consent") { S.consent = t.checked; save(); render(); return; }
+  if (t.dataset.met) { const m = S.draft.dx.mets; const i = m.indexOf(t.dataset.met); if (t.checked && i < 0) m.push(t.dataset.met); if (!t.checked && i >= 0) m.splice(i, 1); save(); return; }
+  if (t.dataset.bindCheck) { setPath(S.draft, t.dataset.bindCheck, t.checked); save(); return; }
+  if (t.id === "f-file" && t.files && t.files[0]) {
+    const rd = new FileReader();
+    rd.onload = () => { S.draft.ngsText = String(rd.result).slice(0, 20000); save(); render(); toast("Report loaded. Tap Detect alterations."); };
+    rd.readAsText(t.files[0]); return;
+  }
+});
+document.addEventListener("input", e => {
+  const t = e.target;
+  if (t.dataset.bind) { let v = t.value; if (t.type === "number" && v !== "") v = Number(v); setPath(S.draft, t.dataset.bind, v); save(); return; }
+  if (t.dataset.hist) { const [i, k] = t.dataset.hist.split("."); S.draft.history[Number(i)][k] = t.value; save(); return; }
+  if (t.dataset.econ) { S.econ[t.dataset.econ] = Number(t.value); save(); updateEcon(); return; }
+});
+document.addEventListener("keydown", e => {
+  if (e.key === "Enter" && e.target.id === "qa-input") { e.preventDefault(); $('[data-action="ai-qa"]')?.click(); }
+});
+async function aiExtract() {
+  if (!SAMPLE || AI.busy) return;
+  const text = (S.draft.ngsText || "").slice(0, 12000);
+  if (!text.trim()) { toast("Paste the report text first."); return; }
+  AI.busy = "extract"; AI.err.extract = ""; render();
+  try {
+    const res = await SAMPLE.json(`Extract genomic findings from this lung cancer NGS report text. Reply with only JSON of the form {"variants":[{"gene":"EGFR","alt":"L858R","vaf":"34.1"}],"pdl1":10,"tmb":4}. Use HGNC gene symbols (HER2 → ERBB2). Use "" for unknown VAF and null for unknown pdl1/tmb. Include fusions (alt like "EML4-ALK fusion"), amplifications and losses.\n\nREPORT:\n${text}`, {modelTier:"quick"});
+    let added = 0;
+    for (const v of (res && Array.isArray(res.variants) ? res.variants : [])) {
+      const gene = String(v.gene || "").toUpperCase().trim(), alt = String(v.alt || "").trim();
+      if (gene && alt && !S.draft.variants.some(x => x.gene === gene && x.alt.toLowerCase() === alt.toLowerCase())) { S.draft.variants.push({gene, alt, vaf:String(v.vaf ?? "")}); added++; }
+    }
+    if (res && res.pdl1 != null && S.draft.dx.pdl1 === "") S.draft.dx.pdl1 = Number(res.pdl1);
+    if (res && res.tmb != null && S.draft.dx.tmb === "") S.draft.dx.tmb = Number(res.tmb);
+    save(); toast(added ? `AI extracted ${added} alteration${added > 1 ? "s" : ""}.` : "No new alterations found.");
+  } catch (e) { AI.err.extract = sampleErr(e); }
+  AI.busy = null; render();
+}
+
+/* Boot */
+(() => {
+  const h = (location.hash || "").slice(1);
+  if (["home","intake","cases","review","investors"].includes(h)) S.view = h;
+  render();
+})();
+</script>
+</body>
+</html>
