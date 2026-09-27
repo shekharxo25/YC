@@ -1,3 +1,5 @@
+> This repo also contains **[Tacit](company-brain/)**, a company-brain prototype for YC RFS #17.
+
 # Nof1 Oncology
 
 **One patient. One protocol.** A working demo of a physician-reviewed precision-oncology second-opinion service for non-small-cell lung cancer (NSCLC). It's based on YC Request for Startups #16, "AI Personalized Medicine".
