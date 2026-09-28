@@ -208,7 +208,7 @@ main{padding-block:0 80px}
 .grid-side{display:grid;grid-template-columns:minmax(0,1.55fr) minmax(0,1fr);gap:20px;align-items:start}
 .bench-grid{grid-template-columns:300px minmax(0,1fr)}
 @media (max-width:980px){.grid2,.grid-side,.bench-grid{grid-template-columns:1fr}}
-.stack{display:grid;gap:16px}
+.stack{display:grid;gap:16px;grid-template-columns:minmax(0,1fr)}
 .hr{height:1px;background:var(--line);border:0;margin:0}
 .meter{height:6px;border-radius:3px;background:var(--surface-2);overflow:hidden;min-width:60px}
 .meter > i{display:block;height:100%;background:var(--ok);border-radius:3px}
@@ -306,7 +306,7 @@ tr.click:hover td{background:var(--surface-2)}
 .ev .l2{grid-column:2;font-size:13px;color:var(--ink-2)}
 .quote{padding:12px 14px;border-left:3px solid var(--accent);background:var(--surface-2);border-radius:0 8px 8px 0;font-size:14px}
 .quote .src-l{font:500 12px var(--mono);color:var(--ink-3);margin-bottom:4px}
-.seg{display:inline-flex;border:1px solid var(--line);border-radius:8px;overflow:hidden;background:var(--surface)}
+.seg{display:inline-flex;flex-wrap:wrap;max-width:100%;border:1px solid var(--line);border-radius:8px;overflow:hidden;background:var(--surface)}
 .seg button{border:0;background:transparent;padding:6px 12px;font-size:13px;font-weight:500;cursor:pointer;color:var(--ink-2)}
 .seg button[aria-pressed="true"]{background:var(--ink);color:var(--bg)}
 .seg button+button{border-left:1px solid var(--line)}
@@ -380,6 +380,40 @@ pre.code{margin:0;background:var(--code);color:var(--code-ink);border-radius:10p
 .modal .mb{padding:18px 20px;display:grid;gap:14px;font-size:14px}
 .x{border:0;background:transparent;font-size:22px;line-height:1;cursor:pointer;color:var(--ink-3);padding:4px 8px}
 .sr{position:absolute;width:1px;height:1px;overflow:hidden;clip:rect(0 0 0 0);white-space:nowrap}
+/* live engine */
+.stages{list-style:none;margin:20px 0 0;padding:0;display:grid;gap:16px}
+.stage{display:grid;grid-template-columns:52px minmax(0,1fr);gap:16px;align-items:start}
+@media (max-width:560px){.stage{grid-template-columns:1fr;gap:8px}}
+.stage > *{min-width:0}
+.stage-n{font:500 30px/1 var(--mono);color:var(--ink-3);padding-top:18px;letter-spacing:-.03em}
+.stage.done .stage-n{color:var(--accent)}
+.stage.wait{opacity:.45}
+.stage-h{display:flex;justify-content:space-between;gap:12px;flex-wrap:wrap;align-items:baseline}
+.stage-h h3{font-size:19px}
+.stage-s{font:500 12px var(--mono);color:var(--ink-3)}
+.stage.done .stage-s{color:var(--ok)}
+.mapping{display:grid;grid-template-columns:minmax(0,1.3fr) auto minmax(0,1fr);gap:8px 12px;align-items:center;font-size:13.5px}
+.mapping .raw{font-family:var(--mono);font-size:12.5px;color:var(--ink-2);background:var(--surface-2);padding:4px 8px;border-radius:6px;overflow-wrap:anywhere}
+.mapping .arr{color:var(--ink-3)}
+@media (max-width:640px){.mapping{grid-template-columns:1fr}.mapping .arr{display:none}}
+.cloud{display:flex;flex-wrap:wrap;gap:6px}
+.cl-row{display:grid;grid-template-columns:minmax(0,1.3fr) minmax(0,1fr) minmax(0,1.4fr);gap:12px;align-items:center;padding:10px 0;border-bottom:1px solid var(--line);font-size:14px}
+.cl-row:last-child{border-bottom:0}
+.cl-row .bar{height:8px;border-radius:4px;background:var(--accent);opacity:.8}
+@media (max-width:720px){.cl-row{grid-template-columns:1fr}}
+details.proc{border:1px solid var(--line);border-radius:12px;background:var(--surface)}
+details.proc+details.proc{margin-top:10px}
+details.proc > summary{list-style:none;cursor:pointer;padding:14px 16px;display:flex;flex-wrap:wrap;gap:8px 12px;align-items:center;justify-content:space-between}
+details.proc > summary::-webkit-details-marker{display:none}
+details.proc > summary .t{font-weight:600;font-size:15px}
+details.proc > summary .t::before{content:"▸ ";color:var(--ink-3)}
+details.proc[open] > summary .t::before{content:"▾ "}
+details.proc .body{padding:0 16px 16px;display:grid;gap:12px}
+.flow .none-li{list-style:none}
+.fields{display:grid;grid-template-columns:repeat(auto-fill,minmax(170px,1fr));gap:10px}
+.fields .field input,.fields .field select{width:100%;padding:8px 10px;border:1px solid var(--line);border-radius:7px;background:var(--surface);font-size:14px}
+.err{padding:10px 14px;border-radius:8px;background:var(--drift-soft);color:var(--drift);font-size:14px}
+
 /* human layer */
 .av{display:inline-grid;place-items:center;width:28px;height:28px;border-radius:50%;font:600 11px/1 var(--sans);letter-spacing:.02em;flex:none;background:var(--av1);color:var(--av1i);border:2px solid var(--surface)}
 .av.lg{width:44px;height:44px;font-size:15px}
@@ -430,6 +464,7 @@ details.how > div{margin-top:10px;display:grid;gap:12px}
     <a class="brand" href="#home"><span class="mark" aria-hidden="true"></span>tacit</a>
     <nav class="nav" id="nav" aria-label="Main">
       <a href="#home">Product</a>
+      <a href="#lab">How it works</a>
       <span class="sep" aria-hidden="true"></span>
       <a href="#audit">Audit</a>
       <a href="#brain">Procedures</a>
@@ -453,7 +488,7 @@ details.how > div{margin-top:10px;display:grid;gap:12px}
         <p class="lede">Most of what makes your support team good was never written down. It lives in Theo's head, a Slack thread from March, and a thousand tickets nobody will ever reread. Tacit learns it from the work itself, credits the people who figured it out, and hands it to your AI agent, so it helps customers the way your best people would.</p>
         <div class="btn-row">
           <a class="btn primary" href="#audit">See what your team knows</a>
-          <a class="btn" href="#agent">Watch the agent help a customer</a>
+          <a class="btn" href="#lab">Watch it learn, live</a>
         </div>
         <div class="who-line" style="margin-top:22px"><span class="avs" id="heroAvs"></span><span>Learned from <b>6 support people</b> and <b>118 conversations</b> at Quillfield, a made-up payroll company.</span></div>
       </div>
@@ -499,7 +534,7 @@ details.how > div{margin-top:10px;display:grid;gap:12px}
     <div class="sec">
       <div class="sec-head">
         <h2>How Tacit learns, the way a new hire would</h2>
-        <p>A great new hire reads old tickets, asks around, notices when the docs are out of date, and eventually writes down how things really work. Tacit does the same, for every procedure, and keeps doing it.</p>
+        <p>A great new hire reads old tickets, asks around, notices when the docs are out of date, and eventually writes down how things really work. Tacit does the same, for every procedure, and keeps doing it. <a href="#lab">Watch it happen on a real export →</a></p>
       </div>
       <div class="steps4">
         <div><span class="num">1 · Read</span><h3>Read what the team actually did</h3><p>Resolved tickets, internal notes, escalation threads, call transcripts and the old wiki. Read-only, nothing changes on your side.</p><code>zendesk  1,284 tickets
@@ -598,6 +633,25 @@ confirmed by Dana, Mar 12</code></div>
   </div>
 
   <footer class="foot"><div class="wrap"><span>Tacit is a prototype, based on YC Request for Startups #17, "Company Brain".</span><span>Quillfield, its customers and its team are made up. Any resemblance is a coincidence.</span></div></footer>
+</section>
+
+<!-- ================= LAB ================= -->
+<section class="view" id="v-lab" hidden>
+  <div class="wrap">
+    <div class="page-head">
+      <div><p class="eyebrow">The engine, running live in your browser</p><h1 style="margin-top:6px">Watch Tacit learn from a raw helpdesk export</h1><p>Nothing below is pre-written. Tacit starts from the messy export any helpdesk gives you and works through it the way a thoughtful new hire would, in six steps. Use Quillfield's export, or paste your own and see what it finds.</p></div>
+      <span class="hand" style="max-width:26ch">everything on this page is computed, not typed in by us</span>
+    </div>
+    <div class="card pad stack">
+      <div style="display:flex;justify-content:space-between;gap:12px;flex-wrap:wrap;align-items:center">
+        <h3 style="font-size:17px">Start with the data</h3>
+        <div class="seg" role="group" aria-label="Data source"><button type="button" data-lmode="sample" aria-pressed="true">Quillfield's export</button><button type="button" data-lmode="own" aria-pressed="false">Paste your own CSV</button></div>
+      </div>
+      <div id="labData"></div>
+      <div class="btn-row"><button class="btn primary" id="labRun">Learn from this data</button><span class="small dim" id="labMeta"></span></div>
+    </div>
+    <ol class="stages" id="labStages"></ol>
+  </div>
 </section>
 
 <!-- ================= AUDIT ================= -->
@@ -1147,7 +1201,7 @@ const QUEUE=[
 ];
 
 /* ---------------- router ---------------- */
-const VIEWS=['home','audit','brain','drift','agent','schema','ask'];
+const VIEWS=['home','lab','audit','brain','drift','agent','schema','ask'];
 function route(){
   let v=(location.hash||'#home').slice(1);
   if(!VIEWS.includes(v)) v='home';
@@ -1801,6 +1855,430 @@ async function ask(){
   $('#askBtn').disabled=false;renderChat();
 }
 $('#askForm').addEventListener('submit',e=>{e.preventDefault();ask()});
+
+/* ================= LIVE ENGINE ================= */
+/* A real, generic learning pipeline. It only sees a raw export: text, messy notes and whatever columns exist. */
+const ENG=(function(){
+  const STOP=new Set('the a an to and or for of in on at with was is are it its them they their we i he she him her our us you your my this that ok okay done as usual per policy so then also just by from be been has have had all any into up via re fyi pls please hi hey thanks thank can could would will do does did not our me what how why when'.split(' '));
+  function stem(w){if(w.length>5&&w.endsWith('ing'))return w.slice(0,-3);if(w.length>4&&w.endsWith('ed'))return w.slice(0,-2);if(w.length>4&&w.endsWith('es'))return w.slice(0,-2);if(w.length>3&&w.endsWith('s')&&!w.endsWith('ss'))return w.slice(0,-1);if(w.length>4&&w.endsWith('e'))return w.slice(0,-1);return w}
+  const ORIG={};
+  function toks(s){return (String(s||'').toLowerCase().replace(/\$\s?[\d,.]+/g,' ').match(/[a-z][a-z0-9-]*|\d+/g)||[]).map(w=>w.replace(/\d+/g,'#')).filter(w=>w!=='#'&&!STOP.has(w)&&w.length>1).map(w=>{const st=stem(w);const o=ORIG[st]=ORIG[st]||{};o[w]=(o[w]||0)+1;return st})}
+  const unstem=st=>{const o=ORIG[st];return o?Object.entries(o).sort((a,b)=>b[1]-a[1])[0][0].replace(/#/g,'2'):st};
+  const jacc=(a,b)=>{if(!a.size&&!b.size)return 0;let i=0;for(const x of a)if(b.has(x))i++;return i/(a.size+b.size-i)};
+  function splitClauses(note){return String(note||'').split(/\s*(?:;|\.(?=\s|$)|->|→|\s\+\s|\bthen\b|\n)\s*/i).map(s=>s.replace(/^[\s,:-]+|[\s,:-]+$/g,'')).filter(s=>toks(s).length>0)}
+  function niceBetween(lo,hi){
+    if(!(hi>lo)) return lo;
+    for(let e=Math.floor(Math.log10(Math.max(1,hi)));e>=0;e--){
+      for(const m of [10,5,2,1]){const step=m*Math.pow(10,e-1);const c=Math.ceil(lo/step)*step;if(c>=lo&&c<hi&&c>0)return +c.toFixed(2)}
+    }
+    return lo;
+  }
+  function parseCSV(text){
+    const rows=[];let row=[],f='',q=false;
+    for(let i=0;i<text.length;i++){const c=text[i];
+      if(q){if(c==='"'){if(text[i+1]==='"'){f+='"';i++}else q=false}else f+=c}
+      else if(c==='"')q=true; else if(c===','){row.push(f);f=''} else if(c==='\n'||c==='\r'){if(c==='\r'&&text[i+1]==='\n')i++;row.push(f);f='';if(row.some(x=>x.trim()!==''))rows.push(row);row=[]} else f+=c}
+    row.push(f);if(row.some(x=>x.trim()!==''))rows.push(row);
+    if(rows.length<2) throw new Error('Tacit needs a header row and at least one ticket.');
+    const head=rows[0].map(h=>h.trim());
+    return rows.slice(1).map(r=>Object.fromEntries(head.map((h,i)=>[h,(r[i]??'').trim()])));
+  }
+  function toCSV(rows){const cols=Object.keys(rows[0]);const q=v=>{v=String(v??'');return /[",\n]/.test(v)?'"'+v.replace(/"/g,'""')+'"':v};return cols.join(',')+'\n'+rows.map(r=>cols.map(c=>q(r[c])).join(',')).join('\n')}
+  /* guess which columns are which */
+  function mapColumns(rows){
+    const cols=Object.keys(rows[0]||{});
+    const find=re=>cols.find(c=>re.test(c));
+    const note=find(/note|resolution|internal|action|agent_comment|comment/i);
+    const text=cols.filter(c=>/^(subject|title|message|body|description|question|summary|customer_message|request_text)$/i.test(c)&&c!==note);
+    const date=find(/date|created|opened|time/i), id=find(/^id$|ticket|number/i), agent=find(/agent|assignee|owner|handled/i), company=find(/company|customer|account|org/i);
+    if(!note) throw new Error('Tacit could not find a notes column. Name one "internal_note" or "resolution".');
+    if(!text.length) throw new Error('Tacit could not find the customer message. Name a column "subject" or "message".');
+    const skip=new Set([note,date,id,agent,company,...text].filter(Boolean));
+    const features=[];
+    for(const c of cols){ if(skip.has(c)) continue;
+      const vals=rows.map(r=>r[c]).filter(v=>v!==''&&v!=null).map(String);
+      if(!vals.length) continue;
+      const num=vals.filter(v=>/^-?\$?[\d,]+(\.\d+)?$/.test(v)).length/vals.length;
+      const bool=vals.filter(v=>/^(yes|no|true|false|y|n)$/i.test(v)).length/vals.length;
+      const distinct=new Set(vals.map(v=>v.toLowerCase())).size;
+      if(bool>0.95) features.push({name:c,type:'bool'});
+      else if(num>0.95) features.push({name:c,type:'num'});
+      else if(distinct<=8) features.push({name:c,type:'cat'});
+    }
+    return {note,text,date,id,agent,company,features};
+  }
+  function normalize(rows,map){
+    return rows.map((r,i)=>{const fields={};
+      for(const f of map.features){const v=r[f.name];if(v===''||v==null)continue;
+        fields[f.name]=f.type==='num'?+String(v).replace(/[$,]/g,''):f.type==='bool'?/^(yes|true|y)$/i.test(v):String(v).toLowerCase()}
+      return {id:map.id?r[map.id]:'#'+(i+1),date:map.date?r[map.date]:'',agent:map.agent?r[map.agent]:'',company:map.company?r[map.company]:'',text:map.text.map(c=>r[c]).join('. '),subject:r[map.text[0]]||'',note:r[map.note]||'',fields};
+    });
+  }
+  /* stage 1: turn free-text notes into a vocabulary of actions */
+  function readNotes(ts){
+    const clauses=[];ts.forEach((t,ti)=>splitClauses(t.note).forEach((c,pi)=>clauses.push({ti,pi,raw:c,set:new Set(toks(c))})));
+    const byForm={};clauses.forEach(c=>{const k=[...c.set].sort().join(' ');(byForm[k]=byForm[k]||[]).push(c)});
+    const forms=Object.values(byForm).sort((a,b)=>b.length-a.length);
+    const groups=[];
+    for(const f of forms){
+      const set=f[0].set;let best=null,bs=0;
+      for(const g of groups){const s=jacc(set,g.set);if(s>bs){bs=s;best=g}}
+      if(best&&bs>=0.6){best.members.push(...f)} else groups.push({id:'A'+(groups.length+1),set,members:[...f]});
+    }
+    groups.forEach(g=>{const cnt={};g.members.forEach(m=>{const k=m.raw.replace(/\s+/g,' ').trim();const kk=k.toLowerCase();cnt[kk]=cnt[kk]||{k,n:0};cnt[kk].n++});
+      const top=Object.values(cnt).sort((a,b)=>b.n-a.n||a.k.length-b.k.length);
+      let lab=top[0].k.replace(/^i\s+/i,'');lab=lab.charAt(0).toUpperCase()+lab.slice(1);
+      g.label=lab;g.variants=top.length;g.count=g.members.length;g.kind=kindOf(lab);g.examples=top.slice(0,4).map(x=>x.k)});
+    ts.forEach(t=>{t.acts=new Map()});
+    groups.forEach(g=>g.members.forEach(m=>{const t=ts[m.ti];if(!t.acts.has(g.id))t.acts.set(g.id,m.pi/Math.max(1,splitClauses(t.note).length-1))}));
+    return {groups,clauses:clauses.length,byId:Object.fromEntries(groups.map(g=>[g.id,g]))};
+  }
+  function kindOf(s){const l=s.toLowerCase();
+    if(/\b(escalat|page[ds]?\b|paged|hand(ed)? (it )?to|routed?|forward|loop(ed)? in|approval|double-check|sign-off)/.test(l))return 'esc';
+    if(/\b(told|explain|confirm(ed)? (the )?(timeline|window|review)|ask(ed)? (for|a|the customer)|acknowledg|replied|sent receipt|sent link|directed)/.test(l))return 'reply';
+    if(/\b(check|verif|confirm|look(ed)? (up|at)|found|reviewed)/.test(l))return 'check';
+    return 'act';}
+  /* stage 2: group tickets into situations */
+  function tfidf(docs){const df={};docs.forEach(d=>new Set(d).forEach(w=>df[w]=(df[w]||0)+1));const N=docs.length;
+    const idf=w=>Math.log((N+1)/((df[w]||0)+1))+1;
+    const vec=d=>{const tf={};d.forEach(w=>tf[w]=(tf[w]||0)+1);let n=0;const v={};for(const w in tf){v[w]=tf[w]*idf(w);n+=v[w]*v[w]}n=Math.sqrt(n)||1;for(const w in v)v[w]/=n;return v};
+    return {idf,vec,vecs:docs.map(vec)}}
+  const cos=(a,b)=>{let s=0;const [x,y]=Object.keys(a).length<Object.keys(b).length?[a,b]:[b,a];for(const w in x)if(y[w])s+=x[w]*y[w];return s};
+  function group(ts){
+    const docs=ts.map(t=>toks(t.text));const T=tfidf(docs);
+    const actSets=ts.map(t=>new Set(t.acts.keys()));
+    const n=ts.length;const sim=[];for(let i=0;i<n;i++){sim[i]=[];for(let j=0;j<n;j++)sim[i][j]=i===j?1:0.5*cos(T.vecs[i],T.vecs[j])+0.5*jacc(actSets[i],actSets[j])}
+    let cl=ts.map((_,i)=>[i]);
+    const link=(a,b)=>{let s=0;for(const i of a)for(const j of b)s+=sim[i][j];return s/(a.length*b.length)};
+    for(;;){let best=-1,bi=-1,bj=-1;
+      for(let i=0;i<cl.length;i++)for(let j=i+1;j<cl.length;j++){const s=link(cl[i],cl[j]);if(s>best){best=s;bi=i;bj=j}}
+      if(best<0.3||bi<0)break;cl[bi]=cl[bi].concat(cl[bj]);cl.splice(bj,1)}
+    cl.sort((a,b)=>b.length-a.length);
+    const T2=tfidf(ts.map(t=>toks(t.text+' '+t.note)));
+    return {T,T2,clusters:cl.map((idx,k)=>{
+      const cen={};idx.forEach(i=>{for(const w in T.vecs[i])cen[w]=(cen[w]||0)+T.vecs[i][w]/idx.length});
+      const ranked=Object.entries(cen).sort((a,b)=>b[1]-a[1]).map(x=>x[0]);const terms=ranked.slice(0,5).map(unstem),terms8=ranked.slice(0,8);
+      const subj={};idx.forEach(i=>{const s=ts[i].subject;subj[s]=(subj[s]||0)+1});
+      const name=Object.entries(subj).sort((a,b)=>b[1]-a[1])[0][0];
+      return {id:'C'+(k+1),idx,tickets:idx.map(i=>ts[i]),cen,terms,terms8,name}})};
+  }
+  /* stage 3: learn the rules inside each situation */
+  const H=c=>{const n=c.reduce((a,b)=>a+b,0);return c.reduce((h,x)=>x?h-x/n*Math.log2(x/n):h,0)};
+  const countsOf=(rows,lab)=>{const m={};rows.forEach(r=>{const k=lab(r);m[k]=(m[k]||0)+1});return m};
+  const majErr=(rows,lab)=>{const c=Object.values(countsOf(rows,lab));return rows.length-(c.length?Math.max(...c):0)};
+  // a small, deliberately cautious decision tree: every split must explain at least 2 tickets
+  function learnTree(rows,feats,lab,depth){
+    depth=depth||0;const cm=countsOf(rows,lab);const entries=Object.entries(cm).sort((a,b)=>b[1]-a[1]);
+    const leaf={leaf:true,variant:entries[0][0],n:rows.length,right:entries[0][1]};
+    if(entries.length===1||rows.length<4||depth>=3) return leaf;
+    const h0=H(Object.values(cm)),e0=majErr(rows,lab);let best=null;
+    for(const f of feats){
+      const have=rows.filter(r=>r.fields[f.name]!==undefined);
+      if(have.length<rows.length*0.8) continue;
+      const cands=[];
+      if(f.type==='num'){const vs=[...new Set(have.map(r=>r.fields[f.name]))].sort((a,b)=>a-b);for(let i=0;i<vs.length-1;i++)cands.push({op:'lte',v:niceBetween(vs[i],vs[i+1])})}
+      else{const byVal={};have.forEach(r=>{const v=String(r.fields[f.name]);byVal[v]=byVal[v]||{};byVal[v][lab(r)]=(byVal[v][lab(r)]||0)+1});
+        for(const cl of Object.keys(cm)){const S=Object.keys(byVal).filter(v=>Object.entries(byVal[v]).sort((a,b)=>b[1]-a[1])[0][0]===cl);if(S.length&&S.length<Object.keys(byVal).length)cands.push({op:'in',v:S})}}
+      for(const c of cands){
+        const test=r=>{const x=r.fields[f.name];if(x===undefined)return false;return c.op==='lte'?x<=c.v:c.v.includes(String(x))};
+        const L=rows.filter(test),Rr=rows.filter(r=>!test(r));if(L.length<2||Rr.length<2)continue;
+        if(e0-majErr(L,lab)-majErr(Rr,lab)<2)continue;
+        const g=h0-(L.length/rows.length)*H(Object.values(countsOf(L,lab)))-(Rr.length/rows.length)*H(Object.values(countsOf(Rr,lab)));
+        const score=g+(f.type==='num'?0:0.03)+0.05*(f.spec||0);
+        if(!best||score>best.score)best={f,c,L,R:Rr,g,score};
+      }
+    }
+    if(!best) return leaf;
+    return {f:best.f.name,type:best.f.type,op:best.c.op,v:best.c.v,n:rows.length,then:learnTree(best.L,feats,lab,depth+1),else:learnTree(best.R,feats,lab,depth+1)};
+  }
+  function predict(node,fields,trace){
+    while(!node.leaf){const x=fields[node.f];const miss=x===undefined;const r=!miss&&(node.op==='lte'?x<=node.v:node.v.includes(String(x)));if(trace)trace.push({node,r,miss});node=r?node.then:node.else}
+    return node.variant;
+  }
+  const errOf=(tree,rows,lab)=>rows.filter(r=>predict(tree,r.fields)!==lab(r)).length;
+  function treeConds(node,out=[]){if(!node||node.leaf)return out;out.push(node);treeConds(node.then,out);treeConds(node.else,out);return out}
+  function leaves(node){return node.leaf?1:leaves(node.then)+leaves(node.else)}
+  function diffTrees(a,b){const A=treeConds(a),B=treeConds(b);const out=[];
+    B.forEach(nb=>{if(nb.op!=='lte')return;const na=A.find(x=>x.f===nb.f&&x.op==='lte');if(na&&na.v!==nb.v)out.push({f:nb.f,from:na.v,to:nb.v})});return out}
+  // learn one decision, and look for the moment the team started deciding it differently
+  function learnDecision(ts,F,lab){
+    const n=ts.length;let tree=learnTree(ts,F,lab),err=errOf(tree,ts,lab),change=null,trainN=n;
+    if(err>0&&n>=8){
+      for(let k=2;k<=n-5;k++){const tail=ts.slice(k),head=ts.slice(0,k);const tk=learnTree(tail,F,lab);
+        if(errOf(tk,tail,lab)>0)continue;
+        const mis=errOf(tk,head,lab);
+        if(mis>=2&&mis/k>=0.25){let j=k;while(j>0&&predict(tk,ts[j-1].fields)===lab(ts[j-1]))j--;
+          const oldT=learnTree(ts.slice(0,j),F,lab);
+          const firstNew=ts.slice(j).find(t=>predict(oldT,t.fields)!==lab(t));
+          change={date:ts[j].date,lastOld:j>0?ts[j-1].date:null,firstNew:firstNew?firstNew.date:ts[j].date,oldTree:oldT,olderDisagree:mis,older:k,diffs:diffTrees(oldT,tk)};tree=tk;err=0;trainN=n-j}
+        break}
+    }
+    return {tree,err,change,trainN};
+  }
+  function learnProcedure(c,vocab,allTs,feats){
+    const ts=c.tickets.slice().sort((a,b)=>a.date<b.date?-1:1);const n=ts.length;
+    const sup={};ts.forEach(t=>t.acts.forEach((p,id)=>sup[id]=(sup[id]||0)+1));
+    const common=[],optional=[],oneoffs=[];
+    for(const id in sup){const s=sup[id]/n;if(s>=0.85)common.push(id);else if(sup[id]>=2&&s>=0.12)optional.push(id);else oneoffs.push(id)}
+    const pos=id=>{let s=0,k=0;ts.forEach(t=>{if(t.acts.has(id)){s+=t.acts.get(id);k++}});return k?s/k:0.5};
+    optional.sort((a,b)=>pos(a)-pos(b));
+    // actions that never happen together are one either/or decision
+    const groups=[];
+    for(const id of optional){const g=groups.find(g=>g.every(o=>!ts.some(t=>t.acts.has(o)&&t.acts.has(id))));if(g)g.push(id);else groups.push([id])}
+    const fr=f=>{const inC=ts.filter(t=>t.fields[f.name]!==undefined).length/n;const all=allTs.filter(t=>t.fields[f.name]!==undefined).length/allTs.length;return Math.max(0,inC-all)};
+    const F=feats.map(f=>({...f,spec:fr(f)}));
+    const decisions=groups.map(g=>{const lab=t=>g.find(id=>t.acts.has(id))||'none';const d=learnDecision(ts,F,lab);return {ids:g,lab,pos:pos(g[0]),...d}});
+    const firstPos=decisions.length?decisions[0].pos:0.5;
+    const before=common.filter(id=>pos(id)<=firstPos).sort((a,b)=>pos(a)-pos(b));
+    const after=common.filter(id=>pos(id)>firstPos).sort((a,b)=>pos(a)-pos(b));
+    const exact=ts.filter(t=>decisions.every(d=>predict(d.tree,t.fields)===d.lab(t)||(d.change&&t.date<d.change.date))).length;
+    const trainN=decisions.length?Math.min(...decisions.map(d=>d.trainN)):n;
+    const acc=exact/n;
+    const conf=Math.round(Math.min(0.97,acc*(trainN/(trainN+2)))*100);
+    const agents={};ts.forEach(t=>{if(t.agent)agents[t.agent]=(agents[t.agent]||0)+1});
+    const co={};ts.forEach(t=>{if(t.company)co[t.company]=(co[t.company]||0)+1});
+    const topCo=Object.entries(co).sort((a,b)=>b[1]-a[1])[0];
+    return {id:c.id,name:c.name,n,trainN,common,before,after,decisions,oneoffs:oneoffs.map(id=>({id,n:sup[id]})),acc,conf,
+      onlyFor:topCo&&topCo[1]/n>=0.9&&n>=4?topCo[0]:null,
+      agents:Object.entries(agents).sort((a,b)=>b[1]-a[1]),feats:[...new Set(decisions.flatMap(d=>treeConds(d.tree).map(x=>x.f)))],cluster:c,
+      firstDate:ts[0].date,lastDate:ts[n-1].date,change:decisions.find(d=>d.change)?.change||null};
+  }
+  /* stage 4: compare with the help center */
+  function checkDocs(docs,procs,G){
+    return docs.map(d=>{
+      const dv=G.T2.vec(toks(d.title+' '+d.says));
+      let best=null,bs=0;
+      procs.forEach(p=>{const sims=p.cluster.idx.map(i=>cos(dv,G.T2.vecs[i])).sort((a,b)=>b-a);const s=sims.slice(0,3).reduce((a,b)=>a+b,0)/Math.min(3,sims.length);if(s>bs){bs=s;best=p}});
+      const dt=new Set(toks(d.title+' '+d.says));
+      if(!best||bs<0.1||!best.cluster.terms8.some(w=>dt.has(w))) return {d,status:'unused',score:bs,detail:'No conversations match this article. Nobody seems to need it anymore.'};
+      const nums=[...d.says.matchAll(/(\d+)\s*days?/gi)].map(m=>({unit:'days',v:+m[1]})).concat([...d.says.matchAll(/\$\s?([\d,]+)/g)].map(m=>({unit:'$',v:+m[1].replace(/,/g,'')})));
+      const conds=best.decisions.flatMap(x=>treeConds(x.tree)).filter(c=>c.op==='lte').map(c=>({unit:/day/i.test(c.f)?'days':/amount|price|cost|refund|\$/i.test(c.f)?'$':'',v:c.v,f:c.f}));
+      for(const nm of nums){const same=conds.filter(c=>c.unit===nm.unit);if(same.length&&!same.some(c=>c.v===nm.v))return {d,p:best,score:bs,status:'drift',detail:`The article says ${nm.unit==='$'?'$'+nm.v:nm.v+' days'}. The team uses ${same.map(c=>nm.unit==='$'?'$'+c.v.toLocaleString('en-US'):c.v+' days').join(' / ')} (${pretty(same[0].f)}).`}}
+      const acts=new Set();best.cluster.tickets.forEach(t=>t.acts.forEach((_,id)=>acts.add(id)));
+      let worst=null,bestS=null;
+      for(const sn of d.says.split(/(?<=[.!?])\s+/).filter(Boolean)){const st=new Set(toks(sn));let bestA=null,ba=0;
+        acts.forEach(id=>{const g=VOC.byId[id];let i=0;g.set.forEach(w=>{if(st.has(w))i++});const c=i/g.set.size;if(c>ba){ba=c;bestA=g}});
+        const sup=bestA&&ba>=0.5?best.cluster.tickets.filter(t=>t.acts.has(bestA.id)).length:0;
+        const r={s:sn,act:ba>=0.5?bestA:null,sup,n:best.n};
+        if(!worst||r.sup/r.n<worst.sup/worst.n)worst=r;
+        if(!bestS||r.sup/r.n>bestS.sup/bestS.n)bestS=r}
+      if(bestS&&bestS.sup/bestS.n<0.2) return {d,p:best,score:bs,status:'ignored',detail:bestS.act?`"${bestS.s}" happened in ${bestS.sup} of ${bestS.n} conversations.`:`"${bestS.s}" never happens in ${bestS.n} conversations.`};
+      return {d,p:best,score:bs,status:'followed',detail:`Matches what the team does in ${best.n} conversations.`};
+    });
+  }
+  let VOC=null;
+  function pretty(f){return String(f).replace(/_/g,' ')}
+  function condText(node){
+    if(node.type==='bool') return `${pretty(node.f)} is ${node.v.includes('true')?'yes':'no'}`;
+    if(node.op==='lte') return `${pretty(node.f)} is ${/amount|arr|price|refund|cost|total|revenue|value/i.test(node.f)?'$'+node.v.toLocaleString('en-US'):node.v.toLocaleString('en-US')} or less`;
+    return `${pretty(node.f)} is ${node.v.map(x=>/^[a-z]{2}$/.test(x)?x.toUpperCase():x.replace(/_/g,' ')).join(' or ')}`;
+  }
+  const KW={check:'Check',act:'Do',esc:'Escalate',reply:'Reply'};
+  function toSkill(p){
+    const L=[];const g=id=>VOC.byId[id];
+    const step=(id,ind)=>`${ind}- ${KW[g(id).kind]}: ${g(id).label}`;
+    p.before.forEach(id=>L.push(step(id,'')));
+    p.decisions.forEach(d=>(function walk(node,ind){
+      if(node.leaf){if(node.variant==='none')L.push(`${ind}- Nothing extra.`);else L.push(step(node.variant,ind));return}
+      L.push(`${ind}- If ${condText(node)}:`);walk(node.then,ind+'  ');L.push(`${ind}- Otherwise:`);walk(node.else,ind+'  ');
+    })(d.tree,''));
+    p.after.forEach(id=>L.push(step(id,'')));
+    const slug=p.name.toLowerCase().replace(/[^a-z0-9]+/g,'-').replace(/^-|-$/g,'');
+    return `---\nname: ${slug}\ndescription: Use for tickets like "${p.name}" (${p.cluster.terms.slice(0,4).join(', ')})${p.onlyFor?`, only for ${p.onlyFor}`:''}.\nconfidence: ${(p.conf/100).toFixed(2)}\nlearned_from: ${p.n} tickets${p.change?`, current rule since ${p.change.date}`:''}\n---\n\n# ${p.name}\n\nIf confidence is below 0.60 or a field below is missing, ask for it or hand the ticket to a person.\n\n## Needs\n${p.feats.length?p.feats.map(f=>`- ${pretty(f)}`).join('\n'):'- Nothing beyond the ticket.'}\n\n## Steps\n${L.join('\n')}\n\n## Evidence\n- ${p.n} tickets, ${Math.round(p.acc*100)}% match these steps exactly${p.change?`\n- The team changed how they decide this on ${p.change.date}. Older tickets are kept as history.`:''}\n${p.agents.slice(0,3).map(([a,k])=>`- ${a}: ${k} tickets`).join('\n')}\n`;
+  }
+  function route(text,procs,G){const v=G.T.vec(toks(text));let best=null,bs=0;procs.forEach(p=>{const s=cos(v,p.cluster.cen);if(s>bs){bs=s;best=p}});return {p:bs>=0.12?best:null,score:bs}}
+  function run(rows){
+    const t0=performance.now();const map=mapColumns(rows);const ts=normalize(rows,map);const t1=performance.now();
+    VOC=readNotes(ts);const t2=performance.now();
+    const G=group(ts);const t3=performance.now();
+    const procs=G.clusters.filter(c=>c.idx.length>=4).map(c=>learnProcedure(c,VOC,ts,map.features));
+    const small=G.clusters.filter(c=>c.idx.length<4);const t4=performance.now();
+    return {map,ts,voc:VOC,G,procs,small,ms:[t1-t0,t2-t1,t3-t2,t4-t3]};
+  }
+  return {run,parseCSV,toCSV,checkDocs,toSkill,route,predict,condText,pretty,splitClauses,toks,treeConds,get voc(){return VOC}};
+})();
+
+/* ---- the raw Quillfield export: what a helpdesk actually hands you ---- */
+function buildSampleRows(){
+  const r2=rng(4242);const pk=a=>a[Math.floor(r2()*a.length)];
+  const STYLE={'Theo K.':{sep:' -> ',low:true,pre:['','']},'Maya R.':{sep:'. ',low:false,pre:['I ','']},'Sam O.':{sep:'; ',low:false,pre:['','']},'Inès A.':{sep:', then ',low:true,pre:['','ok, ']},'Jordan P.':{sep:'. ',low:false,pre:['','Done: ']},'Lena W.':{sep:' + ',low:true,pre:['','']}};
+  const byId={};DEFAULT_PROCS.forEach(p=>allSteps(p.steps).forEach(s=>byId[s.id]=s));
+  const rows=TICKETS.map(t=>{
+    const st=STYLE[t.agent]||STYLE['Sam O.'];
+    const parts=t.sig.split('>').map(id=>{let n=byId[id].n;if(st.low)n=n.toLowerCase();if(r2()<.25)n+=pk([' as usual',' per policy','']);return n});
+    if(t.follows.includes('KB-204'))parts.unshift(st.low?'escalated to engineering per kb-204':'Escalated to Engineering per KB-204');
+    let note=pk(st.pre)+parts.join(st.sep);if(r2()<.3)note+=pk(['.',' 👍',' - closed','']);
+    const c=CUST[t.cust]||{};const x=t.ctx;
+    return {ticket_id:t.id,created:t.date,company:t.cust,agent:t.agent,subject:t.subj,message:t.body,internal_note:note,
+      plan:c.plan||'',arr:c.arr||'',seats:c.seats||'',
+      amount:x.amount??'',days_since_renewal:x.days_since_renewal??'',bank_status:x.bank_status??'',hours_to_payroll:x.hours_to_payrun??'',
+      idp:t.proc==='sso-lockout'?x.idp:'',requester_is_admin:x.is_listed_admin===undefined?'':(x.is_listed_admin?'yes':'no'),forms_filed:x.after_jan31===undefined?'':(x.after_jan31?'yes':'no'),new_state:x.state??''};
+  });
+  const noise=[['Need a copy of our invoice','Can you send last month’s invoice as a PDF?','Sent invoice copy'],['Invoice copy please','Our accountant needs the March invoice.','sent invoice copy'],['Where is our invoice?','We cannot find the invoice for August.','Sent the invoice copy'],['Change our company address','We moved offices, please update our address.','Updated company address'],['Add another admin','Please make Jo an admin on our account.','Added new admin after checking with owner'],['Holiday schedule','Is support open on Thanksgiving?','Shared holiday hours'],['Question about API','Do you have an API for time tracking?','Sent API docs link']];
+  noise.forEach(([s,m,n],i)=>{const c=CUSTOMERS[(i*5)%CUSTOMERS.length];rows.push({ticket_id:'#'+(4990+i),created:addDays('2026-02-02',i*31),company:c.name,agent:AGENTS[i%AGENTS.length],subject:s,message:m,internal_note:n,plan:c.plan,arr:c.arr,seats:c.seats,amount:'',days_since_renewal:'',bank_status:'',hours_to_payroll:'',idp:'',requester_is_admin:'',forms_filed:'',new_state:''})});
+  rows.sort((a,b)=>a.created<b.created?-1:1);
+  return rows.map(r=>Object.fromEntries(Object.entries(r).map(([k,v])=>[k,String(v)])));
+}
+
+/* ================= LIVE ENGINE PAGE ================= */
+const LAB={mode:'sample',rows:null,res:null,docs:null,own:'',err:'',ran:false,skillSel:0,running:false};
+const SAMPLE_ROWS=buildSampleRows();
+const STAGE_TITLES=['Read the notes','Group the situations','Learn the rules','Check the help center','Write it down for the agent','Try it on a new ticket'];
+RENDER.lab=function(){
+  refreshBadge();
+  $$('[data-lmode]').forEach(b=>b.setAttribute('aria-pressed',b.dataset.lmode===LAB.mode));
+  renderLabData();
+  if(!LAB.ran&&!LAB.running) labRun(true); else renderStages(6);
+};
+function renderLabData(){
+  if(LAB.mode==='sample'){
+    const cols=['created','agent','subject','internal_note','plan','amount','days_since_renewal'];
+    const show=SAMPLE_ROWS.filter(r=>/refund|charged|payroll|data/i.test(r.subject)).slice(0,6);
+    $('#labData').innerHTML=`<p class="small muted">This is what Quillfield's helpdesk exports: ${SAMPLE_ROWS.length} resolved tickets and ${Object.keys(SAMPLE_ROWS[0]).length} columns. Six people wrote the notes, each in their own style, and custom fields are only filled in when someone bothered. A few tickets are one-offs.</p>
+    <div class="tbl-wrap"><table><thead><tr>${cols.map(c=>`<th>${esc(c)}</th>`).join('')}</tr></thead><tbody>${show.map(r=>`<tr>${cols.map(c=>`<td class="${c==='internal_note'?'mono':''}" style="${c==='internal_note'?'min-width:260px;font-size:12.5px':''}">${esc(r[c]||'–')}</td>`).join('')}</tr>`).join('')}</tbody></table></div>
+    <div class="btn-row"><button class="btn sm" id="copyCsv">Copy the whole CSV</button><span class="small dim">Edit it and paste it back under "Paste your own CSV" to see the rules change.</span></div>`;
+    $('#copyCsv').onclick=async()=>{const t=ENG.toCSV(SAMPLE_ROWS);try{await navigator.clipboard.writeText(t);toast('Copied all '+SAMPLE_ROWS.length+' rows')}catch(e){LAB.mode='own';LAB.own=t;RENDER.lab();toast('Put the CSV in the box below so you can copy or edit it')}};
+    $('#labMeta').textContent=`${SAMPLE_ROWS.length} tickets · ${Object.keys(SAMPLE_ROWS[0]).length} columns`;
+  } else {
+    $('#labData').innerHTML=`<p class="small muted">Any helpdesk export works if it has a customer message column (named something like <span class="mono">subject</span> or <span class="mono">message</span>) and a notes column (<span class="mono">internal_note</span>, <span class="mono">resolution</span>…). Every other column is treated as a fact Tacit can learn rules from. It all stays in your browser.</p>
+    <div class="field"><label for="ownCsv">CSV</label><textarea id="ownCsv" style="min-height:180px;font-family:var(--mono);font-size:12.5px" placeholder="subject,message,internal_note,plan,amount&#10;Refund please,We renewed 10 days ago,Full refund issued,growth,900">${esc(LAB.own)}</textarea></div>
+    <div class="btn-row"><label class="btn sm" for="ownFile" style="cursor:pointer">Choose a CSV file</label><input type="file" id="ownFile" accept=".csv,text/csv,text/plain" hidden><button class="btn sm ghost" id="fillSample">Start from Quillfield's CSV</button></div>
+    ${LAB.err?`<div class="err">${esc(LAB.err)}</div>`:''}`;
+    $('#ownCsv').oninput=e=>{LAB.own=e.target.value};
+    $('#ownFile').onchange=e=>{const f=e.target.files[0];if(!f)return;const rd=new FileReader();rd.onload=()=>{LAB.own=String(rd.result);renderLabData()};rd.readAsText(f)};
+    $('#fillSample').onclick=()=>{LAB.own=ENG.toCSV(SAMPLE_ROWS);renderLabData()};
+    $('#labMeta').textContent='';
+  }
+}
+$$('[data-lmode]').forEach(b=>b.onclick=()=>{LAB.mode=b.dataset.lmode;LAB.err='';RENDER.lab()});
+$('#labRun').onclick=()=>labRun(false);
+function labRun(instant){
+  let rows;
+  try{
+    rows=LAB.mode==='sample'?SAMPLE_ROWS:ENG.parseCSV(LAB.own);
+    if(rows.length<4) throw new Error('Tacit needs at least a handful of tickets to learn anything. Try 20 or more.');
+    const t=performance.now();
+    LAB.res=ENG.run(rows);
+    const t1=performance.now();
+    LAB.docs=LAB.mode==='sample'?ENG.checkDocs(DOCS,LAB.res.procs,LAB.res.G):null;
+    const t2=performance.now();
+    LAB.skills=LAB.res.procs.map(ENG.toSkill);
+    LAB.res.ms.push(t2-t1,performance.now()-t2);
+    LAB.err='';LAB.rows=rows;LAB.skillSel=0;LAB.tryText=LAB.mode==='sample'?'Hi, we renewed about 25 days ago but we are moving to another provider. Can we get the $1,200 back?':'';
+  }catch(e){LAB.err=e.message||String(e);LAB.res=null;renderLabData();$('#labStages').innerHTML='';return}
+  LAB.ran=true;
+  if(instant||matchMedia('(prefers-reduced-motion: reduce)').matches){renderStages(6);return}
+  LAB.running=true;$('#labRun').disabled=true;let k=0;renderStages(0);
+  const step=()=>{k++;renderStages(k);if(k<6)setTimeout(step,420);else{LAB.running=false;$('#labRun').disabled=false;toast('Done. That took '+Math.round(LAB.res.ms.reduce((a,b)=>a+b,0))+' ms.')}};
+  setTimeout(step,300);
+}
+const kindName=k=>({check:'Check',act:'Do',esc:'Escalate',reply:'Reply'})[k];
+function renderStages(done){
+  const r=LAB.res;if(!r){$('#labStages').innerHTML='';return}
+  const ms=[r.ms[1],r.ms[2],r.ms[3],r.ms[4],r.ms[5],0];
+  const bodies=[stageNotes,stageGroups,stageRules,stageDocs,stageSkill,stageTry];
+  $('#labStages').innerHTML=STAGE_TITLES.map((t,i)=>{
+    const st=i<done?'done':i===done?'run':'wait';
+    return `<li class="stage ${st}"><div class="stage-n" aria-hidden="true">${i+1}</div><div class="card pad stack"><div class="stage-h"><h3>${t}</h3><span class="stage-s">${st==='done'?(i<5?`done in ${ms[i]<1?'<1':Math.round(ms[i])} ms`:'ready'):st==='run'?'working on it…':'up next'}</span></div>${st==='done'?bodies[i]():`<p class="small dim">${esc(STAGE_INTRO[i])}</p>`}</div></li>`}).join('');
+  if(done>=6) wireStages();
+}
+const STAGE_INTRO=['Split every internal note into phrases, and work out which phrases mean the same action even when people write them differently.','Cluster tickets that look alike and were handled alike. Each cluster is a situation the team keeps running into.','Inside each situation, find the facts that decide what people do. Then look for the moment the team started deciding differently.','Compare each help article with what people actually did.','Turn each situation into a skills file an agent can follow.','Send a brand new ticket through what Tacit just learned.'];
+function stageNotes(){
+  const r=LAB.res,V=r.voc;
+  const rich=V.groups.filter(g=>g.variants>=3).slice(0,3);
+  return `<p>${r.ts.length} notes contained <b>${V.clauses}</b> phrases. Tacit found they describe <b>${V.groups.length}</b> distinct actions.</p>
+  ${rich.length?`<div><p class="eyebrow">Different people, same action</p><div class="mapping" style="margin-top:8px">${rich.map(g=>g.examples.slice(0,3).map((ex,i)=>`<span class="raw">${esc(ex)}</span><span class="arr">→</span><span>${i===0?`<span class="kind k-${g.kind}" style="min-width:0;padding:0 6px">${kindName(g.kind)}</span> ${esc(g.label)}`:'<span class="dim">same action</span>'}</span>`).join('')).join('')}</div></div>`:''}
+  <div><p class="eyebrow">Every action it found, by how often it happens</p><div class="cloud" style="margin-top:8px">${V.groups.map(g=>`<span class="chip ${g.kind==='esc'?'warn':g.kind==='reply'?'ok':g.kind==='act'?'acc':''}" title="${esc(kindName(g.kind))}">${esc(g.label)} · ${g.count}</span>`).join('')}</div></div>`;
+}
+function stageGroups(){
+  const r=LAB.res;const max=Math.max(...r.G.clusters.map(c=>c.idx.length));
+  return `<p><b>${r.procs.length}</b> situations came up often enough to learn from. ${r.small.length?`${r.small.reduce((a,c)=>a+c.idx.length,0)} tickets in ${r.small.length} smaller groups are kept aside until there's more to go on.`:''}</p>
+  <div>${r.procs.map(p=>`<div class="cl-row"><span><b>${esc(p.name)}</b>${p.onlyFor?` <span class="chip acc">only ${esc(p.onlyFor)}</span>`:''}</span><span style="display:flex;gap:8px;align-items:center"><span class="bar" style="width:${Math.max(8,p.n/max*100)}%"></span><span class="mono small">${p.n}</span></span><span class="cloud">${p.cluster.terms.map(t=>`<span class="chip">${esc(t)}</span>`).join('')}</span></div>`).join('')}</div>
+  ${r.small.length?`<p class="small muted">Too few to learn yet: ${r.small.map(c=>`${esc(c.name)} (${c.idx.length})`).join(', ')}.</p>`:''}`;
+}
+function supportOf(p,id){return p.cluster.tickets.filter(t=>t.acts.has(id)).length}
+function engStep(p,id,extra){const g=LAB.res.voc.byId[id];return `<li class="st"><div class="st-head"><span class="kind k-${g.kind}">${kindName(g.kind)}</span><span class="st-text">${esc(g.label)}</span><span class="chip">${extra||supportOf(p,id)+' tickets'}</span></div></li>`}
+function engTree(p,node){
+  if(node.leaf) return node.variant==='none'?`<li class="none-li"><p class="none">Nothing extra · ${node.right} of ${node.n} tickets</p></li>`:engStep(p,node.variant,`${node.right} of ${node.n} tickets`);
+  return `<li class="st st-if"><div class="st-head"><span class="kind k-if">If</span><span class="st-text">${esc(cap(ENG.condText(node)))}</span></div>
+    <div class="br"><div class="br-lab">Yes</div><ol class="flow">${engTree(p,node.then)}</ol></div><div class="br"><div class="br-lab">Otherwise</div><ol class="flow">${engTree(p,node.else)}</ol></div></li>`;
+}
+function engFlow(p){return `<ol class="flow">${p.before.map(id=>engStep(p,id)).join('')}${p.decisions.map(d=>engTree(p,d.tree)).join('')}${p.after.map(id=>engStep(p,id)).join('')}</ol>`}
+function stageRules(){
+  const r=LAB.res,V=r.voc;
+  return `<p>For every decision inside a situation, Tacit tries each fact (plan, amount, days since renewal…) and keeps a rule only if it explains at least two tickets. That stops it from inventing rules out of coincidences.</p>
+  <div>${r.procs.map((p,i)=>{const ch=p.decisions.find(d=>d.change);
+    return `<details class="proc" ${i<3||ch?'open':''}><summary><span class="t">${esc(p.name)}</span><span style="display:flex;gap:8px;align-items:center;flex-wrap:wrap">${ch?'<span class="chip drift">rule changed</span>':''}${p.onlyFor?`<span class="chip acc">only ${esc(p.onlyFor)}</span>`:''}<span class="chip">${p.n} tickets</span><span class="conf">${meter(p.conf)}<span class="mono small tnum">${p.conf}%</span></span></span></summary>
+    <div class="body">
+      ${p.agents.length?`<div class="who-line"><span class="avs">${p.agents.slice(0,4).map(([a])=>av(a,'sm')).join('')}</span><span>Learned from ${p.agents.slice(0,3).map(([a,k])=>`<b>${esc(firstName(a))}</b> (${k})`).join(', ')}${p.agents.length>3?` and ${p.agents.length-3} more`:''}.</span></div>`:''}
+      ${engFlow(p)}
+      ${ch?`<div class="quote" style="border-color:var(--drift)"><div class="src-l">The team changed how they decide this</div>The last ticket handled the old way was ${ch.change.lastOld?fd(ch.change.lastOld):'at the start'}; the first one handled the new way was ${fd(ch.change.firstNew)}. ${ch.change.olderDisagree} of the ${ch.change.older} older tickets don't fit the current rule. ${ch.change.diffs.length?ch.change.diffs.map(x=>`<b>${esc(ENG.pretty(x.f))}</b> moved from about ${/amount|arr/.test(x.f)?money(x.from):x.from} to ${/amount|arr/.test(x.f)?money(x.to):x.to}.`).join(' '):''} Tacit uses the newer rule and keeps older tickets as history.
+        <details class="how" style="margin-top:10px"><summary>What the old rule looked like</summary><div><ol class="flow">${engTree(p,ch.change.oldTree)}</ol></div></details></div>`:''}
+      ${p.oneoffs.length?`<p class="small muted">Set aside as one-offs: ${p.oneoffs.map(o=>`"${esc(V.byId[o.id].label)}" (${o.n})`).join(', ')}.</p>`:''}
+    </div></details>`}).join('')}</div>`;
+}
+function stageDocs(){
+  if(!LAB.docs) return `<p class="muted">Your CSV didn't come with help articles, so there's nothing to compare. In the product, Tacit connects to your help center and does this automatically.</p>`;
+  const lab={drift:['drift','Out of date'],ignored:['warn','Nobody follows it'],unused:['','Nobody needs it'],followed:['ok','Still right']};
+  return `<p>Tacit matched each article to a situation, then checked its numbers and instructions against what people did.</p>
+  <div>${LAB.docs.map(x=>`<div class="finding"><h4><span class="mono dim">${esc(x.d.id)}</span> ${esc(x.d.title)}</h4><div class="act"><span class="chip ${lab[x.status][0]}">${lab[x.status][1]}</span></div><p class="why">${esc(x.detail)}${x.p?` <span class="dim">Matched to "${esc(x.p.name)}".</span>`:''}</p></div>`).join('')}</div>`;
+}
+function stageSkill(){
+  const r=LAB.res;
+  return `<div style="display:flex;gap:10px;flex-wrap:wrap;align-items:center"><div class="field" style="flex:1;min-width:200px"><label for="skillSel" class="sr">Situation</label><select id="skillSel">${r.procs.map((p,i)=>`<option value="${i}" ${i===LAB.skillSel?'selected':''}>${esc(p.name)}</option>`).join('')}</select></div><button class="btn sm" id="copySkill">Copy</button></div>
+  <pre class="code" id="skillOut">${esc(LAB.skills[LAB.skillSel]||'')}</pre>`;
+}
+const FIELD_FROM={amount:'amount',days_since_renewal:'days_since_renewal',hours_to_payroll:'hours_to_payrun',bank_status:'bank_status',new_state:'state',requester_is_admin:'is_listed_admin',forms_filed:'after_jan31',idp:'idp',plan:'plan',arr:'arr',seats:'seats'};
+function stageTry(){
+  const r=LAB.res;
+  return `<div class="grid2" style="grid-template-columns:minmax(0,1fr) minmax(0,1.2fr)">
+    <div class="stack">
+      ${LAB.mode==='sample'?`<div class="field"><label for="tryCust">Customer</label><select id="tryCust">${CUSTOMERS.map(c=>`<option ${c.name===(LAB.tryCust||'Oakline Logistics')?'selected':''}>${esc(c.name)}</option>`).join('')}</select></div>`:''}
+      <div class="field"><label for="tryText">New ticket</label><textarea id="tryText" style="min-height:110px">${esc(LAB.tryText||'')}</textarea></div>
+      <button class="btn primary" id="tryRun">Handle this ticket</button>
+    </div>
+    <div id="tryOut" class="stack"></div></div>`;
+}
+function tryTicket(){
+  const r=LAB.res;const text=$('#tryText').value.trim();LAB.tryText=text;
+  const out=$('#tryOut');if(!text){out.innerHTML='<p class="small dim">Write a message a customer might send.</p>';return}
+  const cust=$('#tryCust')?$('#tryCust').value:'';LAB.tryCust=cust;
+  const rt=ENG.route(text,r.procs,r.G);
+  if(!rt.p){out.innerHTML=`<div class="bubble">This doesn't look like anything the team has handled before (closest match ${(rt.score*100).toFixed(0)}%). The agent passes it to a person and Tacit watches how they solve it.</div>`;return}
+  const p=rt.p;const ftypes=Object.fromEntries(r.map.features.map(f=>[f.name,f.type]));
+  const guess={};
+  if(LAB.mode==='sample'){const c=ctxFrom(text,cust);for(const f of p.feats){const k=FIELD_FROM[f];let v=c[k];if(v===undefined&&CUST[cust])v=CUST[cust][k];if(f==='idp'&&CUST[cust])v=CUST[cust].idp;if(v!==undefined)guess[f]=typeof v==='boolean'?v:(ftypes[f]==='num'?+v:String(v).toLowerCase())}}
+  LAB.tryFields=Object.assign(guess,LAB.tryFieldsKeep&&LAB.tryFieldsKeep.p===p.id?LAB.tryFieldsKeep.v:{});
+  renderTryResult(p);
+}
+function renderTryResult(p){
+  const r=LAB.res,V=r.voc;const f=LAB.tryFields;const ftypes=Object.fromEntries(r.map.features.map(x=>[x.name,x.type]));
+  const vals=f=>{const s=new Set();p.cluster.tickets.forEach(t=>{if(t.fields[f]!==undefined)s.add(String(t.fields[f]))});return [...s].sort()};
+  const inputs=p.feats.map(n=>{const id='tf-'+n;const v=f[n];
+    if(ftypes[n]==='num') return `<div class="field"><label for="${id}">${esc(ENG.pretty(n))}</label><input type="number" id="${id}" data-tf="${esc(n)}" value="${v??''}" placeholder="ask the customer"></div>`;
+    const opts=ftypes[n]==='bool'?['true','false']:vals(n);
+    return `<div class="field"><label for="${id}">${esc(ENG.pretty(n))}</label><select id="${id}" data-tf="${esc(n)}"><option value="">not known yet</option>${opts.map(o=>`<option value="${esc(o)}" ${String(v)===o?'selected':''}>${esc(ftypes[n]==='bool'?(o==='true'?'yes':'no'):o.replace(/_/g,' '))}</option>`).join('')}</select></div>`}).join('');
+  const steps=[];const missing=[];
+  p.before.forEach(id=>steps.push({id}));
+  p.decisions.forEach(d=>{const tr=[];const v=ENG.predict(d.tree,f,tr);tr.forEach(x=>{if(x.miss)missing.push(x.node.f);steps.push({cond:x})});if(v!=='none')steps.push({id:v})});
+  p.after.forEach(id=>steps.push({id}));
+  const miss=[...new Set(missing)];
+  $('#tryOut').innerHTML=`<div class="inputs"><span class="chip acc">${esc(p.name)}</span><span class="chip">${Math.round(ENG.route(LAB.tryText,r.procs,r.G).score*100)}% similar</span><span class="chip ${p.conf>=75?'ok':'warn'}">confidence ${p.conf}%</span></div>
+    ${p.onlyFor?`<p class="small muted">Heads up: the team has only done this for ${esc(p.onlyFor)}.</p>`:''}
+    ${inputs?`<div><p class="eyebrow">Facts it needs</p><div class="fields" style="margin-top:8px">${inputs}</div></div>`:''}
+    <div><p class="eyebrow">What the agent does</p><div class="trace" style="margin-top:8px">${steps.map(s=>s.cond?`<div class="r"><span class="i ${s.cond.miss?'m':s.cond.r?'y':'n'}">${s.cond.miss?'?':s.cond.r?'✓':'✗'}</span><span>${esc(cap(ENG.condText(s.cond.node)))}${s.cond.miss?' <span class="dim">(not known yet)</span>':''}</span></div>`:`<div class="r p"><span class="kind k-${V.byId[s.id].kind}" style="min-width:64px;font-size:10px">${kindName(V.byId[s.id].kind)}</span><span>${esc(V.byId[s.id].label)}</span></div>`).join('')}</div></div>
+    <div class="bubble">${miss.length?`<b>First it asks the customer for the ${esc(miss.map(ENG.pretty).join(' and '))}</b>, because the team's rule depends on it.`:p.conf<60?'<b>Confidence is low, so it hands this to a person.</b>':'<b>It follows the team\'s steps.</b> Change a fact above and watch the plan change.'}</div>`;
+  $$('[data-tf]').forEach(el=>el.onchange=()=>{const n=el.dataset.tf;const t=ftypes[n];let v=el.value;
+    if(v==='')delete LAB.tryFields[n];else LAB.tryFields[n]=t==='num'?+v:t==='bool'?v==='true':v;
+    LAB.tryFieldsKeep={p:p.id,v:{...LAB.tryFields}};renderTryResult(p)});
+}
+function wireStages(){
+  const s=$('#skillSel');if(s)s.onchange=()=>{LAB.skillSel=+s.value;$('#skillOut').textContent=LAB.skills[LAB.skillSel]};
+  const c=$('#copySkill');if(c)c.onclick=async()=>{try{await navigator.clipboard.writeText(LAB.skills[LAB.skillSel]);toast('Copied the skills file')}catch(e){const rg=document.createRange();rg.selectNodeContents($('#skillOut'));const se=getSelection();se.removeAllRanges();se.addRange(rg);toast('Selected it for you. Press Ctrl+C or ⌘C to copy.')}};
+  const tr=$('#tryRun');if(tr){tr.onclick=()=>{LAB.tryFieldsKeep=null;tryTicket()};const tc=$('#tryCust');if(tc)tc.onchange=()=>{LAB.tryFieldsKeep=null;tryTicket()};tryTicket()}
+}
+
+window.TacitEngine={ENG,buildSampleRows,DOCS};
 
 /* ---------------- Claude runtime (optional) ---------------- */
 if(window.claude&&typeof window.claude.use==='function'){

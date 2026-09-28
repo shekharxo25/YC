@@ -4,6 +4,18 @@ A working prototype of YC Request for Startups #17, "Company Brain". Tacit reads
 
 > Demo build. Quillfield, a payroll company, and all of its customers and tickets are fictional. The 118 tickets are generated from a fixed seed, so every load is identical.
 
+## The live engine (How it works tab)
+This is the real pipeline, running in the browser with no pre-written output. It starts from a raw helpdesk export (125 tickets, notes written by six people in their own styles, sparse custom fields, some one-off tickets) and works in six steps:
+
+1. **Read the notes.** It splits notes into phrases and merges phrases that mean the same action (token Jaccard ≥ 0.6), producing 341 phrases → 43 actions.
+2. **Group the situations.** Average-linkage clustering on TF-IDF of the customer text plus the overlap of actions taken finds 10 situations. Groups under 4 tickets are kept aside.
+3. **Learn the rules.** Common actions become fixed steps. Actions that never happen together become one either/or decision, and each decision gets a small decision tree over the export's columns. A split must explain at least 2 tickets, which prevents coincidental rules. A change-point scan then finds when the team started deciding differently: it detects the refund change (between Feb 12 and Mar 21) and the duplicate-charge approval moving from about $400 to $250 (between Jul 12 and Aug 11). It also notices that one situation only ever happens for Brightwater Clinics.
+4. **Check the help center.** It matches each article to a situation and compares the article's numbers and instructions with what people did. The 14-day refund article comes out as out of date, 3 articles as not followed, 1 as unused and the W-2 article as still right.
+5. **Write it down.** Each situation becomes a SKILL.md file.
+6. **Try it.** A new ticket is routed to the closest situation, its facts are filled in, and the rules run. The page asks for any missing fact, and hands off when nothing matches.
+
+**Paste your own CSV** to run it on your data. It needs a message column (`subject`/`message`) and a notes column (`internal_note`/`resolution`). Every other column is treated as a fact the rules can use.
+
 ## Screens
 
 | Screen | What it shows |
