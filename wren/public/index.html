@@ -1,0 +1,679 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
+<title>Wren · A reading tutor that listens</title>
+<meta name="description" content="Wren listens to your child read aloud, finds the exact phonics sounds they're missing, and writes tomorrow's story around them. For ages 4 to 8. Start with a free 12-minute reading check.">
+<meta property="og:title" content="Wren: a reading tutor that listens">
+<meta property="og:description" content="Private-tutor-quality reading practice for ages 4 to 8, in 15 minutes a day. Start with a free 12-minute reading check.">
+<meta property="og:image" content="media/wren-demo-poster.jpg">
+<meta name="theme-color" content="#2E5E4E">
+<link rel="icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 40 40'%3E%3Crect width='40' height='40' rx='11' fill='%232E5E4E'/%3E%3Cellipse cx='19.7' cy='23.4' rx='9.7' ry='8.6' fill='%23F3D2A8'/%3E%3Ccircle cx='23.5' cy='17.5' r='5.9' fill='%23F3D2A8'/%3E%3Ccircle cx='24.1' cy='16.1' r='1.5' fill='%231E2430'/%3E%3Cpath d='M27.8 16.7l4.6.8-4.6 1.4z' fill='%23F2BD45'/%3E%3C/svg%3E">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Andika:wght@400;700&family=Fraunces:opsz,wght@9..144,500;9..144,600;9..144,700&family=Nunito:wght@400;600;700;800&display=swap">
+<link rel="stylesheet" href="styles.css">
+<style>
+/* ---------- nav ---------- */
+.nav{position:sticky;top:0;z-index:30;background:color-mix(in srgb,var(--bg) 86%,transparent);backdrop-filter:saturate(1.4) blur(12px);-webkit-backdrop-filter:saturate(1.4) blur(12px);border-bottom:1px solid transparent;transition:border-color .2s}
+.nav.scrolled{border-bottom-color:var(--line)}
+.nav-in{display:flex;align-items:center;gap:20px;height:68px}
+.nav-links{display:flex;gap:4px;margin-left:12px}
+.nav-links a{color:var(--ink-2);text-decoration:none;font-weight:700;font-size:15px;padding:8px 12px;border-radius:999px}
+.nav-links a:hover{color:var(--ink);background:var(--surface-2)}
+.nav-cta{margin-left:auto;display:flex;gap:8px;align-items:center}
+.menu-btn{display:none;margin-left:auto;background:none;border:1.5px solid var(--line);border-radius:12px;width:44px;height:44px;cursor:pointer}
+.menu-btn svg{width:22px;height:22px}
+.mobile-menu{display:none}
+@media (max-width:940px){
+  .nav-links{display:none}
+  .nav-cta .hide-sm{display:none}
+}
+@media (max-width:560px){
+  .nav-cta{display:none}
+  .menu-btn{display:grid;place-items:center}
+  .mobile-menu.open{display:grid;gap:4px;padding:8px 16px 16px;border-bottom:1px solid var(--line);background:var(--bg)}
+  .mobile-menu a{padding:12px 8px;font-weight:700;color:var(--ink);text-decoration:none;border-radius:10px}
+  .mobile-menu .btn{margin-top:6px}
+}
+
+/* ---------- hero ---------- */
+.hero{position:relative;padding:56px 0 40px;overflow:hidden}
+.hero-grid{display:grid;grid-template-columns:1.05fr .95fr;gap:48px;align-items:center}
+.hero h1{font-size:clamp(40px,6.2vw,72px);line-height:1.02;letter-spacing:-.025em}
+.hero h1 em{font-style:italic;color:var(--accent);font-weight:600}
+.hero .lede{font-size:clamp(17px,1.9vw,20px);color:var(--ink-2);margin-top:20px;max-width:560px}
+.hero-ctas{display:flex;flex-wrap:wrap;gap:12px;margin-top:28px}
+.trust{display:flex;flex-wrap:wrap;gap:8px 18px;margin-top:22px;color:var(--ink-2);font-size:14.5px;font-weight:700}
+.trust span{display:inline-flex;gap:7px;align-items:center}
+.trust svg{width:18px;height:18px;color:var(--ok)}
+.blob{position:absolute;border-radius:50%;filter:blur(2px);opacity:.55;z-index:-1}
+@media (max-width:900px){.hero-grid{grid-template-columns:1fr}.hero{padding-top:32px}}
+
+/* tablet mock */
+.tablet{position:relative;background:#23272F;border-radius:34px;padding:14px;box-shadow:var(--shadow-lg);transform:rotate(1.5deg);max-width:560px;margin-left:auto}
+.tablet-screen{background:#FFFDF8;border-radius:22px;overflow:hidden;position:relative;color:#1E2430}
+.tablet .scene{display:block;width:100%;height:auto;aspect-ratio:400/190}
+.t-text{padding:18px 22px 22px;font-family:var(--read);font-size:clamp(22px,3vw,30px);line-height:1.5;letter-spacing:.01em}
+.t-text .w{border-radius:8px;padding:0 3px;transition:background .25s,color .25s}
+.t-text .w.done{color:#2C7A51}
+.t-text .w.now{background:#FCF0CF;box-shadow:0 0 0 2px #F2BD45 inset}
+.t-text .w.tgt{text-decoration:underline;text-decoration-color:#D8662F;text-decoration-thickness:3px;text-underline-offset:5px}
+.t-bar{display:flex;align-items:center;gap:12px;padding:10px 16px 14px;border-top:1px solid #EFE6D6}
+.t-bar .wren-mini{width:52px;height:52px;flex:none}
+.t-bubble{background:#F4EDE1;border-radius:14px 14px 14px 4px;padding:8px 12px;font-weight:700;font-size:14.5px;line-height:1.35}
+.wave{display:flex;gap:3px;align-items:center;height:28px;margin-left:auto}
+.wave i{display:block;width:4px;border-radius:3px;background:#2E5E4E;animation:wv 1s ease-in-out infinite}
+.wave i:nth-child(2n){animation-delay:.15s}.wave i:nth-child(3n){animation-delay:.3s}.wave i:nth-child(5n){animation-delay:.45s}
+@keyframes wv{0%,100%{height:6px}50%{height:26px}}
+.float-card{position:absolute;background:var(--surface);border:1px solid var(--line);border-radius:18px;box-shadow:var(--shadow-lg);padding:12px 14px;font-size:14px;color:var(--ink)}
+.fc-1{left:-28px;bottom:26px;transform:rotate(-3deg);width:230px}
+.fc-2{right:-10px;top:-22px;transform:rotate(3deg)}
+.fc-1 .bar{height:8px;border-radius:5px;background:var(--surface-3);overflow:hidden;margin-top:6px}
+.fc-1 .bar b{display:block;height:100%;background:var(--ok);border-radius:5px}
+@media (max-width:900px){.tablet{margin:10px auto 0;transform:none}.fc-1{left:-6px;bottom:-24px}.fc-2{right:-4px}}
+@media (max-width:520px){.fc-1{display:none}.fc-2{top:-16px}}
+
+/* ---------- sections ---------- */
+section{scroll-margin-top:76px}
+.sec{padding:88px 0}
+.sec-tight{padding:64px 0}
+.sec-head{max-width:720px;margin-bottom:40px}
+.sec-head h2{font-size:clamp(32px,4.4vw,50px);margin-top:10px}
+.sec-head p{font-size:18.5px;color:var(--ink-2);margin-top:14px}
+.center{text-align:center;margin-left:auto;margin-right:auto}
+.band{background:var(--surface-2)}
+@media (max-width:640px){.sec{padding:64px 0}}
+
+/* stat strip */
+.stats{display:grid;grid-template-columns:repeat(4,1fr);gap:0;border:1px solid var(--line);border-radius:var(--r-lg);background:var(--surface);overflow:hidden}
+.stat{padding:22px 24px;border-right:1px solid var(--line)}
+.stat:last-child{border-right:0}
+.stat b{display:block;font-family:var(--display);font-size:34px;font-weight:600;letter-spacing:-.02em}
+.stat span{color:var(--ink-2);font-size:14.5px;font-weight:600}
+@media (max-width:800px){.stats{grid-template-columns:1fr 1fr}.stat:nth-child(2){border-right:0}.stat:nth-child(-n+2){border-bottom:1px solid var(--line)}}
+
+/* video */
+.video-wrap{position:relative;border-radius:28px;overflow:hidden;box-shadow:var(--shadow-lg);background:#101418;aspect-ratio:16/9;border:1px solid var(--line)}
+.video-wrap video{display:block;width:100%;height:100%;object-fit:cover;background:#101418}
+.play-over{position:absolute;inset:0;display:grid;place-items:center;background:linear-gradient(180deg,transparent 40%,rgba(10,14,18,.55));border:0;cursor:pointer;color:#fff;padding:0}
+.play-over .pbtn{width:92px;height:92px;border-radius:50%;background:var(--accent);display:grid;place-items:center;box-shadow:0 10px 40px rgba(0,0,0,.35);transition:transform .2s}
+.play-over:hover .pbtn{transform:scale(1.06)}
+.play-over .plabel{position:absolute;left:24px;bottom:20px;text-align:left;font-weight:800;font-size:17px;text-shadow:0 1px 8px rgba(0,0,0,.4)}
+.play-over .plabel small{display:block;font-weight:600;opacity:.85;font-size:14px}
+.video-notes{display:flex;flex-wrap:wrap;gap:10px;margin-top:18px;justify-content:center}
+.chapter{background:var(--surface);border:1px solid var(--line);border-radius:999px;padding:7px 14px;font-weight:700;font-size:14px;cursor:pointer;color:var(--ink-2)}
+.chapter:hover{color:var(--ink);border-color:var(--ink-3)}
+.chapter b{color:var(--accent);font-variant-numeric:tabular-nums;margin-right:6px}
+
+/* steps */
+.steps{display:grid;grid-template-columns:repeat(3,1fr);gap:20px}
+.step{padding:28px;position:relative}
+.step .num{width:44px;height:44px;border-radius:14px;display:grid;place-items:center;font-family:var(--display);font-weight:700;font-size:21px;margin-bottom:18px}
+.step h3{font-size:24px}
+.step p{color:var(--ink-2);margin-top:10px}
+.step .ill{margin-top:20px;border-radius:16px;background:var(--surface-2);padding:16px;min-height:132px}
+@media (max-width:900px){.steps{grid-template-columns:1fr}}
+.mini-words{font-family:var(--read);font-size:22px;line-height:1.7}
+.mini-words span{padding:1px 4px;border-radius:6px}
+.mini-words .ok{color:var(--ok)}
+.mini-words .miss{background:var(--bad-soft);color:var(--bad)}
+.gap-grid{display:grid;grid-template-columns:repeat(8,1fr);gap:5px}
+.gap-grid i{aspect-ratio:1;border-radius:6px;display:block}
+.legend{display:flex;gap:14px;flex-wrap:wrap;margin-top:10px;font-size:12.5px;font-weight:700;color:var(--ink-2)}
+.legend span{display:inline-flex;align-items:center;gap:5px}
+.legend i{width:10px;height:10px;border-radius:3px;display:inline-block}
+
+/* check / report */
+.split{display:grid;grid-template-columns:1fr 1fr;gap:56px;align-items:center}
+@media (max-width:900px){.split{grid-template-columns:1fr;gap:36px}}
+.checklist{list-style:none;padding:0;margin:24px 0 0;display:grid;gap:14px}
+.checklist li{display:flex;gap:12px;align-items:flex-start;font-size:17px}
+.checklist svg{flex:none;width:24px;height:24px;color:var(--ok);margin-top:2px}
+.report{padding:26px;position:relative}
+.report-head{display:flex;justify-content:space-between;align-items:flex-start;gap:12px;padding-bottom:16px;border-bottom:1px dashed var(--line)}
+.report h4{font-size:22px}
+.lvl{display:flex;align-items:center;gap:14px;margin:18px 0}
+.lvl-meter{flex:1;display:grid;grid-template-columns:repeat(6,1fr);gap:4px}
+.lvl-meter i{height:10px;border-radius:5px;background:var(--surface-3)}
+.lvl-meter i.on{background:var(--brand)}
+.rgap{display:grid;gap:10px;margin-top:6px}
+.rgap div{display:flex;justify-content:space-between;align-items:center;gap:10px;padding:10px 12px;border-radius:12px;background:var(--surface-2);font-weight:700}
+.rgap small{font-weight:600;color:var(--ink-2)}
+.todo{margin-top:18px;padding:14px 16px;border-radius:14px;background:var(--sun-soft);font-size:15.5px}
+.todo b{display:block;margin-bottom:4px}
+.stamp{position:absolute;right:-12px;top:-14px;transform:rotate(6deg)}
+
+/* parent weekly */
+.phone{width:min(340px,100%);margin:0 auto;background:#23272F;border-radius:44px;padding:12px;box-shadow:var(--shadow-lg)}
+.phone-screen{background:var(--bg);border-radius:34px;overflow:hidden;padding:22px 18px;min-height:560px}
+.phone .msg{background:var(--surface);border:1px solid var(--line);border-radius:18px;padding:14px;margin-top:12px;font-size:14.5px}
+.phone .msg h5{margin:0 0 6px;font-size:15px;font-family:var(--sans);font-weight:800}
+.week-dots{display:flex;gap:6px;margin-top:8px}
+.week-dots i{flex:1;height:30px;border-radius:8px;background:var(--surface-3);display:grid;place-items:center;font-style:normal;font-size:11px;font-weight:800;color:var(--ink-3)}
+.week-dots i.on{background:var(--brand);color:var(--brand-ink)}
+
+/* worlds */
+.worlds{display:grid;grid-template-columns:repeat(5,1fr);gap:16px}
+.world{padding:0;overflow:hidden;text-align:left}
+.world .wimg{height:150px;display:grid;place-items:center}
+.world .wbody{padding:14px 16px 18px}
+.world h4{font-size:19px}
+.world p{font-size:14px;color:var(--ink-2);margin-top:2px}
+@media (max-width:1000px){.worlds{grid-template-columns:repeat(3,1fr)}}
+@media (max-width:620px){.worlds{grid-template-columns:1fr 1fr}.world:last-child{grid-column:span 2}}
+
+/* habit */
+.habit{display:grid;grid-template-columns:repeat(4,1fr);gap:16px}
+.habit .card{padding:22px}
+.habit h4{font-size:19px;margin-top:12px}
+.habit p{color:var(--ink-2);font-size:15px;margin-top:6px}
+.ico{width:46px;height:46px;border-radius:14px;display:grid;place-items:center}
+.ico svg{width:24px;height:24px}
+@media (max-width:900px){.habit{grid-template-columns:1fr 1fr}}
+@media (max-width:520px){.habit{grid-template-columns:1fr}}
+.session-line{display:flex;border-radius:16px;overflow:hidden;margin-top:28px;border:1px solid var(--line);background:var(--surface)}
+.session-line div{padding:14px 16px;font-weight:700;font-size:14.5px;border-right:1px solid var(--line)}
+.session-line div:last-child{border-right:0}
+.session-line small{display:block;color:var(--ink-3);font-weight:700}
+@media (max-width:700px){.session-line{flex-direction:column}.session-line div{border-right:0;border-bottom:1px solid var(--line);flex:auto!important}}
+
+/* privacy */
+.privacy{display:grid;grid-template-columns:repeat(3,1fr);gap:16px}
+.privacy .card{padding:22px;background:var(--surface)}
+.privacy h4{font-size:18px;margin-top:12px}
+.privacy p{color:var(--ink-2);font-size:15px;margin-top:6px}
+@media (max-width:900px){.privacy{grid-template-columns:1fr 1fr}}
+@media (max-width:560px){.privacy{grid-template-columns:1fr}}
+
+/* pricing */
+.toggle{display:inline-flex;background:var(--surface-2);border:1px solid var(--line);border-radius:999px;padding:4px;gap:4px}
+.toggle button{border:0;background:transparent;border-radius:999px;padding:8px 16px;font-weight:800;cursor:pointer;color:var(--ink-2)}
+.toggle button[aria-pressed="true"]{background:var(--surface);color:var(--ink);box-shadow:var(--shadow-sm)}
+.prices{display:grid;grid-template-columns:1fr 1.15fr 1fr;gap:18px;margin-top:28px;align-items:stretch}
+.price{padding:28px;display:flex;flex-direction:column}
+.price.featured{border:2px solid var(--brand);box-shadow:var(--shadow-lg);position:relative}
+.price .tag{position:absolute;top:-14px;left:28px}
+.price h3{font-size:22px}
+.price .amt{font-family:var(--display);font-size:52px;font-weight:600;letter-spacing:-.03em;margin-top:10px;line-height:1}
+.price .amt small{font-family:var(--sans);font-size:16px;color:var(--ink-2);font-weight:700;letter-spacing:0}
+.price ul{list-style:none;padding:0;margin:20px 0 24px;display:grid;gap:10px;font-size:15.5px}
+.price li{display:flex;gap:10px}
+.price li svg{flex:none;width:20px;height:20px;color:var(--ok);margin-top:2px}
+.price .btn{margin-top:auto}
+@media (max-width:900px){.prices{grid-template-columns:1fr}}
+
+/* faq */
+.faq{max-width:820px;margin:0 auto}
+.faq details{border-bottom:1px solid var(--line);padding:4px 0}
+.faq summary{list-style:none;cursor:pointer;padding:18px 40px 18px 0;font-weight:800;font-size:18px;position:relative}
+.faq summary::-webkit-details-marker{display:none}
+.faq summary::after{content:"";position:absolute;right:8px;top:50%;width:12px;height:12px;border-right:2.5px solid var(--ink-2);border-bottom:2.5px solid var(--ink-2);transform:translateY(-70%) rotate(45deg);transition:transform .2s}
+.faq details[open] summary::after{transform:translateY(-30%) rotate(-135deg)}
+.faq details p{padding:0 0 20px;color:var(--ink-2);font-size:16.5px}
+
+/* final cta + footer */
+.final{background:var(--brand);color:var(--brand-ink);border-radius:36px;padding:64px 48px;display:grid;grid-template-columns:1.4fr .6fr;gap:24px;align-items:center;position:relative;overflow:hidden}
+.final h2{font-size:clamp(32px,4.2vw,50px)}
+.final p{opacity:.88;font-size:18px;margin-top:12px;max-width:560px}
+.final .btn-accent{margin-top:26px}
+.final .wren-big{justify-self:center}
+@media (max-width:760px){.final{grid-template-columns:1fr;padding:44px 24px;border-radius:28px}.final .wren-big{display:none}}
+footer{padding:56px 0 40px;color:var(--ink-2);font-size:14.5px}
+.foot{display:grid;grid-template-columns:1.5fr repeat(3,1fr);gap:28px}
+.foot h5{font-size:13px;letter-spacing:.08em;text-transform:uppercase;color:var(--ink);margin:0 0 10px}
+.foot a{display:block;color:var(--ink-2);text-decoration:none;padding:3px 0}
+.foot a:hover{color:var(--ink)}
+@media (max-width:760px){.foot{grid-template-columns:1fr 1fr}}
+.fine{margin-top:36px;padding-top:20px;border-top:1px solid var(--line);font-size:13px;color:var(--ink-3);display:flex;flex-wrap:wrap;gap:8px 20px;justify-content:space-between}
+
+.reveal{opacity:0;transform:translateY(18px);transition:opacity .7s ease,transform .7s ease}
+.reveal.in{opacity:1;transform:none}
+.wren-ring{animation:ring 1.6s ease-out infinite;transform-origin:64px 64px;color:var(--brand)}
+@keyframes ring{0%{transform:scale(.8);opacity:1}100%{transform:scale(1.1);opacity:0}}
+</style>
+</head>
+<body>
+<svg width="0" height="0" style="position:absolute" aria-hidden="true">
+  <symbol id="i-check" viewBox="0 0 24 24"><circle cx="12" cy="12" r="11" fill="currentColor" opacity=".14"/><path d="M7 12.5l3.2 3.2L17 9" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"/></symbol>
+  <symbol id="i-tick" viewBox="0 0 24 24"><path d="M5 12.5l4.2 4.2L19 7" fill="none" stroke="currentColor" stroke-width="2.6" stroke-linecap="round" stroke-linejoin="round"/></symbol>
+</svg>
+
+<header class="nav" id="nav">
+  <div class="wrap nav-in">
+    <a class="logo" href="#top" aria-label="Wren home"><span id="logo-slot"></span>Wren</a>
+    <nav class="nav-links" aria-label="Sections">
+      <a href="#how">How it works</a>
+      <a href="#check">Free reading check</a>
+      <a href="#parents">For parents</a>
+      <a href="#privacy">Privacy</a>
+      <a href="#pricing">Pricing</a>
+      <a href="#faq">FAQ</a>
+    </nav>
+    <div class="nav-cta" data-auth="out">
+      <a class="btn btn-quiet" href="app.html#/signin">Sign in</a>
+      <a class="btn btn-primary" href="app.html#/signup">Start free check</a>
+    </div>
+    <div class="nav-cta" data-auth="in" hidden>
+      <span class="small muted hide-sm" id="hello"></span>
+      <a class="btn btn-primary" href="app.html#/home">Open Wren</a>
+    </div>
+    <button class="menu-btn" id="menu-btn" aria-expanded="false" aria-controls="mobile-menu" aria-label="Menu"><svg viewBox="0 0 24 24"><path d="M4 7h16M4 12h16M4 17h16" stroke="currentColor" stroke-width="2.2" stroke-linecap="round"/></svg></button>
+  </div>
+  <div class="mobile-menu" id="mobile-menu">
+    <a href="#how">How it works</a><a href="#check">Free reading check</a><a href="#parents">For parents</a><a href="#privacy">Privacy</a><a href="#pricing">Pricing</a><a href="#faq">FAQ</a>
+    <a class="btn btn-ghost" href="app.html#/signin" data-auth="out">Sign in</a>
+    <a class="btn btn-primary" href="app.html#/signup" data-auth="out">Start free check</a>
+    <a class="btn btn-primary" href="app.html#/home" data-auth="in" hidden>Open Wren</a>
+  </div>
+</header>
+
+<main id="top">
+  <!-- HERO -->
+  <section class="hero">
+    <div class="blob" style="width:520px;height:520px;background:var(--sun-soft);right:-160px;top:-120px"></div>
+    <div class="blob" style="width:380px;height:380px;background:var(--brand-soft);left:-200px;bottom:-160px"></div>
+    <div class="wrap hero-grid">
+      <div>
+        <span class="pill pill-accent"><span class="dot"></span> For ages 4 to 8 · 15 minutes a day</span>
+        <h1 style="margin-top:18px">A reading tutor that <em>listens.</em></h1>
+        <p class="lede">Your child reads aloud. Wren hears exactly which sounds are solid and which aren't. Then it writes tomorrow's story around those gaps, set in a world your child loves.</p>
+        <div class="hero-ctas">
+          <a class="btn btn-accent btn-lg" href="app.html#/signup">Take the free reading check</a>
+          <a class="btn btn-ghost btn-lg" href="#demo" id="watch-demo"><svg width="18" height="18" viewBox="0 0 24 24" aria-hidden="true"><path d="M8 5v14l11-7z" fill="currentColor"/></svg> Watch the demo</a>
+        </div>
+        <div class="trust">
+          <span><svg><use href="#i-tick"/></svg>12 minutes, free</span>
+          <span><svg><use href="#i-tick"/></svg>No card needed</span>
+          <span><svg><use href="#i-tick"/></svg>Built for COPPA from day one</span>
+        </div>
+      </div>
+      <div style="position:relative">
+        <div class="tablet" aria-label="Wren's reading screen: a child reads a story aloud while words turn green">
+          <div class="tablet-screen">
+            <div id="hero-scene"></div>
+            <div class="t-text" id="hero-text"></div>
+            <div class="t-bar">
+              <div class="wren-mini" id="hero-wren"></div>
+              <div class="t-bubble" id="hero-bubble">I'm listening, Mia!</div>
+              <div class="wave" aria-hidden="true"><i></i><i></i><i></i><i></i><i></i><i></i><i></i></div>
+            </div>
+          </div>
+        </div>
+        <div class="float-card fc-1" aria-hidden="true">
+          <div class="tiny faint" style="font-weight:800;letter-spacing:.06em;text-transform:uppercase">Just heard</div>
+          <div style="font-weight:800;margin-top:2px">"stop" → "top"</div>
+          <div class="small muted">Working on the <b style="color:var(--accent)">st-</b> blend</div>
+          <div class="bar"><b style="width:46%"></b></div>
+        </div>
+        <div class="float-card fc-2" aria-hidden="true"><b style="color:var(--accent)">🔥 12-day</b> reading streak</div>
+      </div>
+    </div>
+  </section>
+
+  <!-- STATS -->
+  <section class="sec-tight" style="padding-top:24px">
+    <div class="wrap">
+      <div class="stats reveal">
+        <div class="stat"><b>134</b><span>phonics sub-skills tracked for every child</span></div>
+        <div class="stat"><b>12 min</b><span>for the free reading check, with results right away</span></div>
+        <div class="stat"><b>1 story</b><span>written each night from what your child knows</span></div>
+        <div class="stat"><b>90 sec</b><span>of weekly homework for you, in plain English</span></div>
+      </div>
+    </div>
+  </section>
+
+  <!-- DEMO VIDEO -->
+  <section class="sec" id="demo" style="padding-top:48px">
+    <div class="wrap">
+      <div class="sec-head center">
+        <span class="eyebrow">See it in action</span>
+        <h2>One session with Wren, in about 90 seconds</h2>
+        <p>Watch Mia, 5, read to Wren. You'll see the gap it finds, the story it writes that night, and the note her parents get.</p>
+      </div>
+      <div class="video-wrap reveal">
+        <video id="demo-video" preload="metadata" playsinline controls poster="media/wren-demo-poster.jpg">
+          <source src="media/wren-demo.mp4" type="video/mp4">
+          <track kind="captions" srclang="en" label="English" src="media/wren-demo.vtt" default>
+          Your browser can't play this video. <a href="media/wren-demo.mp4">Download the demo</a>.
+        </video>
+        <button class="play-over" id="play-over" aria-label="Play the Wren demo video">
+          <span class="pbtn"><svg width="36" height="36" viewBox="0 0 24 24" aria-hidden="true"><path d="M8 5v14l11-7z" fill="#fff"/></svg></span>
+          <span class="plabel">Mia reads to Wren<small id="vid-len">Demo · with narration and captions</small></span>
+        </button>
+      </div>
+      <div class="video-notes" id="chapters">
+        <button class="chapter" data-t="0"><b>0:00</b>The worry</button>
+        <button class="chapter" data-t="9"><b>0:09</b>Mia reads aloud</button>
+        <button class="chapter" data-t="27"><b>0:27</b>Finding the gap</button>
+        <button class="chapter" data-t="41"><b>0:41</b>Tonight's story</button>
+        <button class="chapter" data-t="57"><b>0:57</b>The parent note</button>
+        <button class="chapter" data-t="70"><b>1:10</b>Coming back daily</button>
+      </div>
+    </div>
+  </section>
+
+  <!-- HOW -->
+  <section class="sec band" id="how">
+    <div class="wrap">
+      <div class="sec-head">
+        <span class="eyebrow">How it works</span>
+        <h2>Listen. Diagnose. Write the next story.</h2>
+        <p>A good tutor watches your child read and knows exactly what to try next. Wren does that every day, and it gets sharper with every session.</p>
+      </div>
+      <div class="steps">
+        <article class="card step reveal">
+          <div class="num" style="background:var(--sky-soft);color:var(--sky)">1</div>
+          <h3>It listens as they read</h3>
+          <p>Your child reads a short story aloud from the screen. Wren follows along word by word and gently helps when they get stuck, the way a patient grown-up would.</p>
+          <div class="ill"><div class="mini-words"><span class="ok">Stop,</span> <span class="ok">said</span> <span class="ok">Beth.</span> <span class="ok">The</span> <span class="ok">bus</span> <span>is</span> <span>here!</span></div><div class="small muted" style="margin-top:6px">Tap any word to hear it. Reading aloud needs no typing.</div></div>
+        </article>
+        <article class="card step reveal">
+          <div class="num" style="background:var(--accent-soft);color:var(--accent)">2</div>
+          <h3>It finds the exact gap</h3>
+          <p>Wren doesn't stop at "right" or "wrong." It spots which sound broke: the <b>st-</b> in "stop," the silent <b>e</b> in "rode." It tracks 134 phonics sub-skills for your child.</p>
+          <div class="ill"><div class="gap-grid" id="gap-grid" aria-hidden="true"></div>
+            <div class="legend"><span><i style="background:var(--ok)"></i>Secure</span><span><i style="background:var(--sun)"></i>Getting there</span><span><i style="background:var(--accent)"></i>Working on</span><span><i style="background:var(--surface-3)"></i>Not yet</span></div></div>
+        </article>
+        <article class="card step reveal">
+          <div class="num" style="background:var(--ok-soft);color:var(--ok)">3</div>
+          <h3>It writes tomorrow's story</h3>
+          <p>Each night Wren writes a new story. It uses only the sounds your child has mastered, plus two or three stretch sounds, so reading feels hard enough without being frustrating.</p>
+          <div class="ill"><div style="font-family:var(--read);font-size:20px;line-height:1.6">Rex <u style="text-decoration-color:var(--accent);text-decoration-thickness:3px;text-underline-offset:4px">spots</u> an egg in the <u style="text-decoration-color:var(--accent);text-decoration-thickness:3px;text-underline-offset:4px">nest</u>.</div><div class="small muted" style="margin-top:6px">98% decodable · stretch: <b>sp-</b>, <b>-st</b></div></div>
+        </article>
+      </div>
+    </div>
+  </section>
+
+  <!-- FREE CHECK -->
+  <section class="sec" id="check">
+    <div class="wrap split">
+      <div>
+        <span class="eyebrow">Start here · always free</span>
+        <h2 style="font-size:clamp(32px,4.4vw,50px);margin-top:10px">A 12-minute reading check that tells you more than a report card</h2>
+        <p class="muted" style="font-size:18.5px;margin-top:14px">Hand your child the tablet. They read three short passages aloud. Two minutes later you get a report that names the exact sounds to practice, not just a level.</p>
+        <ul class="checklist">
+          <li><svg><use href="#i-check"/></svg><span><b>Reading level</b> with the grade band and what that means day to day</span></li>
+          <li><svg><use href="#i-check"/></svg><span><b>The exact phonics gaps</b>, such as "consonant blends: st, cr, nd," with the words that showed them</span></li>
+          <li><svg><use href="#i-check"/></svg><span><b>Three things to work on</b>, plus a 90-second game to play tonight</span></li>
+          <li><svg><use href="#i-check"/></svg><span>Useful if your child <b>was flagged at a school screening</b>, and easy to share with their teacher</span></li>
+        </ul>
+        <div style="display:flex;gap:12px;flex-wrap:wrap;margin-top:28px">
+          <a class="btn btn-primary btn-lg" href="app.html#/signup">Start the free check</a>
+          <a class="btn btn-quiet btn-lg" href="app.html#/signin">I already have an account</a>
+        </div>
+      </div>
+      <div class="card report reveal" aria-label="Sample reading check report">
+        <span class="pill pill-ok stamp">Sample report</span>
+        <div class="report-head">
+          <div><div class="tiny faint" style="font-weight:800;letter-spacing:.06em;text-transform:uppercase">Reading check</div><h4>Mia, age 5</h4></div>
+          <div style="text-align:right"><div class="tiny faint" style="font-weight:800">ACCURACY</div><div style="font-family:var(--display);font-size:28px;font-weight:600">86%</div></div>
+        </div>
+        <div class="lvl"><div><div style="font-weight:800">Building reader</div><div class="small muted">Late kindergarten</div></div><div class="lvl-meter" aria-hidden="true"><i class="on"></i><i class="on"></i><i class="on"></i><i></i><i></i><i></i></div></div>
+        <div class="small" style="font-weight:800;margin-bottom:6px">What to work on</div>
+        <div class="rgap">
+          <div><span>th <small>as in thin</small></span><span class="pill pill-bad">"Beth" → "bet"</span></div>
+          <div><span>–nd <small>as in hand</small></span><span class="pill pill-bad">"and" → "an"</span></div>
+          <div><span>a–e <small>magic e, as in cake</small></span><span class="pill pill-warn">"came" → "cam"</span></div>
+        </div>
+        <div class="todo"><b>Tonight, 90 seconds:</b> "th" is two letters that make one sound. Say "thin" slowly together, then hunt the house for three more things with that sound.</div>
+      </div>
+    </div>
+  </section>
+
+  <!-- PARENTS -->
+  <section class="sec band" id="parents">
+    <div class="wrap split">
+      <div class="phone reveal" aria-label="Sample weekly parent report on a phone">
+        <div class="phone-screen">
+          <div style="display:flex;align-items:center;gap:10px"><span id="phone-logo" style="width:30px;height:30px;display:inline-block"></span><b style="font-family:var(--display);font-size:19px">Mia's week</b><span class="pill pill-brand" style="margin-left:auto">Week 3</span></div>
+          <div class="week-dots" aria-hidden="true"><i class="on">M</i><i class="on">T</i><i class="on">W</i><i>T</i><i class="on">F</i><i class="on">S</i><i>S</i></div>
+          <div class="msg"><h5>In plain English</h5>Mia is secure on letter sounds and short vowel words like <i>cat</i> and <i>sun</i>. This week we're working on consonant blends: <b>st</b>, <b>sp</b> and <b>cr</b>.</div>
+          <div class="msg"><h5>What changed</h5><b style="color:var(--ok)">+4 skills secure</b> this week: sh, ch, –ck and the tricky word "said."</div>
+          <div class="msg" style="background:var(--sun-soft);border-color:transparent"><h5>Your 90-second bedtime thing</h5>Stretch "stop" like a rubber band, one sound at a time, then snap it together fast. Let Mia be the one who snaps it.</div>
+          <div class="msg"><h5>This week</h5>5 sessions · 71 minutes · 412 words read aloud</div>
+        </div>
+      </div>
+      <div>
+        <span class="eyebrow">For parents</span>
+        <h2 style="font-size:clamp(32px,4.4vw,50px);margin-top:10px">You'll know what's going on, without being the teacher</h2>
+        <p class="muted" style="font-size:18.5px;margin-top:14px">Every week you get a short note in plain English: what's secure, what's next, and one tiny thing to do at bedtime. No jargon, no dashboards to decode.</p>
+        <ul class="checklist">
+          <li><svg><use href="#i-check"/></svg><span><b>A supplement to school, not a replacement.</b> Share the skill map with your child's teacher in one tap.</span></li>
+          <li><svg><use href="#i-check"/></svg><span><b>Made for homeschooling too.</b> A clear scope and sequence, with a record of every session.</span></li>
+          <li><svg><use href="#i-check"/></svg><span><b>Up to four children</b> on one plan, each with their own world and pace.</span></li>
+        </ul>
+      </div>
+    </div>
+  </section>
+
+  <!-- WORLDS -->
+  <section class="sec" id="worlds">
+    <div class="wrap">
+      <div class="sec-head center">
+        <span class="eyebrow">Their world, their story</span>
+        <h2>Five worlds to start, and a hero who remembers them</h2>
+        <p>Your child picks a world. Every story after that is set there, with a friend who remembers yesterday.</p>
+      </div>
+      <div class="worlds" id="worlds-grid"></div>
+    </div>
+  </section>
+
+  <!-- HABIT -->
+  <section class="sec band">
+    <div class="wrap">
+      <div class="sec-head">
+        <span class="eyebrow">Built to come back to</span>
+        <h2>Designed like a game. Paced like a tutor.</h2>
+        <p>The hard part isn't one great session. It's the two-hundredth. So every session is short, has a clear ending and gives a small win.</p>
+      </div>
+      <div class="habit">
+        <div class="card reveal"><div class="ico" style="background:var(--accent-soft);color:var(--accent)"><svg viewBox="0 0 24 24"><path d="M12 3c1 4 5 5 5 10a5 5 0 01-10 0c0-2 1-3 2-4 0 2 1 3 2 3 0-3-1-5 1-9z" fill="currentColor"/></svg></div><h4>A streak that forgives</h4><p>Missing one day doesn't reset it. Kids stay motivated and parents feel less guilt.</p></div>
+        <div class="card reveal"><div class="ico" style="background:var(--sun-soft);color:var(--warn)"><svg viewBox="0 0 24 24"><path d="M20 4C11 4 5 10 4 20c3-5 7-8 12-9-3 2-6 4-8 8 7-1 12-7 12-15z" fill="currentColor"/></svg></div><h4>Feathers for Wren's nest</h4><p>Children earn a feather each session, and extra ones for each new sound they master.</p></div>
+        <div class="card reveal"><div class="ico" style="background:var(--sky-soft);color:var(--sky)"><svg viewBox="0 0 24 24"><circle cx="12" cy="12" r="9" fill="none" stroke="currentColor" stroke-width="2.4"/><path d="M12 7v5l3 2" stroke="currentColor" stroke-width="2.4" fill="none" stroke-linecap="round"/></svg></div><h4>Fifteen minutes, done</h4><p>A warm-up, a story and a word hunt. There's no endless scroll and no autoplay.</p></div>
+        <div class="card reveal"><div class="ico" style="background:var(--berry-soft);color:var(--berry)"><svg viewBox="0 0 24 24"><path d="M12 20s-7-4.4-7-10a4 4 0 017-2.6A4 4 0 0119 10c0 5.6-7 10-7 10z" fill="currentColor"/></svg></div><h4>Praise that's specific</h4><p>"You read <i>stop</i> with the st!" is better than "Great job!" Kids can tell the difference.</p></div>
+      </div>
+      <div class="session-line" aria-label="A 15-minute session">
+        <div style="flex:2;background:var(--sun-soft)"><small>2 MIN</small>Warm-up: fast words</div>
+        <div style="flex:8;background:var(--brand-soft)"><small>8 MIN</small>Tonight's story, read aloud</div>
+        <div style="flex:3;background:var(--accent-soft)"><small>3 MIN</small>Word hunt: stretch sounds</div>
+        <div style="flex:2;background:var(--sky-soft)"><small>2 MIN</small>Feathers and goodbye</div>
+      </div>
+    </div>
+  </section>
+
+  <!-- PRIVACY -->
+  <section class="sec" id="privacy">
+    <div class="wrap">
+      <div class="sec-head">
+        <span class="eyebrow">Privacy and safety</span>
+        <h2>Your child's voice is not our product</h2>
+        <p>We built Wren around the U.S. Children's Online Privacy Protection Act (COPPA) from the first line of code. We didn't add it later.</p>
+      </div>
+      <div class="privacy">
+        <div class="card reveal"><div class="ico" style="background:var(--brand-soft);color:var(--brand)"><svg viewBox="0 0 24 24"><path d="M12 3l8 3v6c0 5-3.5 8-8 9-4.5-1-8-4-8-9V6z" fill="currentColor"/></svg></div><h4>A parent says yes first</h4><p>Only an adult can create an account. We ask for your consent before your child reads a single word.</p></div>
+        <div class="card reveal"><div class="ico" style="background:var(--sky-soft);color:var(--sky)"><svg viewBox="0 0 24 24"><rect x="9" y="3" width="6" height="11" rx="3" fill="currentColor"/><path d="M6 11a6 6 0 0012 0M12 17v4" stroke="currentColor" stroke-width="2.2" fill="none" stroke-linecap="round"/><path d="M4 4l16 16" stroke="currentColor" stroke-width="2.2" stroke-linecap="round"/></svg></div><h4>Audio isn't kept</h4><p>Speech is turned into words and then thrown away. We keep recordings only if you opt in, and you can change that at any time.</p></div>
+        <div class="card reveal"><div class="ico" style="background:var(--accent-soft);color:var(--accent)"><svg viewBox="0 0 24 24"><circle cx="12" cy="12" r="9" fill="none" stroke="currentColor" stroke-width="2.4"/><path d="M6 6l12 12" stroke="currentColor" stroke-width="2.4"/></svg></div><h4>No ads, ever</h4><p>No ads, no third-party trackers and no selling data. The only people who pay us are parents.</p></div>
+        <div class="card reveal"><div class="ico" style="background:var(--sun-soft);color:var(--warn)"><svg viewBox="0 0 24 24"><path d="M12 3v12M7 10l5 5 5-5M5 20h14" stroke="currentColor" stroke-width="2.4" fill="none" stroke-linecap="round" stroke-linejoin="round"/></svg></div><h4>Take your data with you</h4><p>Download everything we hold about your family as a file, whenever you like.</p></div>
+        <div class="card reveal"><div class="ico" style="background:var(--bad-soft);color:var(--bad)"><svg viewBox="0 0 24 24"><path d="M5 7h14M9 7V4h6v3M7 7l1 13h8l1-13" stroke="currentColor" stroke-width="2.2" fill="none" stroke-linecap="round" stroke-linejoin="round"/></svg></div><h4>Delete means delete</h4><p>One button erases your account, your children's profiles and every session.</p></div>
+        <div class="card reveal"><div class="ico" style="background:var(--berry-soft);color:var(--berry)"><svg viewBox="0 0 24 24"><rect x="5" y="10" width="14" height="10" rx="2" fill="currentColor"/><path d="M8 10V7a4 4 0 018 0v3" stroke="currentColor" stroke-width="2.2" fill="none"/></svg></div><h4>A grown-up gate</h4><p>Leaving kid mode takes a press-and-hold that only grown-ups can do, so settings and billing stay out of reach.</p></div>
+      </div>
+    </div>
+  </section>
+
+  <!-- PRICING -->
+  <section class="sec band" id="pricing">
+    <div class="wrap">
+      <div class="sec-head center">
+        <span class="eyebrow">Pricing</span>
+        <h2>Tutor-quality practice for less than one tutor session a month</h2>
+        <p>The reading check is always free. When you're ready, start a 7-day free trial.</p>
+      </div>
+      <div class="prices">
+        <div class="card price reveal">
+          <h3>Reading check</h3>
+          <div class="amt">$0</div>
+          <p class="muted small" style="margin-top:6px">Always free, with no card needed</p>
+          <ul>
+            <li><svg><use href="#i-check"/></svg>The 12-minute read-aloud check</li>
+            <li><svg><use href="#i-check"/></svg>A full report with reading level and gaps</li>
+            <li><svg><use href="#i-check"/></svg>Three things to work on, plus a bedtime game</li>
+          </ul>
+          <a class="btn btn-ghost btn-block" href="app.html#/signup">Start the free check</a>
+        </div>
+        <div class="card price featured reveal">
+          <span class="pill pill-brand tag" style="background:var(--brand);color:var(--brand-ink)">Best value: save 43%</span>
+          <h3>Annual</h3>
+          <div class="amt">$199<small> / year</small></div>
+          <p class="muted small" style="margin-top:6px">That's $16.58 a month, billed once after your 7-day trial</p>
+          <ul>
+            <li><svg><use href="#i-check"/></svg>A new decodable story every day, in your child's world</li>
+            <li><svg><use href="#i-check"/></svg>A live map of 134 phonics sub-skills</li>
+            <li><svg><use href="#i-check"/></svg>A weekly plain-English parent report</li>
+            <li><svg><use href="#i-check"/></svg>Up to 4 children</li>
+            <li><svg><use href="#i-check"/></svg>Writing and arithmetic when they launch, at no extra cost</li>
+          </ul>
+          <a class="btn btn-primary btn-block btn-lg" href="app.html#/signup?plan=annual">Start 7-day free trial</a>
+        </div>
+        <div class="card price reveal">
+          <h3>Monthly</h3>
+          <div class="amt">$29<small> / month</small></div>
+          <p class="muted small" style="margin-top:6px">Cancel anytime from your account</p>
+          <ul>
+            <li><svg><use href="#i-check"/></svg>Everything in Annual</li>
+            <li><svg><use href="#i-check"/></svg>Billed monthly after your 7-day trial</li>
+            <li><svg><use href="#i-check"/></svg>Switch to annual anytime</li>
+          </ul>
+          <a class="btn btn-ghost btn-block" href="app.html#/signup?plan=monthly">Start 7-day free trial</a>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- FAQ -->
+  <section class="sec" id="faq">
+    <div class="wrap">
+      <div class="sec-head center"><span class="eyebrow">Questions</span><h2>What parents ask us</h2></div>
+      <div class="faq">
+        <details><summary>What age is Wren for?</summary><p>Ages 4 to 8. Right now it focuses on the step from phonics to reading, which is where most 4 to 6 year olds are. Writing and arithmetic come next, using the same engine that listens and adapts.</p></details>
+        <details><summary>Does it really understand a five-year-old's speech?</summary><p>Children's speech is the hard case, because it's high-pitched, full of pauses and often mispronounced. Wren combines speech recognition with the text your child is supposed to be reading. That way it's judging "did they read <i>stop</i>?" and not trying to transcribe open-ended speech. If the microphone isn't a good fit, a grown-up can tap the words that were tricky instead.</p></details>
+        <details><summary>My child was flagged at a school reading screening. Is this for us?</summary><p>Yes. Many families start there. The free reading check gives you something concrete to bring to the teacher: the specific sounds and patterns your child hasn't secured yet. Wren supports what school is doing. It doesn't replace a teacher or a specialist evaluation, and if you're worried about dyslexia, please also talk to your school or pediatrician.</p></details>
+        <details><summary>How much screen time is this?</summary><p>About fifteen minutes a day, and every session has a clear end. There's no autoplay, no endless feed and nothing to buy inside the app. Most of that time your child is reading out loud, not tapping.</p></details>
+        <details><summary>What do you do with my child's voice?</summary><p>By default, audio is turned into words and then discarded. We only keep recordings if you opt in to help improve accuracy for kids' voices, and you can turn that off at any time. You can download or delete all your family's data from your account.</p></details>
+        <details><summary>Can I cancel?</summary><p>Yes. You can cancel in two taps from your account, and there's no phone call. If you cancel during the 7-day trial, you won't be charged.</p></details>
+        <details><summary>Do you work with schools?</summary><p>Not yet. We're starting with families. Please tell your child's teacher about us. We're planning classroom pilots for later.</p></details>
+      </div>
+    </div>
+  </section>
+
+  <!-- FINAL CTA -->
+  <section class="sec" style="padding-top:24px">
+    <div class="wrap">
+      <div class="final">
+        <div>
+          <h2>Find out exactly where your reader is, tonight</h2>
+          <p>It takes twelve minutes, three short passages and one very specific report. It's free.</p>
+          <a class="btn btn-accent btn-lg" href="app.html#/signup">Take the free reading check</a>
+        </div>
+        <div class="wren-big" id="final-wren"></div>
+      </div>
+    </div>
+  </section>
+</main>
+
+<footer>
+  <div class="wrap">
+    <div class="foot">
+      <div><a class="logo" href="#top" style="padding:0"><span id="logo-slot-2"></span>Wren</a><p style="margin-top:10px;max-width:320px">A voice-first reading tutor for ages 4 to 8. It gives private-tutor-quality practice in fifteen minutes a day.</p></div>
+      <div><h5>Product</h5><a href="#how">How it works</a><a href="#check">Free reading check</a><a href="#pricing">Pricing</a><a href="#demo">Demo video</a></div>
+      <div><h5>Parents</h5><a href="#parents">Weekly reports</a><a href="#worlds">Worlds</a><a href="#faq">FAQ</a></div>
+      <div><h5>Account</h5><a href="app.html#/signup">Create account</a><a href="app.html#/signin">Sign in</a><a href="app.html#/forgot">Reset password</a><a href="#privacy">Privacy</a></div>
+    </div>
+    <div class="fine"><span>© 2026 Wren Learning. A demo build.</span><span>The sample report and the child in the demo video are illustrative.</span></div>
+  </div>
+</footer>
+
+<script type="module">
+import { wrenSVG, logoSVG, sceneSVG, heroSVG } from "./art.js";
+import { WORLDS } from "./engine.js";
+
+document.getElementById("logo-slot").innerHTML = logoSVG();
+document.getElementById("logo-slot-2").innerHTML = logoSVG();
+document.getElementById("phone-logo").innerHTML = logoSVG();
+document.getElementById("hero-wren").innerHTML = wrenSVG({ size: 52, mood: "talk" });
+document.getElementById("final-wren").innerHTML = wrenSVG({ size: 200 });
+document.getElementById("hero-scene").innerHTML = sceneSVG("dinos", 2);
+
+// Hero: words light up as if being read aloud.
+const line = "Rex spots an egg in the nest. The egg rocks and cracks!".split(" ");
+const targets = new Set([1, 6, 10]);
+const ht = document.getElementById("hero-text");
+ht.innerHTML = line.map((w, i) => `<span class="w${targets.has(i) ? " tgt" : ""}">${w}</span>`).join(" ");
+const spans = [...ht.querySelectorAll(".w")];
+const bubble = document.getElementById("hero-bubble");
+const lines = ["I'm listening, Mia!", "Nice blend on “spots”!", "Keep going!", "You read the whole page!"];
+let k = 0;
+const reduce = matchMedia("(prefers-reduced-motion: reduce)").matches;
+function tick() {
+  spans.forEach((s, i) => { s.classList.toggle("done", i < k); s.classList.toggle("now", i === k); });
+  bubble.textContent = k === 0 ? lines[0] : k === 2 ? lines[1] : k >= spans.length ? lines[3] : k > 5 ? lines[2] : bubble.textContent;
+  k = k > spans.length + 3 ? 0 : k + 1;
+}
+if (reduce) { k = 7; tick(); } else { tick(); setInterval(tick, 620); }
+
+// Skill-grid illustration
+const gg = document.getElementById("gap-grid");
+const pattern = "gggggggggggggggggggggggyggggyaggyyaggaaynnnnyannnnnnnnnnnnnnnn".split("");
+const col = { g: "var(--ok)", y: "var(--sun)", a: "var(--accent)", n: "var(--surface-3)" };
+gg.innerHTML = pattern.slice(0, 64).map((c) => `<i style="background:${col[c] || col.n}"></i>`).join("");
+
+// Worlds
+const blurbs = { dinos: "Stomp, hatch and explore with Rex.", space: "Zoom to the moon with Kip the robot.", ocean: "Swim the bay with Fin and friends.", forest: "Sneak through the woods with Pip.", trucks: "Dig, dump and build with Tug." };
+document.getElementById("worlds-grid").innerHTML = Object.entries(WORLDS).map(([id, w]) =>
+  `<div class="card world reveal"><div class="wimg" style="background:${id === "space" ? "#27336B" : w.sky}">${heroSVG(id, 130)}</div><div class="wbody"><h4>${w.name}</h4><p>${blurbs[id]}</p></div></div>`).join("");
+
+// Video
+const v = document.getElementById("demo-video");
+const over = document.getElementById("play-over");
+v.controls = false;
+over.addEventListener("click", () => { v.controls = true; v.play(); over.hidden = true; });
+v.addEventListener("play", () => { over.hidden = true; v.controls = true; });
+v.addEventListener("loadedmetadata", () => {
+  const d = Math.round(v.duration); if (d) document.getElementById("vid-len").textContent = `${Math.floor(d / 60)}:${String(d % 60).padStart(2, "0")} · with narration and captions`;
+});
+document.getElementById("chapters").addEventListener("click", (e) => {
+  const b = e.target.closest(".chapter"); if (!b) return;
+  v.currentTime = Number(b.dataset.t); v.controls = true; over.hidden = true; v.play();
+  document.getElementById("demo").scrollIntoView({ behavior: reduce ? "auto" : "smooth" });
+});
+document.getElementById("watch-demo").addEventListener("click", (e) => {
+  e.preventDefault(); document.getElementById("demo").scrollIntoView({ behavior: reduce ? "auto" : "smooth" });
+  setTimeout(() => { v.controls = true; over.hidden = true; v.play().catch(() => {}); }, reduce ? 0 : 600);
+});
+
+// Nav chrome
+const nav = document.getElementById("nav");
+addEventListener("scroll", () => nav.classList.toggle("scrolled", scrollY > 8), { passive: true });
+const mb = document.getElementById("menu-btn"), mm = document.getElementById("mobile-menu");
+mb.addEventListener("click", () => { const o = mm.classList.toggle("open"); mb.setAttribute("aria-expanded", o); });
+mm.addEventListener("click", (e) => { if (e.target.closest("a")) { mm.classList.remove("open"); mb.setAttribute("aria-expanded", "false"); } });
+
+// Reveal on scroll
+const io = "IntersectionObserver" in window ? new IntersectionObserver((es) => es.forEach((en) => { if (en.isIntersecting) { en.target.classList.add("in"); io.unobserve(en.target); } }), { rootMargin: "0px 0px -8% 0px" }) : null;
+document.querySelectorAll(".reveal").forEach((el) => (io && !reduce ? io.observe(el) : el.classList.add("in")));
+
+// Signed-in state: swap "Sign in" for "Open Wren".
+import("./api.js").then(async ({ api }) => {
+  try {
+    const me = await api.get("/auth/me");
+    if (me.user) {
+      document.querySelectorAll('[data-auth="out"]').forEach((el) => (el.hidden = true));
+      document.querySelectorAll('[data-auth="in"]').forEach((el) => (el.hidden = false));
+      document.getElementById("hello").textContent = `Hi, ${me.user.name.split(" ")[0]}`;
+    }
+  } catch {}
+});
+</script>
+</body>
+</html>

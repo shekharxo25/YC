@@ -1,0 +1,14 @@
+{
+  "name": "wren",
+  "version": "1.0.0",
+  "description": "Wren: a voice-first reading tutor for ages 4 to 8. Landing page, app, accounts and onboarding.",
+  "type": "module",
+  "private": true,
+  "license": "UNLICENSED",
+  "scripts": {
+    "start": "node --disable-warning=ExperimentalWarning server/server.mjs",
+    "test": "node --disable-warning=ExperimentalWarning server/test/smoke.mjs",
+    "video": "python3 video/build.py"
+  },
+  "engines": { "node": ">=22.13" }
+}
