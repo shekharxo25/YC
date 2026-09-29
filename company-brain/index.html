@@ -503,6 +503,19 @@ body.app .foot{display:none}
 @media (max-width:980px){.grid2[style],.grid-side[style]{grid-template-columns:minmax(0,1fr)!important}}
 @media (max-width:1500px){body.app #pdetail > .grid2{grid-template-columns:minmax(0,1fr)!important}}
 @media (max-width:1180px){body.app .lib{grid-template-columns:minmax(0,1fr)}body.app .lib-side{position:static;max-height:none}}
+table.cmp td.yes{color:var(--ok);font-weight:600}
+table.cmp td:first-child{font-weight:500}
+.faq{display:grid;gap:0;border:1px solid var(--line);border-radius:14px;background:var(--surface);overflow:hidden}
+.faq details{border-bottom:1px solid var(--line);padding:0 20px}
+.faq details:last-child{border-bottom:0}
+.faq summary{cursor:pointer;list-style:none;padding:16px 0;font-weight:600;font-size:15.5px;display:flex;justify-content:space-between;gap:12px}
+.faq summary::-webkit-details-marker{display:none}
+.faq summary::after{content:"+";color:var(--ink-3);font-weight:500}
+.faq details[open] summary::after{content:"–"}
+.faq details p{padding:0 0 16px;color:var(--ink-2);max-width:72ch}
+.pilot{display:grid;grid-template-columns:minmax(0,1fr) minmax(0,1.2fr);gap:32px;padding:28px}
+@media (max-width:860px){.pilot{grid-template-columns:1fr}}
+.pilot .field input,.pilot .field select{width:100%;padding:10px 12px;border:1px solid var(--line);border-radius:8px;background:var(--surface);font-size:14px}
 /* human layer */
 .av{display:inline-grid;place-items:center;width:28px;height:28px;border-radius:50%;font:600 11px/1 var(--sans);letter-spacing:.02em;flex:none;background:var(--av1);color:var(--av1i);border:2px solid var(--surface)}
 .av.lg{width:44px;height:44px;font-size:15px}
@@ -598,7 +611,8 @@ details.how > div{margin-top:10px;display:grid;gap:12px}
           <a class="btn primary" href="#signup">Get started free</a>
           <a class="btn" href="#lab">Watch it learn, live</a>
         </div>
-        <div class="who-line" style="margin-top:22px"><span class="avs" id="heroAvs"></span><span>Learned from <b>6 support people</b> and <b>118 conversations</b> at Quillfield, a made-up payroll company.</span></div>
+        <p class="small muted" style="margin-top:16px">Import from <b>Zendesk</b> (live) or a CSV export from any helpdesk. AI by <b>Claude</b>.</p>
+        <div class="who-line" style="margin-top:14px"><span class="avs" id="heroAvs"></span><span>Learned from <b>6 support people</b> and <b>118 conversations</b> at Quillfield, a made-up payroll company.</span></div>
       </div>
       <div class="xform" aria-label="Example: a resolved ticket becomes a structured procedure">
         <div style="position:relative">
@@ -741,6 +755,66 @@ confirmed by Dana, Mar 12</code></div>
     </div>
   </div>
 
+  <div class="wrap">
+    <div class="sec" id="whyTacit">
+      <div class="sec-head"><h2>Why not a wiki, or a chatbot over your docs?</h2><p>Both only know what someone wrote down. Tacit learns from what your team actually did, and keeps checking that it's still true.</p></div>
+      <div class="card tbl-wrap"><table class="cmp"><thead><tr><th></th><th>Wiki or knowledge base</th><th>Chatbot over your docs</th><th>Tacit</th></tr></thead><tbody>
+        <tr><td>Learns from real tickets, not just articles</td><td>✗</td><td>✗</td><td class="yes">✓</td></tr>
+        <tr><td>Finds the rules nobody wrote down</td><td>✗</td><td>✗</td><td class="yes">✓</td></tr>
+        <tr><td>Notices when the team changes how they work</td><td>✗</td><td>✗</td><td class="yes">✓ with the date it changed</td></tr>
+        <tr><td>Shows the evidence behind every step</td><td>✗</td><td>Links to articles</td><td class="yes">✓ tickets, people, confidence</td></tr>
+        <tr><td>An agent can execute it step by step</td><td>✗</td><td>Partly</td><td class="yes">✓ skills file and JSON</td></tr>
+        <tr><td>A named owner confirms every change</td><td>Sometimes</td><td>✗</td><td class="yes">✓</td></tr>
+      </tbody></table></div>
+    </div>
+
+    <div class="sec" id="aiSec">
+      <div class="split">
+        <div class="sec-head" style="grid-template-columns:1fr;margin:0"><h2>Claude does the reading. Your team keeps the final say.</h2><p>Tacit's rule engine finds the patterns and the numbers. Claude, Anthropic's AI model, turns them into plain language and does the busywork around them. Nothing it writes goes live until a person checks it.</p><div class="btn-row" style="margin-top:18px"><a class="btn primary" href="#signup">Try it on your tickets</a><a class="btn ghost" href="#lab">Watch the engine</a></div></div>
+        <div class="card pad"><div class="trace" style="gap:14px;font-size:14.5px">
+          <div class="r p"><span class="chip acc">✦</span><span><b>Rewrites procedures in plain language.</b> It keeps every number, code and team name from your tickets.</span></div>
+          <div class="r p"><span class="chip acc">✦</span><span><b>Drafts customer replies that follow the plan.</b> It promises only what the procedure allows, and says honestly when someone else takes over.</span></div>
+          <div class="r p"><span class="chip acc">✦</span><span><b>Checks help articles against reality.</b> It points out what's out of date and suggests a corrected version.</span></div>
+          <div class="r p"><span class="chip acc">✦</span><span><b>Answers teammates' questions</b> using only your procedures, and cites which one it used.</span></div>
+          <div class="r p"><span class="chip acc">✦</span><span><b>Turns a Slack thread into a draft procedure</b> for someone to review.</span></div>
+        </div></div>
+      </div>
+    </div>
+
+    <div class="sec" id="trustSec">
+      <div class="sec-head"><h2>Built to be trusted with your tickets</h2><p>Support data is sensitive. Here's exactly what Tacit does with yours.</p></div>
+      <div class="wall">
+        <div class="card"><p class="eyebrow">Read-only</p><p class="q" style="margin-top:8px">Tacit never changes anything in your helpdesk. A Zendesk API token is used once for the import and never saved.</p></div>
+        <div class="card"><p class="eyebrow">People approve</p><p class="q" style="margin-top:8px">Every procedure has a named owner. When the team's behavior changes, Tacit asks before it updates anything.</p></div>
+        <div class="card"><p class="eyebrow">Your data, your model calls</p><p class="q" style="margin-top:8px">AI runs through Anthropic's API, which doesn't train models on API data by default. Passwords are salted and hashed.</p></div>
+      </div>
+    </div>
+
+    <div class="sec" id="faqSec">
+      <div class="sec-head"><h2>Questions Heads of CX ask us</h2><p>Something missing? Book a pilot below and we'll talk it through.</p></div>
+      <div class="faq">
+        <details><summary>What do I need to get started?</summary><p>An export of resolved tickets that includes internal notes, or a Zendesk API token. Most teams upload a CSV and see their first procedures in under a minute.</p></details>
+        <details><summary>How accurate is it?</summary><p>Every procedure comes with its evidence and a confidence score. A rule is kept only if at least two tickets support it. Below 60% confidence, the agent hands the ticket to a person instead of guessing, and an owner confirms each procedure before you rely on it.</p></details>
+        <details><summary>Does it replace our support agent or helpdesk?</summary><p>No. Tacit sits beside them. It gives your existing AI agent the knowledge it's missing, as a skills file or JSON it can load, and keeps that knowledge current.</p></details>
+        <details><summary>What happens when our process changes?</summary><p>Tacit checks each new ticket against what it knows. When people start doing something differently, it flags the change, works out what the new rule is and when it started, and asks the owner to confirm.</p></details>
+        <details><summary>Which helpdesks work?</summary><p>Zendesk works through a live, read-only import. Any other helpdesk works with a CSV export that has the customer's message and the agent's notes. Intercom and Freshdesk connectors are on the roadmap.</p></details>
+        <details><summary>What does it cost?</summary><p>The knowledge audit is free. After that it's $3,000 to $15,000 a month depending on ticket volume and sources, and most teams compare that with the value of the extra tickets their agent resolves.</p></details>
+      </div>
+    </div>
+
+    <div class="sec" id="pilotSec">
+      <div class="card pad pilot">
+        <div><p class="eyebrow">Free knowledge audit</p><h2 style="font-size:clamp(26px,3.2vw,36px);margin-top:8px">Book a pilot</h2><p class="muted" style="margin-top:8px;max-width:46ch">Tell us about your team. We'll run the audit on your tickets and walk you through what your team knows, usually within a week.</p></div>
+        <form id="pilotForm" class="stack" novalidate>
+          <div class="grid2"><div class="field"><label for="plName">Your name</label><input type="text" id="plName" autocomplete="name"></div><div class="field"><label for="plEmail">Work email</label><input type="text" id="plEmail" autocomplete="email" placeholder="you@company.com"></div></div>
+          <div class="grid2"><div class="field"><label for="plCompany">Company</label><input type="text" id="plCompany" autocomplete="organization"></div><div class="field"><label for="plSize">Support team size</label><select id="plSize"><option>1–10</option><option selected>11–50</option><option>51–200</option><option>200+</option></select></div></div>
+          <div class="field"><label for="plDesk">Helpdesk</label><select id="plDesk"><option>Zendesk</option><option>Intercom</option><option>Freshdesk</option><option>Help Scout</option><option>Salesforce Service Cloud</option><option>Other</option></select></div>
+          <div id="plMsg"></div>
+          <div class="btn-row"><button class="btn primary" type="submit" id="plBtn">Book my pilot</button><span class="small dim">No card needed.</span></div>
+        </form>
+      </div>
+    </div>
+  </div>
   <div class="wrap"><div class="sec"><div class="card pad" style="display:flex;flex-wrap:wrap;gap:16px;justify-content:space-between;align-items:center;padding:28px"><div><h2 style="font-size:clamp(24px,3vw,32px)">See what your team knows, this week</h2><p class="muted" style="margin-top:6px">Upload a helpdesk export and Tacit writes down how your team handles each situation.</p></div><div class="btn-row"><a class="btn ghost" href="#signin">Sign in</a><a class="btn primary" href="#signup">Get started free</a></div></div></div></div>
   <footer class="foot"><div class="wrap"><span>Tacit is a prototype, based on YC Request for Startups #17, "Company Brain".</span><span>Quillfield, its customers and its team are made up. Any resemblance is a coincidence.</span></div></footer>
 </section>
@@ -776,7 +850,7 @@ confirmed by Dana, Mar 12</code></div>
   <div class="wrap">
     <div class="page-head">
       <div><p class="eyebrow">Quillfield · knowledge audit</p><h1 style="margin-top:6px" id="greet">Here's what your team really knows</h1><p>Tacit read every resolved ticket, three Slack channels and the help center, then compared what your people actually did with what the docs say. Some of this will be a nice surprise. Some of it won't.</p></div>
-      <div class="btn-row"><button class="btn primary" id="runAudit">Read everything again</button></div>
+      <div class="btn-row"><button class="btn" id="auditDl">Download report</button><button class="btn primary" id="runAudit">Read everything again</button></div>
     </div>
     <div class="card pad">
       <div style="display:flex;justify-content:space-between;gap:12px;flex-wrap:wrap;align-items:baseline"><h3 style="font-size:17px">Sources</h3><span class="small dim">Read-only, we never change anything. Turn one off to see what it adds.</span></div>
@@ -789,6 +863,7 @@ confirmed by Dana, Mar 12</code></div>
       <div class="card"><div class="pad" style="padding-bottom:6px"><h3 style="font-size:17px"><span class="sev i"></span>Docs everyone quietly ignores</h3><p class="small muted" style="margin-top:4px">Your team stopped following these, usually for good reason.</p></div><div id="auIgnored"></div></div>
     </div>
     <div class="card" style="margin-top:20px"><div class="pad" style="padding-bottom:6px"><h3 style="font-size:17px"><span class="sev d"></span>What changed, and what's still right</h3></div><div id="auDrift"></div></div>
+    <div class="card pad stack" id="aiDoc" style="margin-top:20px"></div>
     <div style="margin-top:32px"><div style="display:flex;justify-content:space-between;align-items:baseline;gap:12px;flex-wrap:wrap;margin-bottom:14px"><h2 style="font-size:24px">The people behind this</h2><span class="hand">they did the hard part ↓</span></div><div class="people" id="auPeople"></div></div>
   </div>
 </section>
@@ -798,7 +873,7 @@ confirmed by Dana, Mar 12</code></div>
   <div class="wrap">
     <div class="page-head">
       <div><p class="eyebrow">Quillfield · what the team knows</p><h1 style="margin-top:6px">How Quillfield handles things</h1><p>Each one was learned from real conversations and has an owner who can confirm it. If you think something's wrong, change it. Tacit will tell you whether the tickets agree with you.</p></div>
-      <div class="btn-row"><button class="btn" id="openExtract">Teach it from a thread</button><button class="btn ghost sm" id="resetDemo">Start over</button></div>
+      <div class="btn-row"><button class="btn primary" id="aiPolish" title="Claude rewrites names and steps in plain language. Rules and numbers stay the same.">✦ Polish with Claude</button><button class="btn" id="openExtract">Teach it from a thread</button><button class="btn ghost sm" id="resetDemo">Start over</button></div>
     </div>
     <div class="lib">
       <div class="card lib-side"><div class="plist" id="plist"></div></div>
@@ -852,7 +927,7 @@ confirmed by Dana, Mar 12</code></div>
           <div class="seg" role="group" aria-label="Format"><button type="button" data-fmt="skill" aria-pressed="true">SKILL.md</button><button type="button" data-fmt="json" aria-pressed="false">JSON</button><button type="button" data-fmt="all" aria-pressed="false">Full bundle</button></div>
         </div>
         <pre class="code" id="schemaOut"></pre>
-        <div class="btn-row"><button class="btn" id="copySchema">Copy</button><span class="small dim" id="schemaMeta"></span></div>
+        <div class="btn-row"><button class="btn" id="copySchema">Copy</button><button class="btn" id="dlSchema">Download</button><span class="small dim" id="schemaMeta"></span></div>
       </div>
       <div class="card pad stack">
         <h3 style="font-size:17px">What's in a procedure</h3>
@@ -1223,7 +1298,8 @@ function load(){
   if(s&&Array.isArray(s.procs)) return {...base,...s};
   return {...base,procs:clone(WS_DEFAULTS)};
 }
-function save(){store(KEY,S)}
+let saveT=null;
+function save(){store(KEY,S);if(SERVER.on&&KEY.startsWith('tacit-ws-')){const id=KEY.slice(9),st=S;clearTimeout(saveT);saveT=setTimeout(()=>serverCall(api('PUT','/api/workspaces/'+id+'/state',{state:st})),800)}}
 const P=id=>S.procs.find(p=>p.id===id);
 
 /* ---------------- analysis ---------------- */
@@ -1419,7 +1495,13 @@ RENDER.home=function(){
     <div class="row"><span class="v d tnum">${c.driftTotal}</span><span>drift flags from recent tickets</span></div>
     <p class="small dim">From ${TICKETS.length} sample conversations. On a 400-person support team, it's usually closer to 20 and 10.</p>`;
   roi();
+  const pf=$('#pilotForm');if(pf&&!pf.dataset.wired){pf.dataset.wired='1';pf.onsubmit=async e=>{e.preventDefault();
+    const d={name:$('#plName').value.trim(),email:$('#plEmail').value.trim(),company:$('#plCompany').value.trim(),team_size:$('#plSize').value,helpdesk:$('#plDesk').value,source:'landing-pilot'};
+    if(!validEmail(d.email)){$('#plMsg').innerHTML='<div class="form-err" role="alert">That email doesn\'t look right. Try name@company.com.</div>';return}
+    if(SERVER.on){$('#plBtn').disabled=true;try{await api('POST','/api/waitlist',d);$('#plMsg').innerHTML=`<div class="quote" style="border-color:var(--ok)">Thanks${d.name?', '+esc(firstName(d.name)):''}. We'll email ${esc(d.email)} within one business day to set up your audit.</div>`;pf.reset()}catch(err){$('#plMsg').innerHTML=`<div class="form-err" role="alert">${esc(err.message)}</div>`}$('#plBtn').disabled=false;return}
+    PILOT_PREFILL=d;location.hash='#signup';toast('Create your account and your audit starts right away');};}
 };
+let PILOT_PREFILL=null;
 function peopleCards(c,thanks){
   return AGENTS.map(n=>{
     const ts=TICKETS.filter(t=>t.agent===n);
@@ -1460,7 +1542,8 @@ RENDER.audit=function(){
   $('#greet').textContent=`${h<12?'Good morning':h<18?'Good afternoon':'Good evening'}, ${firstName((session()||{}).name||'there')}. Here's what your team really knows.`;
   $('#auPeople').innerHTML=peopleCards(counts(),true);
   $$('[data-thanks]').forEach(b=>b.onclick=()=>{b.textContent='Thanked';b.disabled=true;toast(`Sent ${firstName(b.dataset.thanks)} a thank-you in #support-wins`)});
-  renderAuditBody();
+  renderAuditBody();renderAiDocCard();
+  $('#auditDl').onclick=()=>saveFile(slugify(wsName())+'-knowledge-audit.md',auditReport());
 };
 const STAGES=[['Reading',()=>S.sources.zendesk?`${TICKETS.length} conversations`:'nothing to read'],['Spotting patterns',()=>S.sources.zendesk?`${S.procs.filter(p=>!p.draft).length} situations`:'none yet'],['Writing it down',()=>S.sources.zendesk?`${S.procs.reduce((n,p)=>n+allSteps(p.steps).length,0)} steps`:'0 steps'],['Checking the docs',()=>S.sources.help?`${DOCS.length} articles`:'skipped'],['Giving credit',()=>`${AGENTS.length} people`]];
 function pipe(done){
@@ -1507,6 +1590,7 @@ function firstLine(p){
 const UI={sel:'refund-after-renewal',edit:false,evStep:null,fmt:'skill',queueSel:0,custom:null};
 RENDER.brain=function(){
   const c=refreshBadge();
+  const pb=$('#aiPolish');pb.onclick=()=>polishWithAI(pb);pb.title=aiOn()?'Claude rewrites names and steps in plain language. Rules and numbers stay the same.':aiOffNote();
   if(!P(UI.sel)) UI.sel=S.procs[0].id;
   $('#plist').innerHTML=S.procs.map(p=>{const a=c.A[p.id];return `<button class="pitem" data-sel="${p.id}" aria-current="${p.id===UI.sel}"><span class="nm">${esc(p.name)}</span><span class="cf"><span class="tnum">${a.conf}%</span>${meter(a.conf)}</span><span class="sub">${statusChip(p)}${a.drift?'<span class="chip drift">drift</span>':''}<span class="chip">${a.n} tickets</span></span></button>`}).join('');
   $$('[data-sel]').forEach(b=>b.onclick=()=>{UI.sel=b.dataset.sel;UI.evStep=null;UI.edit=false;RENDER.brain();if(innerWidth<980)$('#pdetail').scrollIntoView({behavior:'smooth'})});
@@ -1530,7 +1614,7 @@ function renderDetail(c){
   $('#pdetail').innerHTML=`
   <div class="card pad pd-head">
     <div style="display:flex;justify-content:space-between;gap:16px;flex-wrap:wrap;align-items:flex-start">
-      <div style="display:grid;gap:8px"><div class="inputs">${statusChip(p)}<span class="chip">v${p.version}</span>${a.drift?'<span class="chip drift">drift detected</span>':''}</div><h2>${esc(p.name)}</h2></div>
+      <div style="display:grid;gap:8px"><div class="inputs">${statusChip(p)}<span class="chip">v${p.version}</span>${a.drift?'<span class="chip drift">drift detected</span>':''}</div><h2>${esc(p.name)}</h2>${p.summary?`<p class="muted">${esc(p.summary)}</p>`:''}</div>
       <div style="display:grid;gap:4px;justify-items:end"><div class="conf">${meter(a.conf)}<span class="pct tnum">${a.conf}%</span></div><span class="small dim">confidence${a.conf<60?' · below the agent floor':''}</span></div>
     </div>
     <div class="who-line" style="flex-wrap:wrap">${av(p.owner)}<span>Owned by <b>${esc(p.owner)}</b>${roleOf(p.owner)?', '+esc(roleOf(p.owner)):''}.</span>${p.verified?`<span class="verified">✓ ${esc(firstName(p.verified.by))} confirmed this on ${fd(p.verified.date)}</span>`:`<span class="dim">Not confirmed by ${esc(firstName(p.owner))} yet.</span>`}<button class="btn sm" id="askOwner">${p.verified?'Check it\'s still right':'Ask '+esc(firstName(p.owner))+' to confirm'}</button></div>
@@ -1856,8 +1940,14 @@ function renderBench(){
   <div class="vs">
     <div class="card lane"><h3>Agent with the help center <span class="chip ${vc}">${vl}</span></h3><div class="cmsg"><span class="av sm" style="background:var(--surface-2);color:var(--ink-3)">AI</span><div class="b">${esc(hc.say)}</div></div><p class="small muted">${esc(hc.why)}</p></div>
     <div class="card lane" style="border-color:var(--accent)"><h3>Agent with Tacit <span class="chip ${status[0]}">${status[1]}</span></h3><div class="cmsg"><span class="av sm c2">AI</span><div class="b warm">${esc(reply)}</div></div>
+      <div class="btn-row"><button class="btn sm" id="aiReplyBtn">✦ Have Claude write this reply</button>${aiOn()?'':`<span class="small dim">${esc(aiOffNote())}</span>`}</div><div id="aiReplyOut"></div>
       <details class="how" open><summary>How it decided</summary><div>${how}</div></details></div>
   </div>`;
+  wireBenchAI(q,t,first);
+}
+function wireBenchAI(q,t,first){
+  const b=$('#aiReplyBtn');if(!b)return;b.disabled=!aiOn();
+  b.onclick=()=>aiDraftReply($('#aiReplyOut'),{ticket:q.text,customer:first+' at '+q.cust,procName:t.match?t.match.name:null,plan:t.match?t.r.exec.map(s=>s.t+(s.to?' (owner: '+s.to+')':'')):['Hand the ticket to a teammate; nothing the team has done before matches it.'],facts:t.ctx||{},outcome:t.match?t.outcome.label:'Handed to a person'});
 }
 function renderScore(){
   let hcOk=0,done=0,routed=0,hand=0;
@@ -1945,6 +2035,7 @@ function renderSchemaOut(){
 }
 $('#schemaProc').onchange=()=>{UI.schemaSel=$('#schemaProc').value;renderSchemaOut()};
 $$('[data-fmt]').forEach(b=>b.onclick=()=>{UI.fmt=b.dataset.fmt;renderSchemaOut()});
+$('#dlSchema').onclick=()=>{const p=P($('#schemaProc').value);const nm=UI.fmt==='all'?slugify(wsName())+'-procedures.ops.json':UI.fmt==='json'?p.id+'.ops.json':p.id+'.skill.md';markDone('exported');saveFile(nm,schemaText())};
 $('#copySchema').onclick=async()=>{
   const txt=schemaText();
   try{await navigator.clipboard.writeText(txt);markDone('exported');toast('Copied. Paste it wherever your agent reads skills.')}catch(e){const r=document.createRange();r.selectNodeContents($('#schemaOut'));const s=getSelection();s.removeAllRanges();s.addRange(r);toast('Selected it for you. Press Ctrl+C or ⌘C to copy.')}
@@ -2368,7 +2459,7 @@ function stageDocs(){
 }
 function stageSkill(){
   const r=LAB.res;
-  return `<div style="display:flex;gap:10px;flex-wrap:wrap;align-items:center"><div class="field" style="flex:1;min-width:200px"><label for="skillSel" class="sr">Situation</label><select id="skillSel">${r.procs.map((p,i)=>`<option value="${i}" ${i===LAB.skillSel?'selected':''}>${esc(p.name)}</option>`).join('')}</select></div><button class="btn sm" id="copySkill">Copy</button></div>
+  return `<div style="display:flex;gap:10px;flex-wrap:wrap;align-items:center"><div class="field" style="flex:1;min-width:200px"><label for="skillSel" class="sr">Situation</label><select id="skillSel">${r.procs.map((p,i)=>`<option value="${i}" ${i===LAB.skillSel?'selected':''}>${esc(p.name)}</option>`).join('')}</select></div><button class="btn sm" id="copySkill">Copy</button><button class="btn sm" id="dlSkill">Download</button></div>
   <pre class="code" id="skillOut">${esc(LAB.skills[LAB.skillSel]||'')}</pre>`;
 }
 const FIELD_FROM={amount:'amount',days_since_renewal:'days_since_renewal',hours_to_payroll:'hours_to_payrun',bank_status:'bank_status',new_state:'state',requester_is_admin:'is_listed_admin',forms_filed:'after_jan31',idp:'idp',plan:'plan',arr:'arr',seats:'seats'};
@@ -2410,13 +2501,16 @@ function renderTryResult(p){
     ${p.onlyFor?`<p class="small muted">Heads up: the team has only done this for ${esc(p.onlyFor)}.</p>`:''}
     ${inputs?`<div><p class="eyebrow">Facts it needs</p><div class="fields" style="margin-top:8px">${inputs}</div></div>`:''}
     <div><p class="eyebrow">What the agent does</p><div class="trace" style="margin-top:8px">${steps.map(s=>s.cond?`<div class="r"><span class="i ${s.cond.miss?'m':s.cond.r?'y':'n'}">${s.cond.miss?'?':s.cond.r?'✓':'✗'}</span><span>${esc(cap(ENG.condText(s.cond.node)))}${s.cond.miss?' <span class="dim">(not known yet)</span>':''}</span></div>`:`<div class="r p"><span class="kind k-${V.byId[s.id].kind}" style="min-width:64px;font-size:10px">${kindName(V.byId[s.id].kind)}</span><span>${esc(V.byId[s.id].label)}</span></div>`).join('')}</div></div>
-    <div class="bubble">${miss.length?`<b>First it asks the customer for the ${esc(miss.map(ENG.pretty).join(' and '))}</b>, because the team's rule depends on it.`:p.conf<60?'<b>Confidence is low, so it hands this to a person.</b>':'<b>It follows the team\'s steps.</b> Change a fact above and watch the plan change.'}</div>`;
+    <div class="bubble">${miss.length?`<b>First it asks the customer for the ${esc(miss.map(ENG.pretty).join(' and '))}</b>, because the team's rule depends on it.`:p.conf<60?'<b>Confidence is low, so it hands this to a person.</b>':'<b>It follows the team\'s steps.</b> Change a fact above and watch the plan change.'}</div>
+    <div class="btn-row"><button class="btn sm" id="tryAiBtn" ${aiOn()?'':'disabled'}>✦ Have Claude write the reply</button>${aiOn()?'':`<span class="small dim">${esc(aiOffNote())}</span>`}</div><div id="tryAiOut"></div>`;
+  const tb=$('#tryAiBtn');if(tb)tb.onclick=()=>aiDraftReply($('#tryAiOut'),{ticket:LAB.tryText,customer:$('#tryCust')?$('#tryCust').value:'',procName:p.name,plan:steps.filter(x=>!x.cond).map(x=>V.byId[x.id].label),facts:f,outcome:miss.length?'Ask the customer for: '+miss.join(', '):'Follow the steps'});
   $$('[data-tf]').forEach(el=>el.onchange=()=>{const n=el.dataset.tf;const t=ftypes[n];let v=el.value;
     if(v==='')delete LAB.tryFields[n];else LAB.tryFields[n]=t==='num'?+v:t==='bool'?v==='true':v;
     LAB.tryFieldsKeep={p:p.id,v:{...LAB.tryFields}};renderTryResult(p)});
 }
 function wireStages(){
   const s=$('#skillSel');if(s)s.onchange=()=>{LAB.skillSel=+s.value;$('#skillOut').textContent=LAB.skills[LAB.skillSel]};
+  const d=$('#dlSkill');if(d)d.onclick=()=>saveFile(slugify(LAB.res.procs[LAB.skillSel].name)+'.skill.md',LAB.skills[LAB.skillSel]);
   const c=$('#copySkill');if(c)c.onclick=async()=>{try{await navigator.clipboard.writeText(LAB.skills[LAB.skillSel]);toast('Copied the skills file')}catch(e){const rg=document.createRange();rg.selectNodeContents($('#skillOut'));const se=getSelection();se.removeAllRanges();se.addRange(rg);toast('Selected it for you. Press Ctrl+C or ⌘C to copy.')}};
   const tr=$('#tryRun');if(tr){tr.onclick=()=>{LAB.tryFieldsKeep=null;tryTicket()};const tc=$('#tryCust');if(tc)tc.onchange=()=>{LAB.tryFieldsKeep=null;tryTicket()};tryTicket()}
 }
@@ -2430,12 +2524,14 @@ function saveAccount(email,acc){const a=accounts();a[email]=acc;store(ACC_KEY,a)
 function session(){
   const s=store(SES_KEY);if(!s)return null;
   if(s.guest) return {guest:true,name:'Guest',email:'',company:'',workspaces:[],active:s.active||'demo'};
-  const a=accounts()[s.email];return a?{...a,email:s.email}:null;
+  const a=accounts()[s.email];if(!a)return null;
+  if(a.provider==='claude') return {...a,name:a.name||(CLAUDE_ME&&CLAUDE_ME.name)||'You',email:(CLAUDE_ME&&CLAUDE_ME.email)||'Signed in with Claude',key:s.email};
+  return {...a,email:s.email,key:s.email};
 }
 function setSession(v){store(SES_KEY,v)}
 function allWs(se){return [DEMO_WS].concat((se&&se.workspaces)||[])}
 function activeWs(se){const l=allWs(se);return l.find(w=>w.id===(se&&se.active))||DEMO_WS}
-function setActive(id){const se=session();if(!se)return;if(se.guest){setSession({guest:true,active:id});return}const a=accounts();a[se.email].active=id;store(ACC_KEY,a)}
+function setActive(id){const se=session();if(!se)return;if(se.guest){setSession({guest:true,active:id});return}const a=accounts();a[se.key].active=id;store(ACC_KEY,a)}
 async function hashPw(pw,salt){
   try{const b=await crypto.subtle.digest('SHA-256',new TextEncoder().encode(salt+':'+pw));return [...new Uint8Array(b)].map(x=>x.toString(16).padStart(2,'0')).join('')}
   catch(e){let h=2166136261;for(const c of salt+':'+pw){h^=c.charCodeAt(0);h=Math.imul(h,16777619)}return 'f'+(h>>>0).toString(16)}
@@ -2522,7 +2618,7 @@ function renderChrome(inApp){
 $('#wsSel').onchange=e=>{const v=e.target.value;if(v==='__new'){location.hash='#onboard';return}setActive(v);CUR_WS=null;route();toast('Switched to '+wsName())};
 $('#menuBtn').onclick=()=>{const o=!document.body.classList.contains('side-open');document.body.classList.toggle('side-open',o);$('#sideScrim').hidden=!o;$('#menuBtn').setAttribute('aria-expanded',o)};
 $('#sideScrim').onclick=()=>{document.body.classList.remove('side-open');$('#sideScrim').hidden=true;$('#menuBtn').setAttribute('aria-expanded','false')};
-function signOut(){store(SES_KEY,null);try{localStorage.removeItem(SES_KEY)}catch(e){}CUR_WS=null;location.hash='#home';toast('Signed out. See you soon.')}
+function signOut(){if(SERVER.on){const se=session();api('POST','/api/auth/logout').catch(()=>{});if(se&&se.server){const a=accounts();delete a[se.key];store(ACC_KEY,a)}sampleFn=null}store(SES_KEY,null);try{localStorage.removeItem(SES_KEY)}catch(e){}CUR_WS=null;location.hash='#home';toast('Signed out. See you soon.')}
 function startGuest(){setSession({guest:true,active:'demo'});CUR_WS=null;location.hash='#overview'}
 
 /* ---- sign up ---- */
@@ -2531,9 +2627,12 @@ const AUTH_SIDE=`<div class="auth-side">
   <div class="cmsg">${'AV_DANA'}<div><div class="by">Dana M., VP Support at Quillfield (demo persona)</div><div class="b">Our agent went from guessing to answering like Theo does. The audit alone was worth it. We found five things nobody had ever written down.</div></div></div>
   <div class="card pad stack"><p class="eyebrow">What happens next</p><div class="trace"><div class="r p"><span class="chip acc">1</span><span>Upload a helpdesk export, or start with the demo workspace.</span></div><div class="r p"><span class="chip acc">2</span><span>Tacit reads it and writes down how your team handles each situation.</span></div><div class="r p"><span class="chip acc">3</span><span>Review, confirm with the owner, and test it on new tickets.</span></div></div></div>
 </div>`;
-const PROTO_NOTE='<p class="proto-note">This is a prototype. Your account and data are saved only in this browser, never sent anywhere.</p>';
+const PROTO_NOTE_LOCAL='<p class="proto-note">On this link your account and data are saved only in this browser. Run the Tacit server for shared accounts and a database.</p>';
+const PROTO_NOTE_SERVER='<p class="proto-note">Your account is stored on this Tacit server. Passwords are salted and hashed with scrypt.</p>';
+let PROTO_NOTE=PROTO_NOTE_LOCAL;
 RENDER.signup=function(){
   $('#signupBody').innerHTML=`<div class="card auth-card"><p class="eyebrow">Free during the pilot</p><h1 style="margin-top:8px">Create your Tacit account</h1>
+    <div class="stack" style="margin-top:18px;gap:8px">${claudeButton()}</div>
     <form id="suForm" novalidate>
       <div class="field"><label for="suName">Your name</label><input id="suName" autocomplete="name" placeholder="Dana Morales"></div>
       <div class="field"><label for="suEmail">Work email</label><input id="suEmail" type="email" autocomplete="email" placeholder="dana@company.com"></div>
@@ -2544,6 +2643,8 @@ RENDER.signup=function(){
     </form>
     <div class="alt"><span>Already have an account? <a href="#signin">Sign in</a></span><span>Just looking? <a href="#demo">Explore the demo workspace</a> without an account.</span></div>${PROTO_NOTE}</div>${AUTH_SIDE.replace('AV_DANA',av('Dana M.'))}`;
   $('#suShow').onclick=()=>{const i=$('#suPw');const s=i.type==='password';i.type=s?'text':'password';$('#suShow').textContent=s?'Hide':'Show'};
+  wireClaudeButton();
+  if(PILOT_PREFILL){$('#suName').value=PILOT_PREFILL.name||'';$('#suEmail').value=PILOT_PREFILL.email||'';$('#suCompany').value=PILOT_PREFILL.company||''}
   $('#suName').focus();
   $('#suForm').onsubmit=async e=>{e.preventDefault();
     const name=$('#suName').value.trim(),email=$('#suEmail').value.trim().toLowerCase(),company=$('#suCompany').value.trim(),pw=$('#suPw').value;
@@ -2554,6 +2655,7 @@ RENDER.signup=function(){
     if(!errs.length&&accounts()[email]){errs.push('There\'s already an account for this email. Sign in instead.')}
     if(errs.length){$('#suErr').innerHTML=`<div class="form-err" role="alert">${errs.map(esc).join('<br>')}</div>`;return}
     $('#suBtn').disabled=true;$('#suBtn').textContent='Creating your account…';
+    if(SERVER.on){try{await api('POST','/api/auth/signup',{name,email,company,password:pw});await serverSync();CUR_WS=null;location.hash='#onboard';toast(`Welcome, ${firstName(name)}!`)}catch(e){$('#suErr').innerHTML=`<div class="form-err" role="alert">${esc(e.message)}</div>`;$('#suBtn').disabled=false;$('#suBtn').textContent='Create account'}return}
     const s=salt();saveAccount(email,{name,company:company||'My company',salt:s,hash:await hashPw(pw,s),created:new Date().toISOString(),workspaces:[],active:'demo'});
     setSession({email});CUR_WS=null;location.hash='#onboard';toast(`Welcome, ${firstName(name)}!`);
   };
@@ -2561,6 +2663,7 @@ RENDER.signup=function(){
 /* ---- sign in ---- */
 RENDER.signin=function(){
   $('#signinBody').innerHTML=`<div class="card auth-card"><p class="eyebrow">Welcome back</p><h1 style="margin-top:8px">Sign in to Tacit</h1>
+    <div class="stack" style="margin-top:18px;gap:8px">${claudeButton()}</div>
     <form id="siForm" novalidate>
       <div class="field"><label for="siEmail">Work email</label><input id="siEmail" type="email" autocomplete="email" placeholder="dana@company.com"></div>
       <div class="field"><label for="siPw">Password</label><div class="pw-row"><input id="siPw" type="password" autocomplete="current-password"><button type="button" class="btn sm" id="siShow">Show</button></div></div>
@@ -2571,9 +2674,12 @@ RENDER.signin=function(){
     <div class="alt"><span>New to Tacit? <a href="#signup">Create an account</a></span><span>Just looking? <a href="#demo">Explore the demo workspace</a> without an account.</span></div>${PROTO_NOTE}</div>${AUTH_SIDE.replace('AV_DANA',av('Dana M.'))}`;
   $('#siShow').onclick=()=>{const i=$('#siPw');const s=i.type==='password';i.type=s?'text':'password';$('#siShow').textContent=s?'Hide':'Show'};
   $('#siForgot').onclick=()=>modal('Forgot your password?','<p>In this prototype your account lives only in this browser, so there is no email to send a reset link to. You can create a new account with a different email, or explore the demo workspace.</p><div class="btn-row"><a class="btn primary" href="#signup">Create an account</a><a class="btn" href="#demo">Explore the demo</a></div>');
+  wireClaudeButton();
   $('#siEmail').focus();
   $('#siForm').onsubmit=async e=>{e.preventDefault();
-    const email=$('#siEmail').value.trim().toLowerCase(),pw=$('#siPw').value;const a=accounts()[email];
+    const email=$('#siEmail').value.trim().toLowerCase(),pw=$('#siPw').value;
+    if(SERVER.on){try{await api('POST','/api/auth/login',{email,password:pw});await serverSync();CUR_WS=null;const want=route.want;route.want=null;location.hash='#'+(want||'overview');toast('Welcome back')}catch(e){$('#siErr').innerHTML=`<div class="form-err" role="alert">${esc(e.message)}</div>`}return}
+    const a=accounts()[email];
     if(!a||(await hashPw(pw,a.salt))!==a.hash){$('#siErr').innerHTML='<div class="form-err" role="alert">That email and password don\'t match an account in this browser. Check for typos, or create an account.</div>';return}
     setSession({email});CUR_WS=null;const want=route.want;route.want=null;location.hash='#'+(want||'overview');toast(`Welcome back, ${firstName(a.name)}`);
   };
@@ -2593,15 +2699,20 @@ RENDER.onboard=function(){
     <div class="opt-grid" style="margin-top:10px">
       <button type="button" class="opt" data-opt="csv" aria-pressed="${ONB.choice==='csv'}"><b>Upload a helpdesk export</b><span>A CSV of resolved tickets with internal notes. Works with Zendesk, Intercom, Freshdesk or a spreadsheet.</span></button>
       <button type="button" class="opt" data-opt="demo" aria-pressed="${ONB.choice==='demo'}"><b>Start with the demo</b><span>Explore Quillfield, a made-up payroll company with 118 tickets. You can add your data later.</span></button>
-      <button type="button" class="opt" disabled><b>Connect your helpdesk</b><span>Live Zendesk, Intercom and Slack sync. Coming soon.</span></button>
+      ${SERVER.on?`<button type="button" class="opt" data-opt="zendesk" aria-pressed="${ONB.choice==='zendesk'}"><b>Import from Zendesk</b><span>Pull your latest solved tickets and internal notes with an API token. Read-only, nothing is stored but the tickets.</span></button>`:`<button type="button" class="opt" disabled><b>Import from Zendesk</b><span>Live import runs on the Tacit server. Here, upload a Zendesk CSV export instead.</span></button>`}
     </div></div>
     <div id="onbCsv" ${ONB.choice==='csv'?'':'hidden'} class="stack">
       <div class="btn-row"><label class="btn" for="onbFile" style="cursor:pointer">Choose a CSV file</label><input type="file" id="onbFile" accept=".csv,text/csv,text/plain" hidden><button type="button" class="btn ghost sm" id="onbSample">Use Quillfield's export as a stand-in</button><span class="small dim" id="onbFileMeta">${ONB.csv?`${ONB.csv.split('\n').length-1} rows ready`:''}</span></div>
       <div class="field"><label for="onbText">Or paste it here</label><textarea id="onbText" style="min-height:140px;font-family:var(--mono);font-size:12.5px" placeholder="subject,message,internal_note,plan,amount&#10;Refund please,We renewed 10 days ago,Full refund issued,growth,900">${esc(ONB.csv)}</textarea></div>
       <p class="small muted">It needs a customer message column (like <span class="mono">subject</span> or <span class="mono">message</span>) and a notes column (like <span class="mono">internal_note</span> or <span class="mono">resolution</span>). Every other column becomes a fact Tacit can learn rules from.</p>
     </div>
+    <div id="onbZd" ${ONB.choice==='zendesk'?'':'hidden'} class="stack">
+      <div class="grid2"><div class="field"><label for="zdSub">Zendesk subdomain</label><input type="text" id="zdSub" placeholder="acme (from acme.zendesk.com)"></div><div class="field"><label for="zdEmail">Agent email</label><input type="text" id="zdEmail" placeholder="you@company.com"></div></div>
+      <div class="grid2"><div class="field"><label for="zdToken">API token</label><input type="text" id="zdToken" placeholder="From Admin Center → Apps and integrations → Zendesk API" autocomplete="off"></div><div class="field"><label for="zdLimit">How many solved tickets</label><select id="zdLimit"><option>200</option><option selected>500</option><option>1000</option></select></div></div>
+      <p class="small muted">Tacit reads solved tickets and their comments. Your token is used once for this import and never saved.</p>
+    </div>
     <div id="onbErr"></div>
-    <div class="btn-row"><button class="btn primary" id="onbGo">${ONB.choice==='csv'?'Build my workspace':'Open the demo workspace'}</button><button class="btn ghost" id="onbSkip">Skip for now</button></div>
+    <div class="btn-row"><button class="btn primary" id="onbGo">${ONB.choice==='csv'?'Build my workspace':ONB.choice==='zendesk'?'Import and build my workspace':'Open the demo workspace'}</button><button class="btn ghost" id="onbSkip">Skip for now</button></div>
   </div>`;
   $('#onbName').oninput=e=>{ONB.name=e.target.value};
   $('#onbSkip').onclick=()=>{markOnboarded();location.hash='#overview'};
@@ -2612,6 +2723,16 @@ RENDER.onboard=function(){
   $('#onbGo').onclick=()=>{
     if(ONB.choice==='demo'){setActive('demo');CUR_WS=null;markOnboarded();location.hash='#overview';return}
     const name=ONB.name.trim()||'My workspace';
+    if(ONB.choice==='zendesk'){
+      const sub=$('#zdSub').value.trim().replace(/^https?:\/\//,'').replace(/\.zendesk\.com.*$/,''),em=$('#zdEmail').value.trim(),tk=$('#zdToken').value.trim();
+      if(!sub||!em||!tk){$('#onbErr').innerHTML='<div class="form-err" role="alert">Add your subdomain, agent email and API token.</div>';return}
+      $('#onbGo').disabled=true;$('#onbGo').textContent='Reading your Zendesk tickets…';
+      api('POST','/api/connectors/zendesk/import',{subdomain:sub,email:em,token:tk,limit:+$('#zdLimit').value}).then(r=>{
+        try{const b=createWs(name,r.csv,'zendesk');ONB.csv='';ONB.name='';location.hash='#overview';toast(`Imported ${r.rows} tickets. Tacit learned ${b.procs.length} situations.`)}
+        catch(e){$('#onbErr').innerHTML=`<div class="form-err" role="alert">${esc(e.message||String(e))}</div>`;$('#onbGo').disabled=false;$('#onbGo').textContent='Import and build my workspace'}
+      }).catch(e=>{$('#onbErr').innerHTML=`<div class="form-err" role="alert">${esc(e.message)}</div>`;$('#onbGo').disabled=false;$('#onbGo').textContent='Import and build my workspace'});
+      return;
+    }
     if(!ONB.csv.trim()){$('#onbErr').innerHTML='<div class="form-err" role="alert">Add a CSV first: choose a file or paste it in.</div>';return}
     $('#onbGo').disabled=true;$('#onbGo').textContent='Reading your tickets…';
     setTimeout(()=>{
@@ -2622,12 +2743,14 @@ RENDER.onboard=function(){
     },60);
   };
 };
-function createWs(name,csv){
+function createWs(name,csv,source){
   const se=session();const id='w'+Date.now().toString(36);const b=buildWorkspace(csv);WS_CACHE[id]=b;
-  const a=accounts();const acc=a[se.email];acc.workspaces=(acc.workspaces||[]).concat([{id,name,type:'csv',csv,created:new Date().toISOString(),rows:b.rows}]);acc.active=id;acc.onboarded=true;
-  store(ACC_KEY,a);CUR_WS=null;return b;
+  const a=accounts();const acc=a[se.key];acc.workspaces=(acc.workspaces||[]).concat([{id,name,type:'csv',csv,created:new Date().toISOString(),rows:b.rows,source:source||'csv',server:!!se.server}]);acc.active=id;acc.onboarded=true;
+  store(ACC_KEY,a);CUR_WS=null;
+  if(se.server) serverCall(api('POST','/api/workspaces',{id,name,csv,source:source||'csv'}));
+  return b;
 }
-function markOnboarded(){const se=session();if(!se||se.guest)return;const a=accounts();a[se.email].onboarded=true;store(ACC_KEY,a)}
+function markOnboarded(){const se=session();if(!se||se.guest)return;const a=accounts();a[se.key].onboarded=true;store(ACC_KEY,a);if(se.server)serverCall(api('PATCH','/api/me',{onboarded:true}))}
 
 /* ---- overview: the app's home ---- */
 RENDER.overview=function(){
@@ -2641,6 +2764,7 @@ RENDER.overview=function(){
   c.brainDrift.forEach(p=>attn.push({ic:'<span class="chip drift">drift</span>',t:`<b>${esc(p.name)}</b>: recent tickets stopped matching the procedure.`,a:'<a class="btn sm" href="#drift">Review</a>'}));
   c.docDrift.forEach(d=>attn.push({ic:'<span class="chip drift">docs</span>',t:`<b>${esc(d.id)} ${esc(d.title)}</b> says something the team no longer does.`,a:'<a class="btn sm" href="#drift">Review</a>'}));
   low.forEach(p=>attn.push({ic:'<span class="chip warn">low</span>',t:`<b>${esc(p.name)}</b> is at ${c.A[p.id].conf}% confidence, so the agent hands these tickets to people.`,a:`<button class="btn sm" data-goproc="${p.id}">Open</button>`}));
+  if(aiOn()&&!isDemo()&&!live.some(p=>p.summary)) attn.push({ic:'<span class="chip acc">AI</span>',t:'Tacit\'s wording comes straight from your notes. <b>Claude can rewrite it in plain language</b> without changing any rule.',a:'<a class="btn sm" href="#brain">Polish</a>'});
   if(unconf.length) attn.push({ic:'<span class="chip acc">confirm</span>',t:`<b>${unconf.length}</b> procedure${unconf.length>1?'s haven\'t':' hasn\'t'} been confirmed by an owner yet, starting with <b>${esc(unconf[0].name)}</b>.`,a:`<button class="btn sm" data-goproc="${unconf[0].id}">Confirm</button>`});
   const ck=S.checklist||{};
   const todos=[
@@ -2652,7 +2776,7 @@ RENDER.overview=function(){
   const doneN=todos.filter(t=>t[1]).length;
   const b=ws.type==='csv'?WS_CACHE[ws.id]:null;
   $('#ovBody').innerHTML=`<div class="page-head"><div><p class="eyebrow">${esc(ws.name)}${ws.type==='demo'?' · demo data':' · from your export'}</p><h1 style="margin-top:6px">${h<12?'Good morning':h<18?'Good afternoon':'Good evening'}, ${esc(firstName(se.name))}</h1><p>${attn.length?`${attn.length} thing${attn.length>1?'s need':' needs'} a look today. Everything else is running the way your team does it.`:'Nothing needs you right now. The brain matches how your team works.'}</p></div>
-    <div class="btn-row"><a class="btn" href="#agent">Test the agent</a><a class="btn primary" href="#learn">Learn from new data</a></div></div>
+    <div class="btn-row"><span class="chip ${aiOn()?'ok':''}" title="${esc(aiOn()?aiWhere():aiOffNote())}">${aiOn()?'✦ AI on':'AI off'}</span><a class="btn" href="#agent">Test the agent</a><a class="btn primary" href="#learn">Learn from new data</a></div></div>
   <div class="tiles"><div><div class="v tnum">${live.length}</div><div class="l">Procedures learned</div></div><div><div class="v tnum">${TICKETS.length}</div><div class="l">Tickets they're learned from${b&&b.aside?` (${b.aside} set aside)`:''}</div></div><div><div class="v tnum">${avgConf}%</div><div class="l">Average confidence</div></div><div><div class="v tnum" style="color:${c.driftTotal?'var(--drift)':'inherit'}">${c.driftTotal}</div><div class="l">Drift flags open</div></div></div>
   <div class="grid2" style="margin-top:20px;grid-template-columns:minmax(0,1.3fr) minmax(0,1fr)">
     <div class="card pad"><h3 style="font-size:17px">Needs your attention</h3><div style="margin-top:6px">${attn.length?attn.map(x=>`<div class="attn">${x.ic}<span>${x.t}</span>${x.a}</div>`).join(''):'<p class="empty">All clear. Nice work.</p>'}</div></div>
@@ -2669,24 +2793,25 @@ RENDER.settings=function(){
   $('#setBody').innerHTML=`<div class="page-head"><div><p class="eyebrow">Settings</p><h1 style="margin-top:6px">Account and workspaces</h1></div></div>
   <div class="card pad">
     <div class="set-sec"><div><h3>Your profile</h3><p class="small muted" style="margin-top:4px">Shown next to things you confirm.</p></div>
-      <form class="stack" id="profForm"><div class="grid2"><div class="field"><label for="pfName">Name</label><input id="pfName" value="${esc(se.name)}"></div><div class="field"><label for="pfCompany">Company</label><input id="pfCompany" value="${esc(se.company)}"></div></div><div class="field"><label for="pfEmail">Email</label><input id="pfEmail" value="${esc(se.email)}" disabled></div><div><button class="btn primary sm" type="submit">Save profile</button></div></form></div>
+      <form class="stack" id="profForm"><div class="grid2"><div class="field"><label for="pfName">Name</label><input id="pfName" value="${esc(se.name)}"></div><div class="field"><label for="pfCompany">Company</label><input id="pfCompany" value="${esc(se.company)}"></div></div><div class="field"><label for="pfEmail">Email</label><input id="pfEmail" value="${esc(se.email)}" disabled></div><p class="small dim">${se.server?'Stored on your Tacit server.':se.provider==='claude'?'Signed in with your Claude account. Workspaces are saved in this browser.':'Saved in this browser.'}</p><div><button class="btn primary sm" type="submit">Save profile</button></div></form></div>
     <div class="set-sec"><div><h3>Workspaces</h3><p class="small muted" style="margin-top:4px">Each one is built from a separate export.</p></div>
       <div><div>${allWs(se).map(w=>`<div class="ws-row"><div><b>${esc(w.name)}</b>${w.id===cur.id?' <span class="chip acc">open</span>':''}<div class="small dim">${w.type==='demo'?'Demo data · always available':`${w.rows||'?'} tickets · added ${fd(normDate(w.created)||NOW)}`}</div></div><div class="btn-row">${w.id===cur.id?'':`<button class="btn sm" data-openws="${esc(w.id)}">Open</button>`}${w.type==='demo'?'':`<button class="btn sm ghost" data-delws="${esc(w.id)}">Delete</button>`}</div></div>`).join('')}</div>
       <a class="btn sm" href="#onboard" style="margin-top:12px">+ New workspace</a></div></div>
     <div class="set-sec"><div><h3>Connections</h3><p class="small muted" style="margin-top:4px">Live sync keeps procedures current without re-uploading.</p></div>
-      <div class="conn">${[['Zendesk','Tickets and internal notes'],['Intercom','Conversations'],['Freshdesk','Tickets'],['Slack','Escalation channels'],['Gong','Call transcripts'],['Confluence','Help center articles']].map(([n,d])=>`<div><b>${n}</b><span class="small muted">${d}</span><button class="btn sm" data-soon="${n}">Join the waitlist</button></div>`).join('')}</div></div>
+      <div class="conn">${[['Zendesk','Tickets and internal notes'],['Intercom','Conversations'],['Freshdesk','Tickets'],['Slack','Escalation channels'],['Gong','Call transcripts'],['Confluence','Help center articles']].map(([n,d])=>`<div><b>${n}</b><span class="small muted">${d}</span>${n==='Zendesk'&&SERVER.on?'<a class="btn sm primary" href="#onboard" data-zd="1">Import now</a>':`<button class="btn sm" data-soon="${n}">Join the waitlist</button>`}</div>`).join('')}</div></div>
     <div class="set-sec"><div><h3>Sign out or leave</h3></div>
       <div class="btn-row"><button class="btn" id="setSignOut">Sign out</button><button class="btn ghost" id="delAcct" style="color:var(--drift)">Delete my account</button></div></div>
   </div>
   ${PROTO_NOTE}`;
-  $('#profForm').onsubmit=e=>{e.preventDefault();const a=accounts();const acc=a[se.email];acc.name=$('#pfName').value.trim()||acc.name;acc.company=$('#pfCompany').value.trim();store(ACC_KEY,a);renderChrome(true);toast('Profile saved')};
+  $('#profForm').onsubmit=e=>{e.preventDefault();const a=accounts();const acc=a[se.key];acc.name=$('#pfName').value.trim()||acc.name;acc.company=$('#pfCompany').value.trim();store(ACC_KEY,a);if(se.server)serverCall(api('PATCH','/api/me',{name:acc.name,company:acc.company}));renderChrome(true);toast('Profile saved')};
   $$('[data-openws]').forEach(b=>b.onclick=()=>{setActive(b.dataset.openws);CUR_WS=null;location.hash='#overview'});
   $$('[data-delws]').forEach(b=>b.onclick=()=>{const w=allWs(se).find(x=>x.id===b.dataset.delws);const close=modal('Delete this workspace?',`<p>This removes <b>${esc(w.name)}</b> and everything you changed in it from this browser. Your original export file isn't touched.</p><div class="btn-row"><button class="btn drift" id="doDel">Delete workspace</button><button class="btn" id="noDel">Keep it</button></div>`);
-    $('#noDel').onclick=close;$('#doDel').onclick=()=>{const a=accounts();const acc=a[se.email];acc.workspaces=acc.workspaces.filter(x=>x.id!==w.id);if(acc.active===w.id)acc.active='demo';store(ACC_KEY,a);try{localStorage.removeItem('tacit-ws-'+w.id)}catch(e){}delete WS_CACHE[w.id];close();CUR_WS=null;route();toast('Workspace deleted')}});
-  $$('[data-soon]').forEach(b=>b.onclick=()=>{b.textContent='On the waitlist';b.disabled=true;toast(`We'll let you know when ${b.dataset.soon} sync is ready`)});
+    $('#noDel').onclick=close;$('#doDel').onclick=()=>{const a=accounts();const acc=a[se.key];acc.workspaces=acc.workspaces.filter(x=>x.id!==w.id);if(se.server)serverCall(api('DELETE','/api/workspaces/'+w.id));if(acc.active===w.id)acc.active='demo';store(ACC_KEY,a);try{localStorage.removeItem('tacit-ws-'+w.id)}catch(e){}delete WS_CACHE[w.id];close();CUR_WS=null;route();toast('Workspace deleted')}});
+  $$('[data-zd]').forEach(b=>b.onclick=()=>{ONB.choice='zendesk'});
+  $$('[data-soon]').forEach(b=>b.onclick=()=>{b.textContent='On the waitlist';b.disabled=true;if(SERVER.on)serverCall(api('POST','/api/waitlist',{email:se.email,name:se.name,company:se.company,source:'connector:'+b.dataset.soon}));toast(`We'll let you know when ${b.dataset.soon} sync is ready`)});
   $('#setSignOut').onclick=signOut;
   $('#delAcct').onclick=()=>{const close=modal('Delete your account?','<p>This removes your account, your workspaces and your changes from this browser. It can\'t be undone.</p><div class="btn-row"><button class="btn drift" id="doDelA">Delete everything</button><button class="btn" id="noDelA">Cancel</button></div>');
-    $('#noDelA').onclick=close;$('#doDelA').onclick=()=>{const a=accounts();(a[se.email].workspaces||[]).forEach(w=>{try{localStorage.removeItem('tacit-ws-'+w.id)}catch(e){}});delete a[se.email];store(ACC_KEY,a);close();signOut()}};
+    $('#noDelA').onclick=close;$('#doDelA').onclick=()=>{const a=accounts();(a[se.key].workspaces||[]).forEach(w=>{try{localStorage.removeItem('tacit-ws-'+w.id)}catch(e){}});delete a[se.key];store(ACC_KEY,a);if(se.server)serverCall(api('DELETE','/api/me'));close();signOut()}};
 };
 
 /* ---- workspace-aware versions of the tools ---- */
@@ -2699,6 +2824,159 @@ function renderAgentOwn(){
   if(LAB.tryText)tryTicket();
 }
 
+/* ================= REAL COMPONENTS: server, AI, identity, downloads ================= */
+/* The same page runs in two places:
+   - Inside Claude (the live link): AI runs on the viewer's Claude account, downloads use the viewer's save prompt,
+     and "Continue with Claude" uses their real Claude identity. Data stays in this browser.
+   - On the Tacit server (server/server.mjs): real accounts and sessions, a SQLite database, server-side Claude,
+     and a live Zendesk importer. The page detects the server by calling /api/health. */
+const SERVER={on:false,ai:false,health:null,me:null};
+let CLAUDE_ME=null, DL=null;
+async function api(method,path,body){
+  const r=await fetch(path,{method,credentials:'same-origin',headers:{'Content-Type':'application/json','X-Tacit':'1'},body:body===undefined?undefined:JSON.stringify(body)});
+  let j={};try{j=await r.json()}catch(e){}
+  if(!r.ok){const e=new Error(j.error||`Request failed (${r.status})`);e.code=j.code;e.status=r.status;throw e}
+  return j;
+}
+async function detectServer(){
+  if(!/^https?:$/.test(location.protocol)) return;
+  try{const r=await fetch('/api/health',{headers:{Accept:'application/json'}});if(!r.ok)return;const j=await r.json();if(j&&j.ok){SERVER.on=true;SERVER.ai=!!j.ai;SERVER.health=j}}catch(e){}
+}
+// Mirror the signed-in server account into the local cache the UI reads synchronously.
+async function serverSync(){
+  let me;
+  try{me=await api('GET','/api/me')}catch(e){const s=store(SES_KEY);if(s&&s.server)store(SES_KEY,null);SERVER.me=null;return false}
+  SERVER.me=me;const u=me.user;const prev=accounts()[u.email]||{};
+  const wss=[];
+  for(const w of me.workspaces){try{const full=await api('GET','/api/workspaces/'+w.id);wss.push({id:w.id,name:w.name,type:'csv',csv:full.csv,rows:full.rows,created:full.created,source:full.source,server:true});if(full.state)store('tacit-ws-'+w.id,full.state)}catch(e){}}
+  const a=accounts();
+  a[u.email]={name:u.name,company:u.company,onboarded:u.onboarded,server:true,created:u.created,workspaces:wss,active:prev.active&&(prev.active==='demo'||wss.some(w=>w.id===prev.active))?prev.active:(wss[0]?wss[0].id:'demo')};
+  store(ACC_KEY,a);setSession({email:u.email,server:true});
+  if(SERVER.ai) sampleFn=makeServerSample();
+  return true;
+}
+function serverCall(p){p.catch(e=>toast(e.message||'The server didn\'t save that. Check your connection.'))}
+function makeServerSample(){
+  const call=async(input,opts,json)=>{try{return await api('POST','/api/ai',{input,json,effort:opts&&opts.modelTier==='quick'?'low':'medium'})}catch(e){throw {code:e.code||'upstream_error',message:e.message}}};
+  const f=async(input,opts={})=>{const r=await call(input,opts,false);if(opts.onText)opts.onText({text:r.text,delta:r.text});return {text:r.text,truncated:r.truncated}};
+  f.json=async(input,opts={})=>(await call(input,opts,true)).json;
+  return f;
+}
+const aiOn=()=>!!sampleFn;
+const aiWhere=()=>SERVER.on?'Claude, through your Tacit server':'Claude, on your Claude account';
+const aiOffNote=()=>SERVER.on?(SERVER.ai?'Sign in to use AI features.':'AI is off on this server. Set ANTHROPIC_API_KEY and restart it.'):'AI features run when this page is opened inside Claude, or on a Tacit server.';
+async function saveFile(name,text){
+  if(DL){try{await DL.save({filename:name,data:text});toast('Saved '+name)}catch(e){if(e&&e.code==='declined')return;if(e&&e.code==='rate_limited'){toast('A save prompt is already open.');return}toast('This view can\'t save files. Use Copy instead.')}return}
+  try{const u=URL.createObjectURL(new Blob([text],{type:'text/plain;charset=utf-8'}));const a=document.createElement('a');a.href=u;a.download=name;document.body.appendChild(a);a.click();a.remove();setTimeout(()=>URL.revokeObjectURL(u),3000);toast('Downloaded '+name)}catch(e){toast('This view can\'t save files. Use Copy instead.')}
+}
+if(window.claude&&typeof window.claude.use==='function'){
+  window.claude.use('downloads').then(d=>{DL=d||null}).catch(()=>{});
+  window.claude.use('user').then(async u=>{if(!u)return;const me=await u.me();if(me&&me.id){CLAUDE_ME=me;if(!$('#v-signin').hidden)RENDER.signin();if(!$('#v-signup').hidden)RENDER.signup();if(document.body.classList.contains('app'))renderChrome(true)}}).catch(()=>{});
+}
+function claudeButton(){
+  if(!CLAUDE_ME||SERVER.on) return '';
+  return `<button type="button" class="btn" id="claudeGo" style="width:100%;gap:10px"><img src="${esc(CLAUDE_ME.avatarUrl)}" alt="" width="22" height="22" style="border-radius:50%">Continue as ${esc(CLAUDE_ME.name||'your Claude account')}</button><p class="small dim" style="text-align:center">or use an email and password</p>`;
+}
+function wireClaudeButton(){
+  const b=$('#claudeGo');if(!b)return;
+  b.onclick=()=>{const key='claude:'+CLAUDE_ME.id;const a=accounts();
+    if(!a[key]){a[key]={provider:'claude',name:'',company:'',created:new Date().toISOString(),workspaces:[],active:'demo'};store(ACC_KEY,a)}
+    setSession({email:key});CUR_WS=null;const acc=accounts()[key];location.hash=acc.onboarded||(acc.workspaces||[]).length?'#overview':'#onboard';toast(`Welcome${CLAUDE_ME.name?', '+firstName(CLAUDE_ME.name):''}!`)};
+}
+
+/* ---------------- AI features ---------------- */
+function procDigest(limit){
+  return S.procs.filter(p=>!p.draft).slice(0,limit||12).map(p=>({id:p.id,name:p.name,owner:p.owner,
+    steps:allSteps(p.steps).filter(s=>s.k!=='if').map(s=>({id:s.id,kind:({check:'check',act:'do',esc:'escalate',reply:'reply'})[s.k],text:s.t,...(s.to?{owner:s.to}:{})})),
+    conditions:allSteps(p.steps).filter(s=>s.k==='if').map(s=>condLabel(s)),
+    examples:TICKETS.filter(t=>t.proc===p.id).slice(-3).map(t=>({subject:t.subj,note:t.note}))}));
+}
+async function polishWithAI(btn){
+  if(!aiOn()){toast(aiOffNote());return}
+  const label=btn.textContent;btn.disabled=true;btn.textContent='Claude is reading your procedures…';
+  const prompt=`A support team's procedures were learned automatically from their resolved tickets, so the names and step wording are rough. Rewrite the wording so a new support agent could follow it. For each procedure return:
+- "id": unchanged
+- "name": a short plain-English name for the situation, at most 7 words
+- "summary": one sentence saying when to use it
+- "steps": an object mapping each step id to a clear imperative instruction of at most 25 words. Keep every specific number, code, tool and team name from the original text and the examples. Add nothing the text and examples don't support.
+- "guardrails": 0 to 2 short things an agent must never do, only when the examples clearly show them
+Reply with a JSON array of these objects.
+
+Procedures:
+${JSON.stringify(procDigest(12)).slice(0,48000)}`;
+  try{
+    const out=await sampleFn.json(prompt,{modelTier:'default'});
+    if(!Array.isArray(out)) throw {message:'Claude answered in an unexpected shape.'};
+    let n=0;
+    out.forEach(o=>{const p=o&&P(String(o.id));if(!p)return;
+      if(o.name)p.name=String(o.name).slice(0,80);
+      if(o.summary)p.summary=String(o.summary).slice(0,240);
+      Object.entries(o.steps||{}).forEach(([sid,txt])=>{const st=findStep(p,sid);if(st&&st.k!=='if'&&txt)st.t=String(txt).slice(0,300)});
+      if(Array.isArray(o.guardrails))o.guardrails.slice(0,2).forEach(g=>{g=String(g).slice(0,200);if(g&&!p.guardrails.includes(g))p.guardrails.push(g)});
+      p.version++;p.changelog.push({v:p.version,date:NOW,text:'Claude rewrote the wording. The rules, numbers and evidence are unchanged.'});n++});
+    save();RENDER.brain();toast(`Claude reworded ${n} procedures. Start over undoes it.`);
+  }catch(e){toast(e.code==='not_granted'?'Claude isn\'t allowed on this page, so nothing changed.':(e.message||'Claude couldn\'t do that just now. Try again.'))}
+  btn.disabled=false;btn.textContent=label;
+}
+async function aiDraftReply(out,{ticket,customer,procName,plan,facts,outcome}){
+  if(!aiOn()){out.innerHTML=`<p class="small muted">${esc(aiOffNote())}</p>`;return}
+  const prompt=`Write the reply an experienced, warm support agent would send this customer. Rules:
+- Do exactly what the plan says and promise nothing beyond it. If the plan hands the ticket to a team, say so honestly and say what happens next.
+- Keep specific amounts, timelines and names from the plan and facts. Don't invent new ones.
+- If a fact the plan needs is missing, ask the customer for it instead of guessing.
+- Greet the customer by first name if you know it. 50 to 120 words. Plain text. No signature placeholder.
+
+Customer: ${customer||'unknown'}
+Their message: ${ticket}
+Procedure: ${procName||'none matched: hand to a person'}
+Facts: ${JSON.stringify(facts||{})}
+Plan: ${(plan||[]).map((s,i)=>`${i+1}. ${s}`).join(' ')}
+Outcome: ${outcome||''}`;
+  out.innerHTML='<div class="cmsg"><span class="av sm c2">AI</span><div class="b warm" id="aiReplyText">Claude is writing…</div></div>';
+  try{const {text}=await sampleFn(prompt,{cache:false,onText:({text})=>{const el=$('#aiReplyText');if(el)el.textContent=text}});
+    const el=$('#aiReplyText');if(el)el.textContent=text;
+    out.insertAdjacentHTML('beforeend',`<p class="small dim">Written by ${esc(aiWhere())}. Check it before sending.</p>`);
+  }catch(e){out.innerHTML=`<p class="small muted">${esc(e.code==='not_granted'?'Claude isn\'t allowed on this page.':(e.message||'Claude couldn\'t write this one. Try again.'))}</p>`}
+}
+function renderAiDocCard(){
+  const el=$('#aiDoc');if(!el)return;
+  el.innerHTML=`<div style="display:flex;justify-content:space-between;gap:10px;flex-wrap:wrap;align-items:baseline"><h3 style="font-size:17px">Check a help article with Claude</h3><span class="chip ${aiOn()?'ok':''}">${aiOn()?'AI on':'AI off'}</span></div>
+    <p class="small muted">Paste an article from your help center. Claude compares it with what your team actually does and suggests a corrected version.</p>
+    <div class="grid2" style="grid-template-columns:minmax(0,1fr) minmax(0,2fr)"><div class="field"><label for="adTitle">Article title</label><input type="text" id="adTitle" placeholder="Refund policy"></div><div class="field"><label for="adBody">Article text</label><textarea id="adBody" style="min-height:90px" placeholder="Refunds are available within 14 days of renewal…"></textarea></div></div>
+    <div class="btn-row"><button class="btn primary" id="adGo" ${aiOn()?'':'disabled'}>Check this article</button>${aiOn()?'':`<span class="small dim">${esc(aiOffNote())}</span>`}</div><div id="adOut"></div>`;
+  if(isDemo()&&!$('#adBody').value){$('#adTitle').value='Refund policy';$('#adBody').value=DEMO_DOCS[0].says}
+  $('#adGo').onclick=async()=>{
+    const title=$('#adTitle').value.trim(),body=$('#adBody').value.trim();if(!body){toast('Paste the article text first');return}
+    const btn=$('#adGo');btn.disabled=true;btn.textContent='Claude is comparing…';
+    const prompt=`Compare a help-center article with the procedures a support team actually follows (learned from their resolved tickets). Pick the procedure the article is about, or null if none. Reply with JSON:
+{"procedure_id": string|null, "verdict": "matches"|"outdated"|"contradicts"|"not_covered", "differences": [short strings, each naming what the article says and what the team does], "suggested_article": "a corrected article in plain language, under 180 words, only stating what the procedure supports"}
+
+Article title: ${title||'(untitled)'}
+Article: ${body.slice(0,6000)}
+
+Procedures:
+${JSON.stringify(procDigest(12)).slice(0,40000)}`;
+    try{const r=await sampleFn.json(prompt,{modelTier:'default'});const p=r.procedure_id&&P(String(r.procedure_id));
+      const V={matches:['ok','Still right'],outdated:['drift','Out of date'],contradicts:['drift','Contradicts the team'],not_covered:['','Not covered yet']}[r.verdict]||['','Checked'];
+      $('#adOut').innerHTML=`<div class="stack" style="margin-top:6px"><div class="inputs"><span class="chip ${V[0]}">${V[1]}</span>${p?`<button class="chip acc" data-goproc="${p.id}">${esc(p.name)}</button>`:''}</div>
+        ${(r.differences||[]).length?`<ul style="margin:0;padding-left:18px;display:grid;gap:4px;font-size:14px">${r.differences.slice(0,6).map(d=>`<li>${esc(d)}</li>`).join('')}</ul>`:''}
+        ${r.suggested_article?`<div class="quote"><div class="src-l">Suggested article</div><span id="adSug" style="white-space:pre-wrap">${esc(r.suggested_article)}</span></div><div class="btn-row"><button class="btn sm" id="adCopy">Copy</button><button class="btn sm" id="adSave">Download .md</button></div>`:''}
+        <p class="small dim">Checked by ${esc(aiWhere())}.</p></div>`;
+      const c=$('#adCopy');if(c)c.onclick=async()=>{try{await navigator.clipboard.writeText(r.suggested_article);toast('Copied')}catch(e){toast('Select the text to copy it')}};
+      const sv=$('#adSave');if(sv)sv.onclick=()=>saveFile(slugify(title||'article')+'.md',`# ${title||'Article'}\n\n${r.suggested_article}\n`);
+    }catch(e){$('#adOut').innerHTML=`<p class="small muted">${esc(e.message||'Claude couldn\'t check this one. Try again.')}</p>`}
+    btn.disabled=false;btn.textContent='Check this article';
+  };
+}
+function auditReport(){
+  const c=counts();const L=[`# Knowledge audit: ${wsName()}`,'',`Generated ${NOW} from ${TICKETS.length} resolved tickets.`,'',
+    `- ${S.procs.filter(p=>!p.draft).length} procedures learned`,`- ${c.undoc.length} followed but not written down`,`- ${c.ignored.length} help articles nobody follows`,`- ${c.driftTotal} drift flags`,'','## Things your team just knows'];
+  c.undoc.forEach(p=>{const a=c.A[p.id];L.push(`- **${p.name}**: ${a.n} tickets, ${a.agents} people, confidence ${a.conf}%`)});
+  if(DOCS.length){L.push('','## Docs nobody follows');DOCS.filter(d=>d.kind==='ignored'||d.kind==='unused').forEach(d=>L.push(`- **${d.id} ${d.title}**: says "${d.says}" · ${d.instead}`))}
+  L.push('','## Procedures');S.procs.filter(p=>!p.draft).forEach(p=>{const a=c.A[p.id];L.push(`- ${p.name} (owner ${p.owner}, ${a.n} tickets, ${a.conf}%${a.drift?', drift':''})`)});
+  return L.join('\n')+'\n';
+}
+
 RENDER.learn=RENDER.lab;
 window.TacitEngine={ENG,buildSampleRows,DOCS};
 
@@ -2707,6 +2985,7 @@ if(window.claude&&typeof window.claude.use==='function'){
   window.claude.use('sample').then(fn=>{if(fn){sampleFn=fn;if(!$('#v-ask').hidden)RENDER.ask()}}).catch(()=>{});
 }
 
-route();
+async function boot(){await detectServer();if(SERVER.on)PROTO_NOTE=PROTO_NOTE_SERVER;if(SERVER.on)await serverSync();route()}
+boot();
 })();
 </script>

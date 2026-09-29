@@ -4,6 +4,22 @@ A working prototype of YC Request for Startups #17, "Company Brain". Tacit reads
 
 > Demo build. Quillfield, a payroll company, and all of its customers and tickets are fictional. The 118 tickets are generated from a fixed seed, so every load is identical.
 
+## Real components
+The same page runs in two places:
+
+| | Live link (inside Claude) | Tacit server (`server/`) |
+|---|---|---|
+| Accounts | Email and password saved in this browser, or **Continue with Claude**, which uses your real Claude identity | Real accounts in SQLite, scrypt password hashing, HttpOnly session cookies |
+| Data | This browser's storage | Server database; your workspaces follow you to any device |
+| AI (Claude) | Runs on the viewer's Claude account | Runs on the server's `ANTHROPIC_API_KEY` (`claude-opus-5-5`, metered per user) |
+| Zendesk | Upload a CSV export | Live read-only import with an API token |
+| Book a pilot | Leads to sign-up | Saved to the server's waitlist table |
+| Downloads | The viewer's save prompt | Normal browser downloads |
+
+**AI features:** Polish with Claude (rewrites procedure names and steps in plain language, keeping the rules), reply drafting in Agent test, the help-article check in Knowledge audit, Ask the brain, and Teach it from a thread. When AI isn't available, each one says why and the rule-based engine keeps working.
+
+See `server/README.md` to run or deploy the server, and `marketing/launch-kit.md` for positioning, pricing message, objection handling, a cold email sequence and launch copy.
+
 ## Product flow
 - **Landing page** (`#home`). It has **Sign in** and **Get started free** in the header, plus buttons that open the demo workspace without an account.
 - **Sign up / Sign in** (`#signup`, `#signin`). Fields are validated, and passwords are salted and hashed with SHA-256. *Prototype only:* accounts live in this browser's localStorage, so there is no email and no password reset.
