@@ -1,0 +1,42 @@
+{
+  "voice": "af_heart",
+  "speed": 0.97,
+  "scenes": [
+    { "id": "worry", "chapter": "The worry", "pad": 0.6, "lines": [
+      "Every parent knows this moment.",
+      "Your child sounds out a word, and gets stuck.",
+      "Is it the blend? The vowel? A good tutor would know."
+    ]},
+    { "id": "meet", "chapter": "Meet Wren", "pad": 0.4, "lines": [
+      "Meet Wren: a reading tutor that listens.",
+      "Mia is five. She reads a story out loud, and Wren follows along, word by word."
+    ]},
+    { "id": "reading", "chapter": "Mia reads aloud", "pad": 0.5, "lines": [
+      "When Mia reads “stop” as “top”, Wren doesn't just mark it wrong.",
+      "It hears the exact gap: the S T blend."
+    ]},
+    { "id": "map", "chapter": "Finding the gap", "pad": 0.5, "lines": [
+      "Every word is evidence.",
+      "Wren tracks a hundred and thirty four phonics skills, so it knows what's secure, and what comes next."
+    ]},
+    { "id": "story", "chapter": "Tonight's story", "pad": 0.5, "lines": [
+      "Each night, it writes tomorrow's story.",
+      "It only uses sounds Mia knows, plus two or three stretch sounds, set in the world she picked: Dino Valley."
+    ]},
+    { "id": "parent", "chapter": "The parent note", "pad": 0.5, "lines": [
+      "And you get a note in plain English.",
+      "What's secure, what's next, and one ninety second thing to do at bedtime."
+    ]},
+    { "id": "habit", "chapter": "Coming back daily", "pad": 0.4, "lines": [
+      "Fifteen minutes a day.",
+      "A streak that forgives a missed day, and feathers for every new sound. It's built to come back to."
+    ]},
+    { "id": "privacy", "chapter": "Privacy", "pad": 0.4, "lines": [
+      "No ads. Audio isn't stored. And a parent says yes before a child reads a single word."
+    ]},
+    { "id": "cta", "chapter": "Start free", "pad": 2.2, "lines": [
+      "Start with the free, twelve minute reading check.",
+      "Wren. A reading tutor that listens."
+    ]}
+  ]
+}

@@ -1,0 +1,251 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<title>Wren demo scenes</title>
+<link rel="stylesheet" href="fonts/fonts.css">
+<style>
+:root{--bg:#FBF7F0;--ink:#1E2430;--ink2:#525A69;--line:#E7DDCC;--brand:#2E5E4E;--brand-soft:#DDECE4;--accent:#D8662F;--accent-soft:#FBE5D6;--sun:#F2BD45;--sun-soft:#FCF0CF;--ok:#2C7A51;--ok-soft:#DDF0E3;--idle:#EDE6DA;--sky-soft:#E0EEF8}
+*{box-sizing:border-box;margin:0;padding:0}
+html,body{width:1280px;height:720px;overflow:hidden;background:var(--bg);font-family:Nunito,sans-serif;color:var(--ink);-webkit-font-smoothing:antialiased}
+.sc{position:absolute;inset:0;opacity:0;overflow:hidden}
+.abs{position:absolute}
+.serif{font-family:Fraunces,serif;font-weight:600;letter-spacing:-.02em}
+.read{font-family:Andika,sans-serif}
+.card{background:#fff;border-radius:24px;box-shadow:0 2px 6px rgba(40,30,15,.06),0 24px 60px rgba(40,30,15,.12)}
+.pill{display:inline-block;padding:6px 14px;border-radius:999px;font-weight:800;font-size:17px}
+.w{display:inline-block;border-radius:10px;padding:0 5px}
+.tag{font-size:14px;font-weight:800;letter-spacing:.1em;text-transform:uppercase;color:var(--accent)}
+/* worry */
+#worry{background:#1F2A27;color:#F4EDE1}
+#worry .letters{left:0;right:0;top:250px;text-align:center;font-size:150px}
+#worry .letters span{display:inline-block;margin:0 10px}
+#worry .q{left:0;right:0;text-align:center;font-size:44px}
+/* meet */
+#meet .logo{left:0;right:0;text-align:center}
+/* reading */
+.tablet{background:#23272F;border-radius:36px;padding:14px}
+.tablet .screen{background:#FFFDF8;border-radius:24px;overflow:hidden}
+.bars{display:flex;gap:4px;align-items:center;height:40px}
+.bars i{display:block;width:6px;border-radius:3px;background:var(--brand)}
+.chip{display:inline-block;font-family:Andika;font-size:54px;background:#fff;border:3px solid var(--line);border-radius:18px;padding:4px 20px;margin:0 5px}
+.chip.hot{border-color:var(--accent);background:var(--accent-soft)}
+/* map */
+.grid{display:grid;grid-template-columns:repeat(19,1fr);gap:7px;width:760px}
+.grid i{display:block;aspect-ratio:1;border-radius:7px;background:var(--idle)}
+/* phone */
+.phone{background:#23272F;border-radius:48px;padding:13px;width:360px}
+.phone .screen{background:var(--bg);border-radius:37px;height:694px;overflow:hidden;padding:26px 20px}
+.msg{background:#fff;border:1px solid var(--line);border-radius:18px;padding:14px 16px;margin-top:12px;font-size:16.5px;line-height:1.45}
+.msg b.h{display:block;font-size:15px;margin-bottom:4px}
+</style>
+</head>
+<body>
+<!-- 1 worry -->
+<div class="sc" id="worry">
+  <div class="abs letters read" id="wl"><span>s</span><span>t</span><span>o</span><span>p</span><span id="wq" style="color:#F2BD45">?</span></div>
+  <div class="abs q serif" id="w1" style="top:120px">Every parent knows this moment.</div>
+  <div class="abs q" id="w2" style="top:500px;font-size:30px;font-weight:700;color:#C9C1B3">Is it the blend? The vowel?</div>
+  <div class="abs q serif" id="w3" style="top:560px;font-size:40px;color:#F2BD45">A good tutor would know.</div>
+</div>
+<!-- 2 meet -->
+<div class="sc" id="meet">
+  <div class="abs" id="m-bird" style="left:540px;top:120px;width:200px"></div>
+  <div class="abs logo serif" id="m-name" style="top:340px;font-size:96px">Wren</div>
+  <div class="abs logo" id="m-tag" style="top:470px;font-size:34px;font-weight:700;color:var(--ink2)">A reading tutor that <span class="serif" style="color:var(--accent);font-style:italic">listens.</span></div>
+  <div class="abs" id="m-kid" style="left:0;right:0;top:560px;text-align:center"><span class="pill" style="background:var(--sun-soft);color:#8A5F00">Mia · age 5 · Dino Valley</span></div>
+</div>
+<!-- 3 reading -->
+<div class="sc" id="reading">
+  <div class="abs tablet" id="r-tab" style="left:70px;top:70px;width:720px">
+    <div class="screen"><div id="r-scene"></div>
+      <div class="read" id="r-text" style="font-size:44px;padding:20px 28px 10px;line-height:1.5"></div>
+      <div style="display:flex;align-items:center;gap:12px;padding:6px 20px 18px"><div id="r-bird" style="width:56px"></div><div id="r-bub" style="background:#F4EDE1;border-radius:14px 14px 14px 4px;padding:8px 14px;font-weight:800;font-size:18px">I'm listening, Mia!</div><div class="bars" id="r-bars" style="margin-left:auto"></div></div>
+    </div>
+  </div>
+  <div class="abs card" id="r-card" style="left:820px;top:170px;width:400px;padding:26px">
+    <div class="tag">Just heard</div>
+    <div style="font-size:30px;font-weight:800;margin-top:6px"><span class="read">stop</span> → <span class="read" style="color:#B24A33">top</span></div>
+    <div style="margin:18px 0 6px;text-align:center"><span class="chip hot" id="r-st">st</span><span class="chip">o</span><span class="chip">p</span></div>
+    <div id="r-gap" style="margin-top:16px;background:var(--accent-soft);border-radius:14px;padding:12px 14px;font-size:19px;font-weight:700">The gap: the <b style="color:var(--accent)">st-</b> blend.<br><span style="color:var(--ink2);font-size:16px">The o and p sounds were right.</span></div>
+  </div>
+</div>
+<!-- 4 map -->
+<div class="sc" id="map">
+  <div class="abs" style="left:80px;top:70px"><div class="tag">Mia's skill map</div><div class="serif" style="font-size:52px;margin-top:6px">Every word is evidence</div></div>
+  <div class="abs grid" id="g" style="left:80px;top:200px"></div>
+  <div class="abs" style="left:900px;top:200px;width:320px">
+    <div class="card" style="padding:22px"><div style="font-weight:800;color:var(--ink2)">Secure</div><div class="serif" style="font-size:64px;color:var(--ok)" id="m-count">0</div><div style="color:var(--ink2);font-weight:700">of 134 phonics skills</div></div>
+    <div class="card" id="m-next" style="padding:22px;margin-top:18px"><div style="font-weight:800;color:var(--ink2)">What's next</div>
+      <div style="display:flex;gap:8px;flex-wrap:wrap;margin-top:10px"><span class="pill read" style="background:var(--accent-soft);color:var(--accent);font-size:24px">st-</span><span class="pill read" style="background:var(--accent-soft);color:var(--accent);font-size:24px">th</span><span class="pill read" style="background:var(--accent-soft);color:var(--accent);font-size:24px">a–e</span></div></div>
+  </div>
+</div>
+<!-- 5 story -->
+<div class="sc" id="story" style="background:#1B2350">
+  <div class="abs" id="s-stars" style="inset:0"></div>
+  <div class="abs" style="left:1060px;top:60px;width:110px;height:110px;border-radius:50%;background:#F6E7B4;box-shadow:0 0 60px rgba(246,231,180,.5)"></div>
+  <div class="abs" style="left:90px;top:80px;color:#F4EDE1"><div class="tag" style="color:#F2BD45">While Mia sleeps</div><div class="serif" style="font-size:50px;margin-top:6px">Tomorrow's story</div></div>
+  <div class="abs card" id="s-book" style="left:90px;top:200px;width:760px;overflow:hidden">
+    <div id="s-scene"></div>
+    <div style="padding:16px 26px 22px"><div class="serif" style="font-size:30px" id="s-title">Rex and the Big Egg</div><div class="read" id="s-text" style="font-size:36px;line-height:1.5;margin-top:6px"></div></div>
+  </div>
+  <div class="abs" id="s-side" style="left:890px;top:240px;width:320px;color:#F4EDE1">
+    <div id="s-b1" class="card" style="padding:18px;background:#26306A;color:#F4EDE1;box-shadow:none"><div style="font-weight:800;opacity:.75">Decodable</div><div class="serif" style="font-size:52px;color:#9ED6BD">96%</div><div style="opacity:.8;font-weight:700">only sounds Mia knows</div></div>
+    <div id="s-b2" class="card" style="padding:18px;margin-top:16px;background:#26306A;color:#F4EDE1;box-shadow:none"><div style="font-weight:800;opacity:.75">Stretch sounds</div><div style="margin-top:8px;display:flex;gap:8px"><span class="pill read" style="background:#F09A64;color:#2A1407;font-size:24px">st-</span><span class="pill read" style="background:#F09A64;color:#2A1407;font-size:24px">-nd</span></div></div>
+  </div>
+</div>
+<!-- 6 parent -->
+<div class="sc" id="parent">
+  <div class="abs" style="left:110px;top:200px;width:560px"><div class="tag">For parents</div><div class="serif" style="font-size:56px;margin-top:8px;line-height:1.08">A note in plain English. Every week.</div><div style="font-size:24px;color:var(--ink2);margin-top:18px;font-weight:600">No jargon, no dashboards to decode.</div></div>
+  <div class="abs phone" id="p-phone" style="left:800px;top:10px">
+    <div class="screen">
+      <div style="display:flex;align-items:center;gap:10px"><div id="p-logo" style="width:30px"></div><b class="serif" style="font-size:21px">Mia's week</b></div>
+      <div class="msg" id="p1"><b class="h">In plain English</b>Mia is secure on short vowel words like <i>cat</i> and <i>sun</i>. This week: blends <b>st</b> and <b>nd</b>.</div>
+      <div class="msg" id="p2"><b class="h" style="color:var(--ok)">+4 skills secure</b>sh, ch, –ck and the tricky word "said."</div>
+      <div class="msg" id="p3" style="background:var(--sun-soft);border-color:transparent"><b class="h">Tonight · 90 seconds</b>Stretch "stop" like a rubber band, one sound at a time, then snap it together. Let Mia do the snap.</div>
+      <div class="msg" id="p4"><b class="h">This week</b>5 sessions · 71 minutes · 412 words read aloud</div>
+    </div>
+  </div>
+</div>
+<!-- 7 habit -->
+<div class="sc" id="habit">
+  <div class="abs" style="left:0;right:0;top:80px;text-align:center"><div class="tag">15 minutes a day</div><div class="serif" style="font-size:54px;margin-top:6px">Built to come back to</div></div>
+  <div class="abs card" style="left:120px;top:250px;width:320px;padding:26px;text-align:center"><div style="font-size:64px" id="h-flame">🔥</div><div class="serif" style="font-size:70px" id="h-streak">1</div><div style="font-weight:800;color:var(--ink2)">day streak</div><div style="font-size:15px;color:var(--ink2);margin-top:6px">Missing one day is forgiven</div></div>
+  <div class="abs card" style="left:480px;top:250px;width:320px;height:282px;padding:26px;text-align:center"><div id="h-feathers" style="height:110px;position:relative"></div><div class="serif" style="font-size:44px">+3 feathers</div><div style="font-weight:800;color:var(--ink2)">for Wren's nest</div></div>
+  <div class="abs card" style="left:840px;top:250px;width:320px;height:282px;padding:26px"><div style="font-weight:800;color:var(--ink2);margin-bottom:12px">Today's session</div><div id="h-steps"></div></div>
+</div>
+<!-- 8 privacy -->
+<div class="sc" id="privacy">
+  <div class="abs" style="left:0;right:0;top:110px;text-align:center"><div class="tag">Privacy and safety</div><div class="serif" style="font-size:54px;margin-top:6px">Your child's voice is not our product</div></div>
+  <div class="abs" id="pv" style="left:110px;right:110px;top:300px;display:flex;gap:30px"></div>
+</div>
+<!-- 9 cta -->
+<div class="sc" id="cta" style="background:#2E5E4E;color:#fff">
+  <div class="abs" id="c-bird" style="left:120px;top:190px;width:300px"></div>
+  <div class="abs" style="left:480px;top:180px;width:720px">
+    <div class="serif" id="c-h" style="font-size:62px;line-height:1.05">Start with the free, 12-minute reading check.</div>
+    <div id="c-btn" style="margin-top:34px"><span style="display:inline-block;background:#D8662F;color:#fff;border-radius:999px;padding:18px 34px;font-size:28px;font-weight:800;box-shadow:0 4px 0 #9C4520">Take the free reading check</span></div>
+    <div id="c-price" style="margin-top:26px;font-size:21px;font-weight:700;opacity:.85">Then $29/month or $199/year · 7-day free trial · Ages 4–8</div>
+  </div>
+  <div class="abs" id="c-sign" style="left:0;right:0;bottom:50px;text-align:center;font-size:26px;font-weight:700;opacity:.9"><span class="serif" style="font-size:34px">Wren</span> · a reading tutor that listens</div>
+</div>
+
+<script type="module">
+import { wrenSVG, logoSVG, sceneSVG, heroSVG } from "../public/art.js";
+const $ = (s) => document.querySelector(s);
+const clamp = (x, a = 0, b = 1) => Math.max(a, Math.min(b, x));
+const ease = (x) => { x = clamp(x); return x < .5 ? 4 * x * x * x : 1 - Math.pow(-2 * x + 2, 3) / 2; };
+const back = (x) => { x = clamp(x); const c = 1.7; return 1 + (c + 1) * Math.pow(x - 1, 3) + c * Math.pow(x - 1, 2); };
+const P = (t, a, d = .6) => ease((t - a) / d);          // progress from time a over d seconds
+const show = (el, p, dy = 24, sc = 0) => { el.style.opacity = p; el.style.transform = `translateY(${(1 - p) * dy}px) scale(${1 - (1 - p) * sc})`; };
+
+// static art
+$("#m-bird").innerHTML = wrenSVG({ size: 200, mood: "talk" });
+$("#r-scene").innerHTML = sceneSVG("dinos", 1);
+$("#r-scene svg").style.cssText = "display:block;width:100%;height:170px";
+$("#r-bird").innerHTML = wrenSVG({ size: 56, mood: "talk" });
+$("#r-bars").innerHTML = "<i></i>".repeat(9);
+$("#s-scene").innerHTML = sceneSVG("dinos", 2);
+$("#s-scene svg").style.cssText = "display:block;width:100%;height:220px";
+$("#p-logo").innerHTML = logoSVG();
+$("#c-bird").innerHTML = wrenSVG({ size: 300 });
+$("#g").innerHTML = "<i></i>".repeat(133);
+const stars = []; for (let i = 0; i < 70; i++) stars.push(`<i style="position:absolute;left:${(i * 137) % 1280}px;top:${(i * 71) % 700}px;width:${2 + (i % 3)}px;height:${2 + (i % 3)}px;border-radius:50%;background:#fff;opacity:${.3 + (i % 5) / 8}"></i>`);
+$("#s-stars").innerHTML = stars.join("");
+const RT = "Stop, said Beth. The bus is here! Chip ran to the bus.".split(" ");
+$("#r-text").innerHTML = RT.map((w, i) => `<span class="w" data-i="${i}">${w}</span>`).join(" ");
+const ST = "Rex stomps up the hill. He spots a big egg in the nest. Crack! Out pops a little dino. Rex and the dino stand in the sand.".split(" ");
+const STRETCH = new Set(["stomps", "spots", "nest.", "stand", "sand."]);
+$("#s-text").innerHTML = ST.map((w) => `<span class="w" style="${STRETCH.has(w) ? "text-decoration:underline;text-decoration-color:#D8662F;text-decoration-thickness:4px;text-underline-offset:7px" : ""}">${w}</span>`).join(" ");
+const FEATHER = (c) => `<svg viewBox="0 0 48 48" width="70" height="70"><path d="M40 6C22 6 10 18 8 40c6-10 14-16 24-18-6 4-12 8-16 16 14-2 24-14 24-32z" fill="${c}"/></svg>`;
+$("#h-feathers").innerHTML = ["#D8662F", "#F2BD45", "#2E5E4E"].map((c, i) => `<div class="abs fe" style="left:${40 + i * 80}px;top:20px">${FEATHER(c)}</div>`).join("");
+const STEPS = [["Warm-up words", "#FCF0CF"], ["Tonight's story", "#DDECE4"], ["Word hunt", "#FBE5D6"], ["Feathers + goodbye", "#E0EEF8"]];
+$("#h-steps").innerHTML = STEPS.map(([s, c]) => `<div class="st" style="background:${c};border-radius:12px;padding:10px 14px;font-weight:800;margin-bottom:8px;display:flex;justify-content:space-between"><span>${s}</span><span class="ck" style="color:#2C7A51">✓</span></div>`).join("");
+const PV = [["🚫", "No ads, ever", "No trackers, no selling data."], ["🎙️", "Audio isn't stored", "Speech becomes words, then it's gone."], ["🛡️", "Parent consent first", "Only adults make accounts."]];
+$("#pv").innerHTML = PV.map(([i, h, s]) => `<div class="card pvc" style="flex:1;padding:30px;text-align:center"><div style="font-size:56px">${i}</div><div class="serif" style="font-size:30px;margin-top:10px">${h}</div><div style="color:var(--ink2);font-size:19px;font-weight:600;margin-top:6px">${s}</div></div>`).join("");
+
+// grid statuses: green, yellow, orange, idle
+const G = [...$("#g").children];
+const status = G.map((_, i) => (i < 70 ? "ok" : i < 76 ? "sun" : i < 81 ? "acc" : "idle"));
+const COL = { ok: "#2C7A51", sun: "#F2BD45", acc: "#D8662F", idle: "#EDE6DA" };
+
+let TL = null;
+window.setTimeline = (tl) => { TL = tl; };
+const fonts = document.fonts.ready;
+window.ready = async () => { await fonts; return true; };
+
+const U = {
+  worry(t, c) {
+    show($("#w1"), P(t, .2, .8));
+    [...$("#wl").children].forEach((s, i) => { const p = P(t, c[1] + .1 + i * .35, .4); s.style.opacity = p; s.style.transform = `translateY(${(1 - p) * 40}px) rotate(${i === 4 ? Math.sin(t * 5) * 8 : 0}deg)`; });
+    const wob = t > c[1] + 1.6 ? Math.sin(t * 9) * 3 : 0; $("#wl").style.transform = `translateX(${wob}px)`;
+    show($("#w2"), P(t, c[2], .6)); show($("#w3"), P(t, c[2] + 1.7, .6));
+  },
+  meet(t, c) {
+    const pb = back((t - .1) / .8); $("#m-bird").style.transform = `scale(${pb}) translateY(${Math.sin(t * 3) * 4}px)`; $("#m-bird").style.opacity = clamp(t / .3);
+    show($("#m-name"), P(t, .5, .6)); show($("#m-tag"), P(t, 1.0, .6)); show($("#m-kid"), P(t, c[1] + .2, .6));
+  },
+  reading(t, c, d) {
+    show($("#r-tab"), P(t, 0, .6), 40);
+    // Words are read at a steady pace. "Stop" is misread first.
+    const k = Math.floor(clamp((t - .6) / 0.42, 0, RT.length + 1));
+    [...$("#r-text").children].forEach((s, i) => {
+      const miss = i === 0 && t > .9;
+      s.style.color = miss ? "#B24A33" : i < k ? "#2C7A51" : "#1E2430";
+      s.style.background = i === k ? "#FCF0CF" : miss && t < 2.4 ? "#F7E0D8" : "transparent";
+      s.style.boxShadow = i === k ? "0 0 0 3px #F2BD45 inset" : "none";
+    });
+    [...$("#r-bars").children].forEach((b, i) => (b.style.height = 8 + Math.abs(Math.sin(t * 7 + i * 1.3)) * 28 + "px"));
+    $("#r-bub").textContent = t < 1 ? "I'm listening, Mia!" : k >= RT.length ? "Great reading!" : "Keep going!";
+    show($("#r-card"), P(t, 1.2, .6), 30, .05);
+    const pulse = t > c[1] ? 1 + Math.max(0, Math.sin((t - c[1]) * 5)) * .08 : 1;
+    $("#r-st").style.transform = `scale(${pulse})`;
+    show($("#r-gap"), P(t, c[1], .5), 14);
+  },
+  map(t, c) {
+    const fill = clamp((t - .4) / 4.5);
+    G.forEach((g, i) => { const on = fill * 150 > i + (i % 7) * 3; g.style.background = on ? COL[status[i]] : COL.idle; g.style.transform = `scale(${on ? 1 : .85})`; });
+    $("#m-count").textContent = Math.round(clamp((t - .4) / 4.5) * 75);
+    show($("#m-next"), P(t, c[1] + 2.2, .6));
+  },
+  story(t, c, d) {
+    show($("#s-book"), P(t, .2, .7), 40);
+    const words = [...$("#s-text").children];
+    const k = clamp((t - 1.2) / (d - 4), 0, 1) * words.length;
+    words.forEach((w, i) => { const p = clamp(k - i); w.style.opacity = p; w.style.transform = `translateY(${(1 - p) * 10}px)`; });
+    show($("#s-b1"), P(t, c[1] + .5, .6)); show($("#s-b2"), P(t, c[1] + 2.5, .6));
+  },
+  parent(t, c) {
+    const pp = P(t, 0, .8); $("#p-phone").style.transform = `translateY(${(1 - pp) * 300}px) rotate(${(1 - pp) * 4}deg)`; $("#p-phone").style.opacity = pp;
+    show($("#p1"), P(t, .9, .5)); show($("#p2"), P(t, c[1] + .1, .5)); show($("#p3"), P(t, c[1] + 2.4, .5)); show($("#p4"), P(t, c[1] + 4, .5));
+  },
+  habit(t, c) {
+    $("#h-streak").textContent = Math.max(1, Math.round(clamp((t - .3) / 2.4) * 12));
+    $("#h-flame").style.transform = `scale(${1 + Math.sin(t * 6) * .06})`;
+    [...document.querySelectorAll(".fe")].forEach((f, i) => { const p = back((t - c[1] - 1.2 - i * .3) / .7); f.style.opacity = clamp((t - c[1] - 1.2 - i * .3) / .2); f.style.transform = `translateY(${(1 - p) * -70}px) rotate(${(1 - p) * -30}deg)`; });
+    [...document.querySelectorAll(".st")].forEach((s, i) => { const p = P(t, .4 + i * .5, .4); show(s, p, 10); s.querySelector(".ck").style.opacity = P(t, 1.2 + i * .8, .3); });
+  },
+  privacy(t) { [...document.querySelectorAll(".pvc")].forEach((el, i) => show(el, P(t, .3 + i * 1.3, .6), 30, .04)); },
+  cta(t, c) {
+    const pb = back((t - .1) / .9); $("#c-bird").style.transform = `scale(${pb}) translateY(${Math.sin(t * 2.5) * 6}px)`; $("#c-bird").style.opacity = clamp(t / .3);
+    show($("#c-h"), P(t, .3, .7)); show($("#c-btn"), P(t, 1.2, .6), 20, .06); show($("#c-price"), P(t, 1.8, .6)); show($("#c-sign"), P(t, c[1], .7));
+  },
+};
+
+window.seek = (T) => {
+  const X = .45; // crossfade length
+  for (const s of TL.scenes) {
+    const el = document.getElementById(s.id);
+    const lt = T - s.start;
+    const vis = T >= s.start - X && T < s.end + (s === TL.scenes.at(-1) ? 99 : 0);
+    if (!vis) { el.style.opacity = 0; continue; }
+    const fadeIn = s === TL.scenes[0] ? 1 : clamp((T - (s.start - X)) / X);
+    const fadeOut = s === TL.scenes.at(-1) ? clamp((TL.total - T) / .8) : clamp((s.end - T) / X + 1);
+    el.style.opacity = Math.min(fadeIn, fadeOut);
+    el.style.zIndex = TL.scenes.indexOf(s);
+    U[s.id](Math.max(0, lt), s.cues.map((c) => c - s.start), s.end - s.start);
+  }
+};
+</script>
+</body>
+</html>

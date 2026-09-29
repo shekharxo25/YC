@@ -1,3 +1,5 @@
+> This branch also contains **[Wren](wren/)**, a voice-first reading tutor for ages 4 to 8, with a landing page, demo video, auth and onboarding.
+
 # Nof1 Oncology
 
 **One patient. One protocol.** A working demo of a physician-reviewed precision-oncology second-opinion service for non-small-cell lung cancer (NSCLC). It's based on YC Request for Startups #16, "AI Personalized Medicine".
