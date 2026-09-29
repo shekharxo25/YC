@@ -4,6 +4,14 @@ A working prototype of YC Request for Startups #17, "Company Brain". Tacit reads
 
 > Demo build. Quillfield, a payroll company, and all of its customers and tickets are fictional. The 118 tickets are generated from a fixed seed, so every load is identical.
 
+## Product flow
+- **Landing page** (`#home`). It has **Sign in** and **Get started free** in the header, plus buttons that open the demo workspace without an account.
+- **Sign up / Sign in** (`#signup`, `#signin`). Fields are validated, and passwords are salted and hashed with SHA-256. *Prototype only:* accounts live in this browser's localStorage, so there is no email and no password reset.
+- **Onboarding** (`#onboard`). You name a workspace, then upload or paste a helpdesk CSV, or start from the Quillfield demo. The engine builds the workspace in about a second.
+- **The app** (`#overview` and the sidebar). The overview dashboard greets you and lists what needs attention (drift, low confidence, unconfirmed procedures), a getting-started checklist and every procedure. The sidebar has Knowledge audit, Procedures, Drift, Agent test, Ask, Export, Learn from data and Settings (profile, workspaces, connections waitlist, sign out, delete account). App pages send signed-out visitors to sign-in, then return them to the page they wanted.
+- **Guest mode** (`#demo`). You explore the Quillfield workspace without an account.
+- A workspace built from your own CSV runs through every tool. Procedures, confidence, drift, evidence, owner check-ins, the agent test, Ask and SKILL.md export all work on your data.
+
 ## The live engine (How it works tab)
 This is the real pipeline, running in the browser with no pre-written output. It starts from a raw helpdesk export (125 tickets, notes written by six people in their own styles, sparse custom fields, some one-off tickets) and works in six steps:
 
