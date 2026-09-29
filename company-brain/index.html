@@ -2839,8 +2839,10 @@ async function api(method,path,body){
   return j;
 }
 async function detectServer(){
-  if(!/^https?:$/.test(location.protocol)) return;
-  try{const r=await fetch('/api/health',{headers:{Accept:'application/json'}});if(!r.ok)return;const j=await r.json();if(j&&j.ok){SERVER.on=true;SERVER.ai=!!j.ai;SERVER.health=j}}catch(e){}
+  // Inside Claude's viewer there is never a Tacit server, so don't even ask. Elsewhere, give up after 2.5s.
+  if(!/^https?:$/.test(location.protocol)||window.claude) return;
+  const ctl=typeof AbortController!=='undefined'?new AbortController():null;const t=setTimeout(()=>ctl&&ctl.abort(),2500);
+  try{const r=await fetch('/api/health',{headers:{Accept:'application/json'},signal:ctl?ctl.signal:undefined});clearTimeout(t);if(!r.ok)return;const j=await r.json();if(j&&j.ok){SERVER.on=true;SERVER.ai=!!j.ai;SERVER.health=j}}catch(e){}
 }
 // Mirror the signed-in server account into the local cache the UI reads synchronously.
 async function serverSync(){
@@ -2985,7 +2987,11 @@ if(window.claude&&typeof window.claude.use==='function'){
   window.claude.use('sample').then(fn=>{if(fn){sampleFn=fn;if(!$('#v-ask').hidden)RENDER.ask()}}).catch(()=>{});
 }
 
-async function boot(){await detectServer();if(SERVER.on)PROTO_NOTE=PROTO_NOTE_SERVER;if(SERVER.on)await serverSync();route()}
+async function boot(){
+  if(!/^https?:$/.test(location.protocol)||window.claude){route();return} // draw right away; no server to wait for
+  try{await detectServer();if(SERVER.on){PROTO_NOTE=PROTO_NOTE_SERVER;await serverSync()}}catch(e){}
+  route();
+}
 boot();
 })();
 </script>
