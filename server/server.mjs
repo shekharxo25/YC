@@ -7,6 +7,7 @@ import crypto from "node:crypto";
 import { fileURLToPath } from "node:url";
 import { DatabaseSync } from "node:sqlite";
 import Anthropic from "@anthropic-ai/sdk";
+import { opsResolve } from "./ops-runtime.mjs";
 
 const here = path.dirname(fileURLToPath(import.meta.url));
 const PORT = Number(process.env.PORT || 8787);
@@ -19,7 +20,8 @@ const MAX_CSV_BYTES = 5 * 1024 * 1024;
 const MAX_STATE_BYTES = 1024 * 1024;
 const MAX_AI_INPUT = 64 * 1024;
 const SESSION_DAYS = 30;
-const VERSION = "0.4.0";
+const VERSION = "0.5.0";
+const SCHEMA_FILE = path.join(here, "..", "schema", "ops-0.3.schema.json");
 
 /* ---------------- database ---------------- */
 fs.mkdirSync(path.dirname(DB_FILE), { recursive: true });
@@ -36,6 +38,8 @@ db.exec(`
     source TEXT NOT NULL DEFAULT 'csv', state TEXT, created TEXT NOT NULL, updated TEXT NOT NULL);
   CREATE TABLE IF NOT EXISTS ai_usage (user_id TEXT NOT NULL, day TEXT NOT NULL, calls INTEGER NOT NULL,
     input_tokens INTEGER NOT NULL DEFAULT 0, output_tokens INTEGER NOT NULL DEFAULT 0, PRIMARY KEY (user_id, day));
+  CREATE TABLE IF NOT EXISTS api_keys (key_hash TEXT PRIMARY KEY, prefix TEXT UNIQUE NOT NULL, workspace_id TEXT NOT NULL,
+    user_id TEXT NOT NULL, name TEXT, created TEXT NOT NULL, last_used TEXT, calls INTEGER NOT NULL DEFAULT 0);
   CREATE TABLE IF NOT EXISTS waitlist (id INTEGER PRIMARY KEY AUTOINCREMENT, email TEXT NOT NULL, name TEXT,
     company TEXT, team_size TEXT, helpdesk TEXT, source TEXT, created TEXT NOT NULL);
 `);
@@ -218,6 +222,40 @@ function appHtml() {
 <style>[hidden]{display:none!important}</style></head><body>${body}</body></html>`;
 }
 
+/* ---------------- agent API ---------------- */
+const CORS = { "Access-Control-Allow-Origin": "*", "Access-Control-Allow-Headers": "Authorization, Content-Type", "Access-Control-Allow-Methods": "GET, POST, OPTIONS" };
+async function agentApi(req, res, m, p) {
+  if (m === "OPTIONS") { res.writeHead(204, { ...SEC_HEADERS, ...CORS }); return res.end(); }
+  const reply = (status, body) => send(res, status, body, CORS);
+  const mk = /^Bearer\s+(tk_[A-Za-z0-9_-]+)$/.exec(req.headers.authorization || "");
+  const key = mk && q("SELECT * FROM api_keys WHERE key_hash = ?").get(sha256(mk[1]));
+  if (!key) return reply(401, { error: "Send a workspace API key as 'Authorization: Bearer tk_...'.", code: "bad_key" });
+  if (limited("key:" + key.prefix, 120, 60_000)) return reply(429, { error: "More than 120 calls a minute on this key. Slow down.", code: "rate_limited" });
+  const w = q("SELECT * FROM workspaces WHERE id = ?").get(key.workspace_id);
+  const state = w && w.state ? JSON.parse(w.state) : null;
+  const bundle = state && state.ops;
+  if (!bundle) return reply(409, { error: "This workspace has no published procedures yet. Open it in Tacit once and they publish automatically.", code: "no_procedures" });
+  q("UPDATE api_keys SET last_used = ?, calls = calls + 1 WHERE key_hash = ?").run(now(), key.key_hash);
+  if (m === "GET" && p === "/api/v1/procedures") return reply(200, bundle);
+  const pm = /^\/api\/v1\/procedures\/([a-z0-9-]+)$/.exec(p);
+  if (m === "GET" && pm) { const proc = bundle.procedures.find((x) => x.id === pm[1]); return proc ? reply(200, proc) : reply(404, { error: "No procedure with that id.", code: "not_found" }); }
+  if (m === "POST" && p === "/api/v1/resolve") {
+    const b = await readBody(req, 64_000);
+    if (typeof b.message !== "string" || !b.message.trim()) return reply(400, { error: "Send the customer's message as 'message'.", code: "bad_request" });
+    const facts = b.facts && typeof b.facts === "object" && !Array.isArray(b.facts) ? b.facts : {};
+    const out = opsResolve(bundle, { subject: str(b.subject, 300), message: b.message.slice(0, 8000), facts, procedure_id: typeof b.procedure_id === "string" ? b.procedure_id : undefined });
+    if (b.draft_reply === true && out.plan && aiConfigured()) {
+      const owner = q("SELECT * FROM users WHERE id = ?").get(key.user_id);
+      try {
+        const r = await runAI(owner, { input: `Write the reply a warm, experienced support agent would send. Do exactly what the plan says and promise nothing beyond it. If it hands off to a team, say so honestly. If facts are missing, ask for them. 50 to 120 words, plain text.\n\nCustomer message: ${b.message.slice(0, 4000)}\nFacts: ${JSON.stringify(facts)}\nOutcome: ${out.outcome}\nMissing facts: ${out.missing_facts.join(", ") || "none"}\nPlan: ${out.plan.map((s, i) => `${i + 1}. ${s.text}${s.owner ? " (owner: " + s.owner + ")" : ""}`).join(" ")}`, effort: "low" });
+        out.reply = r.text;
+      } catch (e) { out.reply_error = e.message; }
+    }
+    return reply(200, { ...out, workspace: w.name, generated: bundle.generated });
+  }
+  return reply(404, { error: "Not found.", code: "not_found" });
+}
+
 /* ---------------- routes ---------------- */
 async function handle(req, res) {
   const url = new URL(req.url, "http://x");
@@ -225,8 +263,12 @@ async function handle(req, res) {
   const m = req.method;
 
   if (m === "GET" && (p === "/" || p === "/index.html")) return send(res, 200, appHtml(), { "Content-Type": "text/html; charset=utf-8", "Cache-Control": "no-cache" });
+  if (m === "GET" && p === "/schema/ops-0.3.json") return send(res, 200, fs.readFileSync(SCHEMA_FILE, "utf8"), { "Content-Type": "application/schema+json; charset=utf-8", "Cache-Control": "public, max-age=3600", "Access-Control-Allow-Origin": "*" });
   if (m === "GET" && p === "/robots.txt") return send(res, 200, "User-agent: *\nAllow: /\nDisallow: /api/\n");
   if (!p.startsWith("/api/")) return send(res, 404, { error: "Not found", code: "not_found" });
+
+  // The agent API: authenticated by a workspace API key, so it needs no cookie and allows cross-origin calls.
+  if (p.startsWith("/api/v1/")) return agentApi(req, res, m, p);
 
   // Mutating API calls must carry a custom header, which cross-site forms can't send.
   if (m !== "GET" && req.headers["x-tacit"] !== "1") throw new HttpError(403, "Missing request header.", "csrf");
@@ -304,6 +346,21 @@ async function handle(req, res) {
     q("UPDATE users SET onboarded = 1 WHERE id = ?").run(user.id);
     return send(res, 201, { id, name });
   }
+  const km = /^\/api\/workspaces\/([A-Za-z0-9_-]+)\/keys(?:\/([A-Za-z0-9_]+))?$/.exec(p);
+  if (km) {
+    const w = q("SELECT id FROM workspaces WHERE id = ? AND user_id = ?").get(km[1], user.id);
+    if (!w) throw new HttpError(404, "That workspace doesn't exist, or it isn't yours.", "not_found");
+    if (m === "GET" && !km[2]) return send(res, 200, { keys: q("SELECT prefix,name,created,last_used,calls FROM api_keys WHERE workspace_id = ? ORDER BY created").all(w.id) });
+    if (m === "POST" && !km[2]) {
+      if (q("SELECT COUNT(*) n FROM api_keys WHERE workspace_id = ?").get(w.id).n >= 10) throw new HttpError(400, "A workspace can have at most 10 keys. Revoke one first.", "too_many_keys");
+      const b = await readBody(req, 10_000);
+      const key = "tk_" + crypto.randomBytes(24).toString("base64url");
+      const prefix = key.slice(0, 11);
+      q("INSERT INTO api_keys (key_hash,prefix,workspace_id,user_id,name,created) VALUES (?,?,?,?,?,?)").run(sha256(key), prefix, w.id, user.id, str(b.name, 60) || "Agent key", now());
+      return send(res, 201, { key, prefix }); // the full key is only ever shown once
+    }
+    if (m === "DELETE" && km[2]) { q("DELETE FROM api_keys WHERE prefix = ? AND workspace_id = ?").run(km[2], w.id); return send(res, 200, { ok: true }); }
+  }
   const wm = /^\/api\/workspaces\/([A-Za-z0-9_-]+)(\/state)?$/.exec(p);
   if (wm) {
     const w = q("SELECT * FROM workspaces WHERE id = ? AND user_id = ?").get(wm[1], user.id);
@@ -315,7 +372,7 @@ async function handle(req, res) {
       return send(res, 200, { ok: true });
     }
     if (m === "PATCH" && !wm[2]) { const b = await readBody(req, 10_000); q("UPDATE workspaces SET name = ?, updated = ? WHERE id = ?").run(str(b.name, 80) || w.name, now(), w.id); return send(res, 200, { ok: true }); }
-    if (m === "DELETE" && !wm[2]) { q("DELETE FROM workspaces WHERE id = ?").run(w.id); return send(res, 200, { ok: true }); }
+    if (m === "DELETE" && !wm[2]) { q("DELETE FROM workspaces WHERE id = ?").run(w.id); q("DELETE FROM api_keys WHERE workspace_id = ?").run(w.id); return send(res, 200, { ok: true }); }
   }
 
   if (m === "POST" && p === "/api/ai") {

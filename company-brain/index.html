@@ -918,7 +918,7 @@ confirmed by Dana, Mar 12</code></div>
 <section class="view" id="v-schema" hidden>
   <div class="wrap">
     <div class="page-head">
-      <div><p class="eyebrow">Open Procedure Schema · v0.3</p><h1 style="margin-top:6px">The format agents run</h1><p>What your team knows, written so an agent can follow it and a person can still read it. It exports as a skills file and as portable JSON, and we plan to publish the format openly so it isn't locked into one vendor.</p></div>
+      <div><p class="eyebrow">Open Procedure Schema · v0.3</p><h1 style="margin-top:6px">The format agents run</h1><p>What your team knows, written so an agent can follow it and a person can still read it. It exports as a skills file and as portable JSON in the Open Procedure Schema, a published JSON Schema, so it isn't locked into one vendor. Agents can also call it live.</p></div>
     </div>
     <div class="grid-side">
       <div class="card pad stack">
@@ -931,6 +931,7 @@ confirmed by Dana, Mar 12</code></div>
       </div>
       <div class="card pad stack">
         <h3 style="font-size:17px">What's in a procedure</h3>
+        <p class="small muted">The format is published as a JSON Schema (OPS 0.3), so any agent or tool can read it, not just Tacit.</p>
         <div class="spec">
           <div><code>trigger</code><span>Intents and phrases that route a ticket here, plus any customer-specific match.</span></div>
           <div><code>inputs</code><span>Facts the agent must fetch before acting, and which system holds each one.</span></div>
@@ -942,6 +943,7 @@ confirmed by Dana, Mar 12</code></div>
         <p class="small muted">If a procedure is below 60% confidence, the agent doesn't guess. It hands the conversation to a person and says why.</p>
       </div>
     </div>
+    <div class="card pad stack" id="apiCard" style="margin-top:20px"></div>
   </div>
 </section>
 
@@ -1299,7 +1301,7 @@ function load(){
   return {...base,procs:clone(WS_DEFAULTS)};
 }
 let saveT=null;
-function save(){store(KEY,S);if(SERVER.on&&KEY.startsWith('tacit-ws-')){const id=KEY.slice(9),st=S;clearTimeout(saveT);saveT=setTimeout(()=>serverCall(api('PUT','/api/workspaces/'+id+'/state',{state:st})),800)}}
+function save(){store(KEY,S);if(SERVER.on&&KEY.startsWith('tacit-ws-')){const id=KEY.slice(9),st=S;clearTimeout(saveT);saveT=setTimeout(()=>serverCall(api('PUT','/api/workspaces/'+id+'/state',{state:{...st,ops:opsBundle()}})),800)}}
 const P=id=>S.procs.find(p=>p.id===id);
 
 /* ---------------- analysis ---------------- */
@@ -1334,7 +1336,9 @@ function propose(proc,recent){
   const ts=TICKETS.filter(t=>t.proc===proc.id).slice().reverse();
   let start=ts[0]?.date;
   for(const t of ts){if(run(proc,t.ctx,{[best.step.id]:best.to}).sig===t.sig) start=t.date; else break}
-  best.start=start;
+  // report when the new rule first made a difference, not the earliest ticket it happens to fit
+  const firstDiff=ts.slice().reverse().find(t=>t.date>=start&&run(proc,t.ctx,{[best.step.id]:best.to}).sig!==run(proc,t.ctx,{[best.step.id]:best.from}).sig);
+  best.start=firstDiff?firstDiff.date:start;
   return best;
 }
 function docAnalysis(doc){
@@ -1764,7 +1768,7 @@ RENDER.drift=function(){
   c.brainDrift.forEach(p=>items.push(brainDriftCard(p,c.A[p.id])));
   DOCS.filter(d=>d.kind==='drift').forEach(d=>items.push(docDriftCard(d)));
   const resolved=S.procs.filter(p=>p.changelog.some(l=>l.drift));
-  $('#driftList').innerHTML=items.join('')+(resolved.length?`<div class="card pad"><h3 style="font-size:16px">Recently updated</h3>${resolved.map(p=>{const l=p.changelog.filter(x=>x.drift).pop();return `<p class="small muted" style="margin-top:8px"><span class="chip ok">v${l.v}</span> ${esc(p.name)}: ${esc(l.text)}</p>`}).join('')}</div>`:'')
+  $('#driftList').innerHTML=liveCardHTML()+items.join('')+(resolved.length?`<div class="card pad"><h3 style="font-size:16px">Recently updated</h3>${resolved.map(p=>{const l=p.changelog.filter(x=>x.drift).pop();return `<p class="small muted" style="margin-top:8px"><span class="chip ok">v${l.v}</span> ${esc(p.name)}: ${esc(l.text)}</p>`}).join('')}</div>`:'')
     +(!c.driftTotal?'<div class="card empty">All caught up. Tacit checks every conversation as it closes, so you\'ll hear about the next change.</div>':'');
   $$('[data-accept]').forEach(b=>b.onclick=()=>{
     const p=P(b.dataset.accept), a=analyze(p), dr=a.proposal; if(!dr) return;
@@ -1773,13 +1777,15 @@ RENDER.drift=function(){
     p.changelog.push({v:p.version,date:NOW,drift:true,text:`"${from}" became "${condLabel(s,dr.to)}", matching tickets since ${fd(dr.start)}.`});
     save();RENDER.drift();toast(`Updated to v${p.version}. We let ${firstName(p.owner)} know.`);
   });
+  wireLive();
   $$('[data-coach]').forEach(b=>b.onclick=()=>toast('Got it. Tacit left a note for the team leads, and the procedure stays as it is.'));
   $$('[data-fixdoc]').forEach(b=>b.onclick=()=>{S.docFixed[b.dataset.fixdoc]=true;save();RENDER.drift();toast(`${b.dataset.fixdoc} now says what the team actually does`)});
 };
 function monthly(rows,fnOk){
-  const months=['01','02','03','04','05','06','07','08','09'];
-  return months.map(m=>{const r=rows.filter(x=>x.t.date.slice(5,7)===m);return {m:MON[+m-1],n:r.length,ok:r.filter(fnOk).length}});
+  const keys=[...new Set(rows.map(x=>x.t.date.slice(0,7)))].sort().slice(-10);
+  return keys.map(k=>{const r=rows.filter(x=>x.t.date.slice(0,7)===k);return {k,m:MON[+k.slice(5,7)-1],n:r.length,ok:r.filter(fnOk).length}});
 }
+function markOf(data,date){const i=data.findIndex(d=>d.k===String(date).slice(0,7));return i<0?undefined:i+(+String(date).slice(8,10)-1)/31}
 function stackChart(data,opts){
   const W=640,H=200,pl=30,pb=26,pt=12,pr=8;
   const max=Math.max(2,...data.map(d=>d.n));
@@ -1798,10 +1804,12 @@ function stackChart(data,opts){
   if(opts.markAt!==undefined){const x=pl+opts.markAt*bw;g+=`<line x1="${x}" x2="${x}" y1="${pt-4}" y2="${y(0)}" stroke="var(--ink)" stroke-dasharray="3 3"/><text class="ax" x="${x+5}" y="${pt+6}" style="fill:var(--ink)">${esc(opts.markLabel)}</text>`}
   return `<svg class="chart" viewBox="0 0 ${W} ${H}" role="img" aria-label="${esc(opts.aria)}">${g}</svg>`;
 }
+// Only credit a message as the decision if it mentions the new number.
+function callSrc(p,dr){return (p.sources||[]).find(s=>new RegExp('\\b'+String(dr.to).replace(/\B(?=(\d{3})+(?!\d))/g,',?')+'\\b').test(s.text))||null}
 function brainDriftCard(p,a){
   const dr=a.proposal;
   const data=monthly(a.rows,x=>x.ok);
-  const markIdx=dr?(+dr.start.slice(5,7)-1)+(+dr.start.slice(8,10)-1)/31:undefined;
+  const markIdx=dr?markOf(data,dr.start):undefined;
   return `<div class="card pad stack">
     <div style="display:flex;justify-content:space-between;gap:12px;flex-wrap:wrap;align-items:flex-start"><div><div class="inputs"><span class="chip drift">Brain drift</span><span class="chip">${esc(p.name)} v${p.version}</span></div><h2 style="font-size:22px;margin-top:10px">The team started doing this differently</h2></div>
     <div style="text-align:right"><div class="pct tnum" style="font:500 28px var(--mono);color:var(--drift)">${Math.round(a.aRecent*100)}%</div><div class="small dim">agreement, last 60 days</div></div></div>
@@ -1809,8 +1817,8 @@ function brainDriftCard(p,a){
     <div class="legend"><span><i style="background:var(--ok)"></i>Matches v${p.version}</span><span><i style="background:var(--drift)"></i>Handled differently</span></div>
     ${stackChart(data,{okColor:'var(--ok)',okLabel:'match',badLabel:'differ',markAt:markIdx,markLabel:dr?'new behavior '+fd(dr.start):'',aria:'Tickets per month matching the procedure versus handled differently'})}
     ${dr?`<div class="diff"><div class="was"><div class="lab">What Tacit knew</div>${esc(condLabel(dr.step,dr.from))}</div><div class="now"><div class="lab">What the team does, since ${fd(dr.start)}</div>${esc(condLabel(dr.step,dr.to))}</div></div>
-    <p class="small muted">Tacit tried every possible number on this step against the last 60 days of conversations. <b>${esc(condLabel(dr.step,dr.to))}</b> explains ${Math.round(dr.ok*100)}% of them.${(p.sources||[]).length?' And it found who made the call:':''}</p>
-    ${(p.sources||[]).length?`<div class="cmsg">${av(p.sources[0].who.split(',')[0],'sm')}<div><div class="by">${esc(p.sources[0].who)} · ${esc(p.sources[0].ref)}</div><div class="b">${esc(p.sources[0].text)}</div></div></div>`:''}
+    <p class="small muted">Tacit tried every possible number on this step against the last 60 days of conversations. <b>${esc(condLabel(dr.step,dr.to))}</b> explains ${Math.round(dr.ok*100)}% of them.${callSrc(p,dr)?' And it found who made the call:':' Nobody wrote the decision down, so check with '+esc(firstName(p.owner))+' before accepting.'}</p>
+    ${callSrc(p,dr)?`<div class="cmsg">${av(callSrc(p,dr).who.split(',')[0],'sm')}<div><div class="by">${esc(callSrc(p,dr).who)} · ${esc(callSrc(p,dr).ref)}</div><div class="b">${esc(callSrc(p,dr).text)}</div></div></div>`:''}
     <div class="btn-row"><button class="btn drift" data-accept="${p.id}">The team's right, update to v${p.version+1}</button><button class="btn" data-coach="${p.id}">Keep v${p.version} and talk to the team</button><button class="btn ghost" data-goproc="${p.id}">Open procedure</button></div>`
     :`<p class="small muted">No single threshold change explains the new behavior. The procedure needs a person to review it. <button class="btn sm" data-goproc="${p.id}">Open procedure</button></p>`}
   </div>`;
@@ -1828,7 +1836,7 @@ function docDriftCard(d){
     <div class="cmsg">${av('Dana M.','sm')}<div><div class="by">Dana M. in #support-leads · Mar 9</div><div class="b">Going forward we honor full refunds up to 30 days after renewal. Churn from the 14-day rule is not worth it.</div></div></div>
     <p class="muted">Everyone on the team saw this and changed what they did the same day. Nobody updated the help article, so any agent reading it still turns away customers the team would happily refund.</p>
     <div class="legend"><span><i style="background:var(--ink-3)"></i>Handled as ${d.id} says</span><span><i style="background:var(--drift)"></i>Contradicts ${d.id}</span></div>
-    ${stackChart(data,{okColor:'var(--ink-3)',okLabel:'follow '+d.id,badLabel:'contradict '+d.id,markAt:2+8/31,markLabel:'Slack decision, Mar 9',aria:'Refund tickets per month following versus contradicting the help article'})}
+    ${stackChart(data,{okColor:'var(--ink-3)',okLabel:'follow '+d.id,badLabel:'contradict '+d.id,markAt:markOf(data,'2026-03-09'),markLabel:'Slack decision, Mar 9',aria:'Refund tickets per month following versus contradicting the help article'})}
     <div class="diff"><div class="was"><div class="lab">${d.id} says</div>${esc(d.says)}</div><div class="now"><div class="lab">What the team does, since Mar 9</div>Full refund with code RNW-30 up to ${r4?r4.cond.v:30} days after renewal. Enterprise goes to the account manager. Credits over $2,000 need Finance.</div></div>
     <div class="btn-row">${fixed?'<span class="chip ok">Article rewritten from the procedure</span>':`<button class="btn drift" data-fixdoc="${d.id}">Update ${d.id} to match the team</button>`}<button class="btn ghost" data-goproc="${p.id}">Open procedure</button></div>
   </div>`;
@@ -2016,7 +2024,7 @@ ${(p.sources||[]).map(s=>`- ${s.type}, ${s.ref}: "${s.text}"`).join('\n')}
 }
 function hlJSON(s){return esc(s).replace(/(&quot;[^&]*?&quot;)(\s*:)/g,'<span style="color:var(--code-key)">$1</span>$2').replace(/:\s(&quot;.*?&quot;)/g,': <span style="color:var(--code-str)">$1</span>')}
 RENDER.schema=function(){
-  refreshBadge();
+  refreshBadge();setTimeout(renderApiCard,0);
   const sel=UI.schemaSel&&P(UI.schemaSel)?UI.schemaSel:UI.sel;
   $('#schemaProc').innerHTML=S.procs.map(p=>`<option value="${p.id}" ${p.id===sel?'selected':''}>${esc(p.name)}</option>`).join('');
   renderSchemaOut();
@@ -2326,7 +2334,19 @@ const ENG=(function(){
     const small=G.clusters.filter(c=>c.idx.length<4);const t4=performance.now();
     return {map,ts,voc:VOC,G,procs,small,ms:[t1-t0,t2-t1,t3-t2,t4-t3]};
   }
-  return {run,parseCSV,toCSV,checkDocs,toSkill,route,predict,condText,pretty,splitClauses,toks,treeConds,get voc(){return VOC}};
+  /* incremental: read new tickets with an existing workspace's vocabulary and match them to its situations */
+  function ingest(res,rows){
+    const map=res.map;
+    if(rows.length&&!(map.note in rows[0])) throw new Error(`The new file needs the same notes column as before ("${map.note}").`);
+    if(rows.length&&!map.text.some(c=>c in rows[0])) throw new Error(`The new file needs the same message column as before ("${map.text[0]}").`);
+    const ts=normalize(rows,map);const V=res.voc;
+    ts.forEach(t=>{t.acts=new Map();const cl=splitClauses(t.note);cl.forEach((c,pi)=>{const set=new Set(toks(c));let best=null,bs=0;for(const g of V.groups){const sc=jacc(set,g.set);if(sc>bs){bs=sc;best=g}}if(best&&bs>=0.5&&!t.acts.has(best.id))t.acts.set(best.id,pi/Math.max(1,cl.length-1))})});
+    res.procs.forEach(p=>{if(!p.core){const c={};p.cluster.tickets.forEach(t=>t.acts.forEach((_,id)=>c[id]=(c[id]||0)+1));p.core=new Set(Object.keys(c).filter(id=>c[id]>=Math.max(1,p.n*0.2)))}});
+    return ts.map((t,i)=>{const v=res.G.T.vec(toks(t.text));let best=null,bs=0;
+      res.procs.forEach(p=>{const sc=0.5*cos(v,p.cluster.cen)+0.5*jacc(new Set(t.acts.keys()),p.core);if(sc>bs){bs=sc;best=p}});
+      return {t,row:rows[i],cluster:bs>=0.3?best.cluster.id:null,score:bs}});
+  }
+  return {run,ingest,parseCSV,toCSV,checkDocs,toSkill,route,predict,condText,pretty,splitClauses,toks,treeConds,get voc(){return VOC}};
 })();
 
 /* ---- the raw Quillfield export: what a helpdesk actually hands you ---- */
@@ -2552,10 +2572,10 @@ function buildWorkspace(csv){
   const moneyF=f=>/amount|arr|price|refund|cost|total|revenue|value/i.test(f);
   const dates=res.ts.map(t=>normDate(t.date)).filter(Boolean).sort();
   const now=dates.length?dates[dates.length-1]:new Date().toISOString().slice(0,10);
-  const used=new Set(),procs=[],tickets=[],seenT=new Set();
+  const used=new Set(),procs=[],tickets=[],seenT=new Set(),byCluster={};
   const ownerOf=l=>{const m=l.match(/\bto\s+(?:the\s+)?([a-z0-9 &'-]+?)(?:\s+(?:for|first|before|with|now)\b|[.,]|$)/i);return m?m[1].replace(/^./,c=>c.toUpperCase()):undefined};
   res.procs.forEach(ep=>{
-    let id=slugify(ep.name);while(used.has(id))id+='-2';used.add(id);
+    let id=slugify(ep.name);while(used.has(id))id+='-2';used.add(id);byCluster[ep.cluster.id]=id;
     const seen={};let ic=0;
     const mk=aid=>{const g=V.byId[aid];seen[aid]=(seen[aid]||0)+1;const sid=seen[aid]>1?aid+'-'+seen[aid]:aid;const st={id:sid,k:g.kind,t:g.label,n:g.label};if(g.kind==='esc'){const o=ownerOf(g.label);if(o)st.to=o}return st};
     const conv=node=>{
@@ -2581,7 +2601,7 @@ function buildWorkspace(csv){
   });
   tickets.sort((a,b)=>a.date<b.date?-1:1);
   const ag={};tickets.forEach(t=>ag[t.agent]=(ag[t.agent]||0)+1);
-  return {res,procs,tickets,now,agents:Object.entries(ag).sort((a,b)=>b[1]-a[1]).map(x=>x[0]),aside:res.small.reduce((n,c)=>n+c.idx.length,0),rows:rows.length};
+  return {res,procs,tickets,now,byCluster,agents:Object.entries(ag).sort((a,b)=>b[1]-a[1]).map(x=>x[0]),aside:res.small.reduce((n,c)=>n+c.idx.length,0),rows:rows.length};
 }
 function useWorkspace(ws){
   if(CUR_WS===ws.id) return;
@@ -2593,7 +2613,10 @@ function useWorkspace(ws){
     TICKETS=b.tickets;DOCS=[];QUEUE=[];AGENTS=b.agents;NOW=b.now;RECENT=addDays(b.now,-60);KEY='tacit-ws-'+ws.id;WS_DEFAULTS=b.procs;WS_RES=b.res;
   }
   TBYID=Object.fromEntries(TICKETS.map(t=>[t.id,t]));
-  S=load();UI.sel=(S.procs[0]||{}).id;UI.evStep=null;UI.edit=false;UI.schemaSel=null;UI.queueSel=0;UI.custom=null;
+  S=load();
+  if(ws.type==='demo')demoLive();else csvLive(WS_CACHE[ws.id]);
+  if(!store(KEY))save();
+  UI.sel=(S.procs[0]||{}).id;UI.evStep=null;UI.edit=false;UI.schemaSel=null;UI.queueSel=0;UI.custom=null;
   if(typeof turns!=='undefined') turns.length=0;
   CUR_WS=ws.id;
 }
@@ -2764,6 +2787,8 @@ RENDER.overview=function(){
   c.brainDrift.forEach(p=>attn.push({ic:'<span class="chip drift">drift</span>',t:`<b>${esc(p.name)}</b>: recent tickets stopped matching the procedure.`,a:'<a class="btn sm" href="#drift">Review</a>'}));
   c.docDrift.forEach(d=>attn.push({ic:'<span class="chip drift">docs</span>',t:`<b>${esc(d.id)} ${esc(d.title)}</b> says something the team no longer does.`,a:'<a class="btn sm" href="#drift">Review</a>'}));
   low.forEach(p=>attn.push({ic:'<span class="chip warn">low</span>',t:`<b>${esc(p.name)}</b> is at ${c.A[p.id].conf}% confidence, so the agent hands these tickets to people.`,a:`<button class="btn sm" data-goproc="${p.id}">Open</button>`}));
+  pendingNew().forEach(cn=>attn.push({ic:'<span class="chip acc">new</span>',t:`Tacit spotted a situation nobody wrote down: <b>${esc(cn.proc.name)}</b> (${cn.tickets.length} tickets).`,a:'<a class="btn sm" href="#drift">Review</a>'}));
+  if(LIVE.kind!=='none'&&!LIVE.log.length) attn.push({ic:'<span class="chip">loop</span>',t:isDemo()?'See the brain catch change: <b>read Quillfield\'s next two weeks of tickets</b>.':'Keep it current: <b>upload tickets resolved since your export</b>, and Tacit checks for drift.',a:'<a class="btn sm" href="#drift">Open</a>'});
   if(aiOn()&&!isDemo()&&!live.some(p=>p.summary)) attn.push({ic:'<span class="chip acc">AI</span>',t:'Tacit\'s wording comes straight from your notes. <b>Claude can rewrite it in plain language</b> without changing any rule.',a:'<a class="btn sm" href="#brain">Polish</a>'});
   if(unconf.length) attn.push({ic:'<span class="chip acc">confirm</span>',t:`<b>${unconf.length}</b> procedure${unconf.length>1?'s haven\'t':' hasn\'t'} been confirmed by an owner yet, starting with <b>${esc(unconf[0].name)}</b>.`,a:`<button class="btn sm" data-goproc="${unconf[0].id}">Confirm</button>`});
   const ck=S.checklist||{};
@@ -2979,8 +3004,224 @@ function auditReport(){
   return L.join('\n')+'\n';
 }
 
+/* ---- OPS runtime (copied from server/ops-runtime.mjs by tools/sync-runtime.mjs; do not edit here) ---- */
+// Tacit procedure runtime: executes an Open Procedure Schema (OPS 0.3) bundle against a ticket.
+// This one file is the single source of truth. The server imports it, and the web app inlines the same code
+// (the build step in tools/sync-runtime.mjs copies it in), so the in-app API console and POST /api/v1/resolve
+// always give the same answer.
+function opsResolve(bundle, input) {
+  const procs = (bundle && Array.isArray(bundle.procedures)) ? bundle.procedures : [];
+  const text = ((input.subject || "") + " " + (input.message || "")).toLowerCase();
+  const facts = Object.assign({}, input.facts || {});
+  // 1. Route the ticket to a procedure, unless the caller named one.
+  let proc = null, score = 0, hits = [];
+  if (input.procedure_id) {
+    proc = procs.find((p) => p.id === input.procedure_id) || null;
+    if (!proc) return { outcome: "error", error: `No procedure with id "${input.procedure_id}".` };
+    score = 99;
+  } else {
+    for (const p of procs) {
+      const sig = (p.trigger && p.trigger.signals) || [];
+      const h = sig.filter((s) => s && text.includes(String(s).toLowerCase()));
+      let sc = h.length;
+      const only = p.trigger && p.trigger.customer;
+      if (only) { if (String(facts.customer || "").toLowerCase() !== String(only).toLowerCase()) continue; sc += 2; }
+      if (sc > score) { proc = p; score = sc; hits = h; }
+    }
+    if (score < 2) proc = null;
+  }
+  if (!proc) return { outcome: "handoff", reason: "No procedure matches this ticket closely enough. Hand it to a person.", match: { score } };
+  // 2. Walk the steps, testing each condition against the facts.
+  const plan = [], decisions = [], missing = [];
+  const coerce = (x, v) => (typeof v === "number" ? Number(x) : typeof v === "boolean" ? (x === true || x === "true" || x === "yes") : String(x).toLowerCase());
+  const test = (c) => {
+    const x = facts[c.field];
+    if (x === undefined || x === null || x === "") return { r: false, missing: true };
+    const v = c.value;
+    switch (c.op) {
+      case "eq": return { r: coerce(x, v) === (typeof v === "string" ? v.toLowerCase() : v) };
+      case "neq": return { r: coerce(x, v) !== (typeof v === "string" ? v.toLowerCase() : v) };
+      case "lte": return { r: Number(x) <= Number(v) };
+      case "lt": return { r: Number(x) < Number(v) };
+      case "gt": return { r: Number(x) > Number(v) };
+      case "in": return { r: (v || []).map((y) => String(y).toLowerCase()).includes(String(x).toLowerCase()) };
+      default: return { r: false };
+    }
+  };
+  (function walk(steps) {
+    for (const s of steps || []) {
+      if (s.if) {
+        const t = test(s.if);
+        decisions.push({ condition: s.label || `${s.if.field} ${s.if.op} ${JSON.stringify(s.if.value)}`, field: s.if.field, result: t.missing ? null : t.r });
+        // A missing fact leaves this decision open: ask for it rather than guessing down either branch.
+        if (t.missing) { missing.push(s.if.field); plan.push({ kind: "pending", text: `Decide: ${s.label || s.if.field} (needs ${s.if.field})` }); continue; }
+        walk(t.r ? s.then : s.else);
+      } else {
+        const kind = s.check ? "check" : s.do ? "do" : s.escalate ? "escalate" : "reply";
+        plan.push({ id: s.id, kind, text: s.check || s.do || s.escalate || s.reply, ...(s.owner ? { owner: s.owner } : {}) });
+      }
+    }
+  })(proc.steps);
+  const conf = proc.provenance && typeof proc.provenance.confidence === "number" ? proc.provenance.confidence : null;
+  const esc = plan.filter((p) => p.kind === "escalate");
+  let outcome = "resolve";
+  if (conf !== null && conf < 0.6) outcome = "handoff";
+  else if (missing.length) outcome = "ask";
+  else if (esc.length) outcome = "escalate";
+  return {
+    outcome,
+    procedure: { id: proc.id, name: proc.name, version: proc.version, confidence: conf, owner: proc.owner || null },
+    match: { score, signals: hits },
+    missing_facts: [...new Set(missing)],
+    decisions,
+    plan,
+    escalate_to: [...new Set(esc.map((e) => e.owner).filter(Boolean))],
+    guardrails: proc.guardrails || [],
+    ...(outcome === "handoff" ? { reason: "Confidence is below 0.60, so a person should handle this." } : {}),
+    ...(outcome === "ask" ? { reason: "Ask the customer for the missing facts first; the procedure depends on them." } : {}),
+  };
+}
+/* ---- end OPS runtime ---- */
+const OPS_SCHEMA_TEXT="{\n  \"$schema\": \"https://json-schema.org/draft/2020-12/schema\",\n  \"$id\": \"tacit-ops/0.3\",\n  \"title\": \"Open Procedure Schema (OPS) 0.3\",\n  \"description\": \"A portable, executable description of how a company handles a situation: when it applies, the facts it needs, the steps with their conditions, the guardrails, and the evidence behind it. Produced by Tacit, executable by any agent.\",\n  \"type\": \"object\",\n  \"required\": [\n    \"ops\",\n    \"procedures\"\n  ],\n  \"properties\": {\n    \"ops\": {\n      \"const\": \"0.3\"\n    },\n    \"company\": {\n      \"type\": \"string\"\n    },\n    \"generated\": {\n      \"type\": \"string\",\n      \"description\": \"ISO date the bundle was produced.\"\n    },\n    \"procedures\": {\n      \"type\": \"array\",\n      \"items\": {\n        \"$ref\": \"#/$defs/procedure\"\n      }\n    }\n  },\n  \"$defs\": {\n    \"procedure\": {\n      \"type\": \"object\",\n      \"required\": [\n        \"ops\",\n        \"id\",\n        \"name\",\n        \"version\",\n        \"trigger\",\n        \"steps\",\n        \"provenance\"\n      ],\n      \"properties\": {\n        \"ops\": {\n          \"const\": \"0.3\"\n        },\n        \"id\": {\n          \"type\": \"string\",\n          \"pattern\": \"^[a-z0-9][a-z0-9-]*$\"\n        },\n        \"name\": {\n          \"type\": \"string\"\n        },\n        \"version\": {\n          \"type\": \"integer\",\n          \"minimum\": 1\n        },\n        \"owner\": {\n          \"type\": \"string\",\n          \"description\": \"The person who confirms changes.\"\n        },\n        \"trigger\": {\n          \"type\": \"object\",\n          \"required\": [\n            \"signals\"\n          ],\n          \"properties\": {\n            \"signals\": {\n              \"type\": \"array\",\n              \"items\": {\n                \"type\": \"string\"\n              },\n              \"description\": \"Phrases that route a ticket here.\"\n            },\n            \"customer\": {\n              \"type\": \"string\",\n              \"description\": \"Only applies to this customer.\"\n            }\n          }\n        },\n        \"inputs\": {\n          \"type\": \"array\",\n          \"items\": {\n            \"type\": \"object\",\n            \"required\": [\n              \"name\"\n            ],\n            \"properties\": {\n              \"name\": {\n                \"type\": \"string\"\n              },\n              \"source\": {\n                \"type\": \"string\"\n              }\n            }\n          }\n        },\n        \"steps\": {\n          \"type\": \"array\",\n          \"items\": {\n            \"$ref\": \"#/$defs/step\"\n          }\n        },\n        \"guardrails\": {\n          \"type\": \"array\",\n          \"items\": {\n            \"type\": \"string\"\n          }\n        },\n        \"provenance\": {\n          \"type\": \"object\",\n          \"required\": [\n            \"tickets\",\n            \"confidence\"\n          ],\n          \"properties\": {\n            \"tickets\": {\n              \"type\": \"integer\",\n              \"minimum\": 0\n            },\n            \"agents\": {\n              \"type\": \"integer\",\n              \"minimum\": 0\n            },\n            \"agreement\": {\n              \"type\": \"number\",\n              \"minimum\": 0,\n              \"maximum\": 1\n            },\n            \"confidence\": {\n              \"type\": \"number\",\n              \"minimum\": 0,\n              \"maximum\": 1,\n              \"description\": \"Agents should hand off below 0.60.\"\n            },\n            \"since\": {\n              \"type\": \"string\"\n            },\n            \"sources\": {\n              \"type\": \"array\",\n              \"items\": {\n                \"type\": \"string\"\n              }\n            }\n          }\n        },\n        \"drift\": {\n          \"type\": \"object\",\n          \"properties\": {\n            \"open\": {\n              \"type\": \"boolean\"\n            },\n            \"recent_agreement\": {\n              \"type\": \"number\"\n            }\n          }\n        },\n        \"helpCenter\": {\n          \"type\": [\n            \"string\",\n            \"null\"\n          ]\n        }\n      }\n    },\n    \"condition\": {\n      \"type\": \"object\",\n      \"required\": [\n        \"field\",\n        \"op\",\n        \"value\"\n      ],\n      \"properties\": {\n        \"field\": {\n          \"type\": \"string\"\n        },\n        \"op\": {\n          \"enum\": [\n            \"eq\",\n            \"neq\",\n            \"lte\",\n            \"lt\",\n            \"gt\",\n            \"in\"\n          ]\n        },\n        \"value\": {}\n      }\n    },\n    \"step\": {\n      \"oneOf\": [\n        {\n          \"type\": \"object\",\n          \"required\": [\n            \"if\",\n            \"then\"\n          ],\n          \"properties\": {\n            \"if\": {\n              \"$ref\": \"#/$defs/condition\"\n            },\n            \"label\": {\n              \"type\": \"string\"\n            },\n            \"then\": {\n              \"type\": \"array\",\n              \"items\": {\n                \"$ref\": \"#/$defs/step\"\n              }\n            },\n            \"else\": {\n              \"type\": \"array\",\n              \"items\": {\n                \"$ref\": \"#/$defs/step\"\n              }\n            }\n          }\n        },\n        {\n          \"type\": \"object\",\n          \"required\": [\n            \"id\",\n            \"check\"\n          ],\n          \"properties\": {\n            \"id\": {\n              \"type\": \"string\"\n            },\n            \"check\": {\n              \"type\": \"string\"\n            },\n            \"evidence\": {\n              \"type\": \"integer\"\n            }\n          }\n        },\n        {\n          \"type\": \"object\",\n          \"required\": [\n            \"id\",\n            \"do\"\n          ],\n          \"properties\": {\n            \"id\": {\n              \"type\": \"string\"\n            },\n            \"do\": {\n              \"type\": \"string\"\n            },\n            \"evidence\": {\n              \"type\": \"integer\"\n            }\n          }\n        },\n        {\n          \"type\": \"object\",\n          \"required\": [\n            \"id\",\n            \"escalate\"\n          ],\n          \"properties\": {\n            \"id\": {\n              \"type\": \"string\"\n            },\n            \"escalate\": {\n              \"type\": \"string\"\n            },\n            \"owner\": {\n              \"type\": \"string\"\n            },\n            \"evidence\": {\n              \"type\": \"integer\"\n            }\n          }\n        },\n        {\n          \"type\": \"object\",\n          \"required\": [\n            \"id\",\n            \"reply\"\n          ],\n          \"properties\": {\n            \"id\": {\n              \"type\": \"string\"\n            },\n            \"reply\": {\n              \"type\": \"string\"\n            },\n            \"evidence\": {\n              \"type\": \"integer\"\n            }\n          }\n        }\n      ]\n    }\n  }\n}";
+/* ================= THE LIVING LOOP: new tickets keep the brain current ================= */
+let LIVE={kind:'none',extra:[],candidates:[],log:[],unmatched:0};
+function actualSig(steps,t){
+  const did=sid=>t.acts.has(String(sid).split('-')[0]);
+  const subDid=st=>allSteps(st).some(s=>s.k!=='if'&&did(s.id));
+  const out=[];
+  (function walk(st){for(const s of st){if(s.k==='if'){const a=subDid(s.then),b=subDid(s.else||[]);const br=a&&!b?true:b&&!a?false:test(s.cond,t.fields,s.cond.v).r;walk(br?s.then:(s.else||[]))}else out.push(s.id)}})(steps);
+  return out.join('>');
+}
+// Situations Tacit hasn't seen before: learn them from the tickets nothing matched.
+function learnCandidates(rows,tag){
+  if(rows.length<4) return [];
+  let b;try{b=buildWorkspace(ENG.toCSV(rows))}catch(e){return []}
+  return b.procs.map(p=>{const id='new-'+p.id;const tickets=b.tickets.filter(t=>t.proc===p.id).map(t=>({...t,id:t.id+'·n',proc:id,fresh:true}));
+    return {proc:{...clone(p),id,isNew:true,version:1,since:'0000-01-01',changelog:[{v:1,date:tickets.length?tickets[tickets.length-1].date:NOW,text:`Spotted in ${tickets.length} new tickets ${tag||''}.`.trim()}]},tickets}}).filter(c=>c.tickets.length>=4);
+}
+function applyUpdates(b,updates){
+  const extra=[],unmatchedRows=[],log=[];const ids=new Set(b.tickets.map(t=>t.id));let k=0;
+  (updates||[]).forEach(u=>{let rows,ing;try{rows=ENG.parseCSV(u.csv);ing=ENG.ingest(b.res,rows)}catch(e){log.push({date:u.date,rows:0,matched:0,unmatched:0,name:u.name,error:e.message});return}
+    let m=0;
+    ing.forEach(x=>{const pid=x.cluster&&b.byCluster[x.cluster];const proc=pid&&(P(pid)||WS_DEFAULTS.find(p=>p.id===pid));
+      if(!proc){unmatchedRows.push(x.row);return}
+      m++;const t=x.t;let tid=String(t.id&&t.id!=='#'?t.id:'u'+(++k));if(!tid.startsWith('#'))tid='#'+tid;while(ids.has(tid))tid+='·';ids.add(tid);
+      extra.push({id:tid,date:normDate(t.date)||u.date,proc:pid,cust:t.company||'Customer',ctx:t.fields,subj:t.subject||'(no subject)',body:t.text,note:t.note,agent:t.agent||'Someone on the team',follows:[],sig:actualSig(proc.steps,t),fresh:true})});
+    log.push({date:u.date,rows:rows.length,matched:m,unmatched:rows.length-m,name:u.name||'Upload'})});
+  return {extra,candidates:learnCandidates(unmatchedRows,'nobody had handled before'),log,unmatched:unmatchedRows.length};
+}
+function csvLive(b){
+  const u=applyUpdates(b,S.updates);LIVE={kind:'csv',...u};
+  const acc=new Set(S.procs.map(p=>p.id));
+  TICKETS=b.tickets.concat(u.extra,...u.candidates.filter(c=>acc.has(c.proc.id)).map(c=>c.tickets)).sort((x,y)=>x.date<y.date?-1:1);
+  const last=TICKETS.length?TICKETS[TICKETS.length-1].date:b.now;NOW=last>b.now?last:b.now;RECENT=addDays(NOW,-60);
+  TBYID=Object.fromEntries(TICKETS.map(t=>[t.id,t]));
+}
+/* demo: two more weeks of Quillfield tickets, Sep 28 to Oct 12 */
+const DEMO_BASE_LEN=DEMO_TICKETS.length;let DEMO_WEEK=null;
+function demoWeekTickets(){
+  if(DEMO_WEEK) return DEMO_WEEK;
+  const base=Object.fromEntries(DEFAULT_PROCS.map(p=>[p.id,p]));const out=[];let n=0;
+  const mk=(proc,date,custName,ctx,subj,body,agent,ov)=>{const r=run(base[proc],ctx,ov);out.push({id:'#'+(5200+(n++)*3),proc,date,cust:custName,ctx,subj,body,agent,ov,sig:r.sig,note:r.exec.map(s=>s.n).join('; ')+'.',follows:[],fresh:true})};
+  const nonEnt=CUSTOMERS.filter(c=>c.plan!=='enterprise');
+  // The team quietly started honoring refunds up to 45 days after renewal.
+  [[33,900],[36,1450],[22,700],[41,1200],[38,600],[44,1800],[35,950],[27,1100],[40,500],[43,1300]].forEach(([d,amt],i)=>{const c=nonEnt[(i*3)%nonEnt.length];
+    mk('refund-after-renewal',addDays('2026-09-28',i+Math.floor(i/3)),c.name,{plan:c.plan,days_since_renewal:d,amount:amt},'Refund after renewal',`We renewed ${d} days ago (${money(amt)}) and have decided to switch providers. Can we get a refund?`,AGENTS[i%AGENTS.length],{r4:45})});
+  [[140,'2026-09-30'],[330,'2026-10-04'],[210,'2026-10-09']].forEach(([amt,date],i)=>{const c=CUSTOMERS[(i*5+2)%CUSTOMERS.length];mk('duplicate-charge',date,c.name,{amount:amt},'Charged twice',`We see two charges of ${money(amt)} on the same day for our subscription.`,AGENTS[(i+2)%AGENTS.length],{d2:250})});
+  [[{bank_status:'closed',hours_to_payrun:12},'2026-10-02'],[{bank_status:'microdeposit_pending',hours_to_payrun:40},'2026-10-08']].forEach(([ctx,date],i)=>{const c=CUSTOMERS[(i*7+1)%CUSTOMERS.length];mk('payroll-bank-rejected',date,c.name,ctx,'Pay run is blocked',ctx.bank_status==='closed'?'The bank rejected the ACH debit (R02, account closed). Payroll runs in 12 hours.':"It says our bank account isn't verified and payroll won't submit. Payroll runs in 40 hours.",AGENTS[(i+4)%AGENTS.length])});
+  // A situation nobody has written a procedure for: switching to unlimited PTO.
+  const pto=[['Oakline Logistics',64],['Redfern Construction',190],['Veridian Labs',95],['Stonebridge Hotels',1200],['Mossgate Schools',610],['Halcyon Fitness',34]].map(([co,emp],i)=>({ticket_id:'#'+(5260+i*3),created:addDays('2026-09-29',i*2),company:co,agent:AGENTS[(i+1)%AGENTS.length],
+    subject:'Switch to unlimited PTO',message:`We're moving all ${emp} employees to unlimited PTO next month. How do we turn off accrual without losing balances?`,
+    internal_note:emp>150?'Checked PTO policy settings; Exported current balances for the admin; Handed to Implementation team for a guided change; Sent confirmation to admin':'Checked PTO policy settings; Exported current balances for the admin; Switched policy to unlimited; Sent confirmation to admin',
+    employees:String(emp)}));
+  DEMO_WEEK={matched:out,candidates:learnCandidates(pto,'nobody had handled before'),rows:out.length+pto.length};
+  return DEMO_WEEK;
+}
+function demoLive(){
+  DEMO_TICKETS.length=DEMO_BASE_LEN;NOW='2026-09-27';RECENT='2026-07-29';LIVE={kind:'demo',extra:[],candidates:[],log:[],unmatched:0};
+  if(S.demoWeek){const w=demoWeekTickets();DEMO_TICKETS.push(...w.matched);const acc=new Set(S.procs.map(p=>p.id));w.candidates.filter(c=>acc.has(c.proc.id)).forEach(c=>DEMO_TICKETS.push(...c.tickets));
+    NOW='2026-10-12';RECENT=addDays(NOW,-60);LIVE={kind:'demo',extra:w.matched,candidates:w.candidates,log:[{date:NOW,rows:w.rows,matched:w.matched.length,unmatched:w.rows-w.matched.length,name:'Two more weeks of tickets'}],unmatched:w.rows-w.matched.length}}
+  TICKETS=DEMO_TICKETS;TBYID=Object.fromEntries(TICKETS.map(t=>[t.id,t]));
+}
+const pendingNew=()=>LIVE.candidates.filter(c=>!S.procs.some(p=>p.id===c.proc.id)&&!(S.ignoredNew||[]).includes(c.proc.id));
+function liveCardHTML(){
+  const last=LIVE.log[LIVE.log.length-1];
+  const summary=last?`<div class="tiles" style="margin-top:4px"><div><div class="v tnum">${last.rows}</div><div class="l">New tickets read</div></div><div><div class="v tnum">${last.matched}</div><div class="l">Matched a procedure you have</div></div><div><div class="v tnum" style="color:${refreshBadge().brainDrift.length?'var(--drift)':'inherit'}">${refreshBadge().brainDrift.length}</div><div class="l">Procedures that drifted</div></div><div><div class="v tnum" style="color:${pendingNew().length?'var(--accent)':'inherit'}">${pendingNew().length}</div><div class="l">New situations spotted</div></div></div>`:'';
+  let ctl;
+  if(LIVE.kind==='demo') ctl=S.demoWeek?`<p class="small muted">Tacit read Quillfield's tickets from Sep 28 to Oct 12 and checked each one against what it already knew.</p><div class="btn-row"><button class="btn sm" id="liveUndo">Undo, go back to Sep 27</button></div>`
+    :`<p class="muted">The brain only stays useful if it notices change. Feed it Quillfield's next two weeks of tickets and watch what it catches.</p><div class="btn-row"><button class="btn primary" id="liveDemo">Read the next two weeks of tickets</button><span class="small dim">Sep 28 to Oct 12 · 21 tickets</span></div>`;
+  else ctl=`<p class="muted">Upload tickets resolved since your last export, in the same format. Tacit matches each one to a procedure, checks whether the team still handles it the same way, and learns any situation it hasn't seen.</p>
+    <div class="btn-row"><label class="btn" for="liveFile" style="cursor:pointer">Choose a CSV of new tickets</label><input type="file" id="liveFile" accept=".csv,text/csv,text/plain" hidden><button class="btn sm ghost" id="livePasteBtn">Paste instead</button>${(S.updates||[]).length?'<button class="btn sm ghost" id="liveUndo">Remove the last upload</button>':''}</div>
+    <div id="livePaste" hidden class="stack"><div class="field"><label for="liveText">New tickets (CSV with the same columns)</label><textarea id="liveText" style="font-family:var(--mono);font-size:12.5px;min-height:120px"></textarea></div><div class="btn-row"><button class="btn primary sm" id="liveGo">Read these tickets</button></div></div>
+    ${(S.updates||[]).length?`<p class="small dim">${S.updates.length} upload${S.updates.length>1?'s':''} so far: ${LIVE.log.map(l=>`${esc(l.name)} (${l.rows} tickets${l.error?', '+esc(l.error):''})`).join(', ')}.</p>`:''}`;
+  const cands=pendingNew().map(c=>`<div class="card pad stack" style="border-color:var(--accent)"><div style="display:flex;justify-content:space-between;gap:12px;flex-wrap:wrap;align-items:flex-start"><div><div class="inputs"><span class="chip acc">New situation</span><span class="chip">${c.tickets.length} tickets</span></div><h3 style="font-size:20px;margin-top:8px">${esc(c.proc.name)}</h3><p class="small muted" style="margin-top:4px">Nothing in your library matched these tickets, so Tacit learned how the team handled them.</p></div>
+      <div class="btn-row"><button class="btn primary sm" data-addnew="${esc(c.proc.id)}">Add to the library</button><button class="btn sm ghost" data-ignorenew="${esc(c.proc.id)}">Not useful</button></div></div>
+      <ol class="flow">${c.proc.steps.map(s=>stepHTML(c.proc,s)).join('')}</ol>
+      <div class="who-line"><span class="avs">${[...new Set(c.tickets.map(t=>t.agent))].slice(0,4).map(a=>av(a,'sm')).join('')}</span><span>Learned from ${[...new Set(c.tickets.map(t=>firstName(t.agent)))].slice(0,3).map(esc).join(', ')}.</span></div></div>`).join('');
+  return `<div class="card pad stack"><div style="display:flex;justify-content:space-between;gap:10px;flex-wrap:wrap;align-items:baseline"><h3 style="font-size:19px">Keep the brain current</h3>${last?`<span class="small dim">Last read ${fd(NOW)}</span>`:''}</div>${ctl}${summary}<div id="liveErr"></div></div>${cands}`;
+}
+function wireLive(){
+  const go=()=>{CUR_WS=null;route()};
+  const d=$('#liveDemo');if(d)d.onclick=()=>{S.demoWeek=true;save();go();const w=demoWeekTickets();toast(`Read ${w.rows} new tickets. ${refreshBadge().brainDrift.length} procedures drifted, ${pendingNew().length} new situation spotted.`)};
+  const u=$('#liveUndo');if(u)u.onclick=()=>{if(LIVE.kind==='demo'){S.demoWeek=false;S.procs=S.procs.filter(p=>!p.isNew)}else{S.updates=(S.updates||[]).slice(0,-1)}save();go();toast('Undone')};
+  const addCsv=(text,name)=>{
+    let rows;try{rows=ENG.parseCSV(text);ENG.ingest(WS_CACHE[CUR_WS].res,rows)}catch(e){$('#liveErr').innerHTML=`<div class="form-err" role="alert">${esc(e.message||String(e))}</div>`;return}
+    const dates=rows.map(r=>normDate(r[WS_CACHE[CUR_WS].res.map.date]||'')).filter(Boolean).sort();
+    const next=(S.updates||[]).concat([{date:dates.length?dates[dates.length-1]:NOW,csv:text,name:name||'Upload '+((S.updates||[]).length+1),rows:rows.length}]);
+    if(JSON.stringify(next).length>900000){$('#liveErr').innerHTML='<div class="form-err" role="alert">That\'s more new tickets than this prototype keeps. Upload a few hundred at a time.</div>';return}
+    S.updates=next;save();go();const l=LIVE.log[LIVE.log.length-1]||{};toast(`Read ${l.rows||rows.length} tickets: ${l.matched||0} matched, ${refreshBadge().brainDrift.length} drift flags, ${pendingNew().length} new situations.`);
+  };
+  const f=$('#liveFile');if(f)f.onchange=e=>{const fl=e.target.files[0];if(!fl)return;const rd=new FileReader();rd.onload=()=>addCsv(String(rd.result),fl.name);rd.readAsText(fl)};
+  const pb=$('#livePasteBtn');if(pb)pb.onclick=()=>{$('#livePaste').hidden=false;$('#liveText').focus()};
+  const lg=$('#liveGo');if(lg)lg.onclick=()=>addCsv($('#liveText').value,'Pasted tickets');
+  $$('[data-addnew]').forEach(b=>b.onclick=()=>{const c=LIVE.candidates.find(x=>x.proc.id===b.dataset.addnew);if(!c)return;S.procs.push(clone(c.proc));save();UI.sel=c.proc.id;go();toast(`Added "${c.proc.name}". Ask ${firstName(c.proc.owner)} to confirm it.`)});
+  $$('[data-ignorenew]').forEach(b=>b.onclick=()=>{S.ignoredNew=(S.ignoredNew||[]).concat([b.dataset.ignorenew]);save();RENDER.drift();toast('Ignored. Tacit will keep watching.')});
+}
+
+/* ================= AGENT API: the executable format, callable by any agent ================= */
+function opsBundle(){return {ops:'0.3',company:wsName(),generated:NOW,procedures:S.procs.filter(p=>!p.draft).map(toOPS)}}
+const API={keys:[],newKey:null};
+function apiDefaults(){
+  if(isDemo()) return {subject:'Refund after renewal',message:'We renewed 20 days ago and want our $900 back.',facts:{plan:'growth',days_since_renewal:20,amount:900}};
+  const p=S.procs.find(x=>!x.draft);const t=p&&TICKETS.find(x=>x.proc===p.id);
+  return t?{subject:t.subj,message:t.body,facts:t.ctx}:{subject:'',message:'',facts:{}};
+}
+function renderApiCard(){
+  const el=$('#apiCard');if(!el)return;
+  const d=API.input||apiDefaults();const ws=activeWs(session());const onServer=SERVER.on&&ws.server;
+  const base=SERVER.on?location.origin:'https://YOUR-TACIT-SERVER';
+  const curl=`curl ${base}/api/v1/resolve \\\n  -H "Authorization: Bearer ${API.newKey||'tk_your_key'}" \\\n  -H "Content-Type: application/json" \\\n  -d '${JSON.stringify({subject:d.subject,message:d.message,facts:d.facts})}'`;
+  const tool=JSON.stringify({name:'tacit_resolve',description:"Look up exactly how this company handles a support situation. Call it before answering any support ticket. Returns the procedure, the facts still needed, the step-by-step plan, who to escalate to, and guardrails. If outcome is 'ask', ask the customer for missing_facts; if 'handoff', pass the ticket to a person.",input_schema:{type:'object',properties:{subject:{type:'string'},message:{type:'string',description:"The customer's message"},facts:{type:'object',description:'Known facts about the customer or ticket, keyed by field name (see each procedure\'s inputs)'}},required:['message']}},null,2);
+  el.innerHTML=`<div style="display:flex;justify-content:space-between;gap:10px;flex-wrap:wrap;align-items:baseline"><h3 style="font-size:19px">Connect your agent</h3><span class="chip ${onServer?'ok':''}">${onServer?'API live on this server':'Try it here'}</span></div>
+  <p class="muted" style="max-width:76ch">Your agent calls Tacit before it answers a ticket. Tacit picks the right procedure, tests each condition against the facts, and returns the exact plan, the facts still missing, and who to escalate to. It runs the same OPS bundle shown above, so what your team confirms is what your agent does.</p>
+  <div class="grid2" style="grid-template-columns:minmax(0,1fr) minmax(0,1.2fr)">
+    <div class="stack">
+      <div class="field"><label for="apiSubj">Subject</label><input type="text" id="apiSubj" value="${esc(d.subject||'')}"></div>
+      <div class="field"><label for="apiMsg">Customer message</label><textarea id="apiMsg" style="min-height:80px">${esc(d.message||'')}</textarea></div>
+      <div class="field"><label for="apiFacts">Facts (JSON)</label><textarea id="apiFacts" style="min-height:80px;font-family:var(--mono);font-size:12.5px">${esc(JSON.stringify(d.facts||{},null,1))}</textarea></div>
+      <div class="btn-row"><button class="btn primary" id="apiRun">Call resolve</button><span class="small dim">Runs the same code as <span class="mono">POST /api/v1/resolve</span></span></div>
+    </div>
+    <div class="stack"><p class="eyebrow">Response</p><pre class="code" id="apiOut" style="max-height:420px">Press "Call resolve".</pre></div>
+  </div>
+  <hr class="hr">
+  <div class="grid2">
+    <div class="stack"><p class="eyebrow">From your agent's code</p><pre class="code" style="white-space:pre-wrap">${esc(curl)}</pre>
+      ${onServer?`<div class="stack"><div class="btn-row"><button class="btn sm" id="apiNewKey">Create an API key</button><span class="small dim">For the workspace "${esc(ws.name)}"</span></div>${API.newKey?`<div class="quote" style="border-color:var(--ok)"><div class="src-l">Copy it now. It won't be shown again.</div><span class="mono">${esc(API.newKey)}</span></div>`:''}<div id="apiKeys" class="small muted"></div></div>`
+      :`<p class="small muted">${SERVER.on?'API keys belong to workspaces stored on this server. Open a workspace you created here.':'Live API keys need the Tacit server (see server/README.md). The console on the left runs the exact same code right now.'}</p>`}
+    </div>
+    <div class="stack"><p class="eyebrow">As a tool for Claude (or any agent)</p><pre class="code" style="max-height:300px">${esc(tool)}</pre><div class="btn-row"><button class="btn sm" id="apiCopyTool">Copy tool definition</button><a class="btn sm ghost" href="#" id="apiSchemaDl">Download the OPS schema</a></div></div>
+  </div>`;
+  $('#apiRun').onclick=()=>{let facts={};try{facts=JSON.parse($('#apiFacts').value||'{}')}catch(e){$('#apiOut').textContent='The facts aren\'t valid JSON: '+e.message;return}
+    API.input={subject:$('#apiSubj').value,message:$('#apiMsg').value,facts};
+    $('#apiOut').textContent=JSON.stringify(opsResolve(opsBundle(),API.input),null,2);markDone('tested')};
+  $('#apiCopyTool').onclick=async()=>{try{await navigator.clipboard.writeText(tool);toast('Copied the tool definition')}catch(e){toast('Select the text to copy it')}};
+  $('#apiSchemaDl').onclick=e=>{e.preventDefault();saveFile('ops-0.3.schema.json',OPS_SCHEMA_TEXT)};
+  const nk=$('#apiNewKey');if(nk)nk.onclick=async()=>{try{const r=await api('POST','/api/workspaces/'+ws.id+'/keys',{name:'Agent key'});API.newKey=r.key;renderApiCard();toast('Key created')}catch(e){toast(e.message)}};
+  if(onServer)api('GET','/api/workspaces/'+ws.id+'/keys').then(r=>{const k=$('#apiKeys');if(k)k.innerHTML=r.keys.length?'Active keys: '+r.keys.map(x=>`<span class="mono">${esc(x.prefix)}…</span> ${x.last_used?'last used '+esc(x.last_used.slice(0,10)):'never used'} <button class="chip" data-revoke="${esc(x.prefix)}">revoke</button>`).join(' · '):'No keys yet.';$$('[data-revoke]').forEach(b=>b.onclick=()=>api('DELETE','/api/workspaces/'+ws.id+'/keys/'+b.dataset.revoke).then(()=>{toast('Key revoked');renderApiCard()}).catch(e=>toast(e.message)))}).catch(()=>{});
+}
+
 RENDER.learn=RENDER.lab;
-window.TacitEngine={ENG,buildSampleRows,DOCS};
+window.TacitEngine={ENG,buildSampleRows,DOCS,get bundle(){return opsBundle()},opsResolve};
 
 /* ---------------- Claude runtime (optional) ---------------- */
 if(window.claude&&typeof window.claude.use==='function'){

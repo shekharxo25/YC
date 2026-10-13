@@ -1,0 +1,805 @@
+{
+ "ops": "0.3",
+ "company": "Quillfield (demo)",
+ "generated": "2026-09-27",
+ "procedures": [
+  {
+   "ops": "0.3",
+   "id": "refund-after-renewal",
+   "name": "Refund request after renewal",
+   "version": 4,
+   "owner": "Dana M.",
+   "trigger": {
+    "signals": [
+     "refund",
+     "money back",
+     "renewed",
+     "renewal",
+     "cancel",
+     "annual charge"
+    ]
+   },
+   "inputs": [
+    {
+     "name": "plan",
+     "source": "Salesforce"
+    },
+    {
+     "name": "days_since_renewal",
+     "source": "Billing"
+    },
+    {
+     "name": "amount",
+     "source": "Billing"
+    }
+   ],
+   "steps": [
+    {
+     "id": "r1",
+     "check": "Open the renewal invoice in Billing. Note the days since renewal and the amount.",
+     "evidence": 26
+    },
+    {
+     "if": {
+      "field": "plan",
+      "op": "eq",
+      "value": "enterprise"
+     },
+     "label": "Plan is Enterprise",
+     "then": [
+      {
+       "id": "r3",
+       "escalate": "Hand to the account manager in Salesforce. Do not promise a refund.",
+       "owner": "Account management",
+       "evidence": 5
+      }
+     ],
+     "else": [
+      {
+       "if": {
+        "field": "days_since_renewal",
+        "op": "lte",
+        "value": 30
+       },
+       "label": "Renewed 30 days ago or less",
+       "then": [
+        {
+         "id": "r5",
+         "do": "Issue a full refund in Billing with reason code RNW-30.",
+         "evidence": 14
+        }
+       ],
+       "else": [
+        {
+         "if": {
+          "field": "amount",
+          "op": "gt",
+          "value": 2000
+         },
+         "label": "Credit is over $2,000",
+         "then": [
+          {
+           "id": "r7",
+           "escalate": "Request approval in #finance-approvals, then issue a prorated credit.",
+           "owner": "Finance",
+           "evidence": 2
+          }
+         ],
+         "else": [
+          {
+           "id": "r8",
+           "do": "Issue a prorated credit for the unused months.",
+           "evidence": 5
+          }
+         ]
+        }
+       ]
+      }
+     ]
+    },
+    {
+     "id": "r9",
+     "reply": "Confirm the amount and that funds arrive in 5 to 7 business days.",
+     "evidence": 26
+    }
+   ],
+   "guardrails": [
+    "Never promise an Enterprise refund in writing. The account manager decides."
+   ],
+   "provenance": {
+    "tickets": 26,
+    "agents": 5,
+    "agreement": 1,
+    "confidence": 0.94,
+    "since": "2026-03-09",
+    "sources": [
+     "Slack: #support-leads · Mar 9"
+    ]
+   },
+   "drift": {
+    "open": false
+   },
+   "helpCenter": "KB-112"
+  },
+  {
+   "ops": "0.3",
+   "id": "payroll-bank-rejected",
+   "name": "Payroll blocked by a bank rejection",
+   "version": 2,
+   "owner": "Ren T.",
+   "trigger": {
+    "signals": [
+     "bank",
+     "ach",
+     "rejected",
+     "payroll failed",
+     "debit",
+     "funding",
+     "returned",
+     "verified"
+    ]
+   },
+   "inputs": [
+    {
+     "name": "bank_status",
+     "source": "Payments console"
+    },
+    {
+     "name": "hours_to_payrun",
+     "source": "Payroll calendar"
+    }
+   ],
+   "steps": [
+    {
+     "id": "a1",
+     "check": "Open the Payments console and check the verification status of the funding account.",
+     "evidence": 14
+    },
+    {
+     "if": {
+      "field": "bank_status",
+      "op": "eq",
+      "value": "microdeposit_pending"
+     },
+     "label": "Micro-deposits are still pending",
+     "then": [
+      {
+       "id": "a3",
+       "do": "Resend micro-deposits and ask the admin to verify within 24 hours.",
+       "evidence": 8
+      }
+     ],
+     "else": [
+      {
+       "if": {
+        "field": "bank_status",
+        "op": "eq",
+        "value": "closed"
+       },
+       "label": "Account is closed or frozen",
+       "then": [
+        {
+         "id": "a5",
+         "do": "Put the pay run on hold and request a new funding account with a voided check.",
+         "evidence": 2
+        }
+       ],
+       "else": [
+        {
+         "id": "a6",
+         "do": "Retry the debit once and attach the bank return code to the ticket.",
+         "evidence": 4
+        }
+       ]
+      }
+     ]
+    },
+    {
+     "if": {
+      "field": "hours_to_payrun",
+      "op": "lt",
+      "value": 24
+     },
+     "label": "Pay run is less than 24 hours away",
+     "then": [
+      {
+       "id": "a8",
+       "escalate": "Page Payroll Ops on-call as Sev 2. Engineering does not own this.",
+       "owner": "Payroll Ops on-call",
+       "evidence": 5
+      }
+     ],
+     "else": []
+    }
+   ],
+   "guardrails": [
+    "Do not send failed payrolls to Engineering. Payroll Ops owns them.",
+    "Never retry a debit more than once."
+   ],
+   "provenance": {
+    "tickets": 14,
+    "agents": 5,
+    "agreement": 1,
+    "confidence": 0.91,
+    "since": "2026-01-01",
+    "sources": [
+     "Slack: #payroll-ops · Jan 13"
+    ]
+   },
+   "drift": {
+    "open": false
+   },
+   "helpCenter": "KB-204"
+  },
+  {
+   "ops": "0.3",
+   "id": "sso-lockout",
+   "name": "Admin locked out of SSO",
+   "version": 1,
+   "owner": "Ade O.",
+   "trigger": {
+    "signals": [
+     "sso",
+     "saml",
+     "okta",
+     "locked out",
+     "single sign",
+     "sign in"
+    ]
+   },
+   "inputs": [
+    {
+     "name": "is_listed_admin",
+     "source": "Account roles"
+    },
+    {
+     "name": "idp",
+     "source": "SSO settings"
+    }
+   ],
+   "steps": [
+    {
+     "id": "s1",
+     "check": "Confirm the requester is listed as an admin on the account.",
+     "evidence": 10
+    },
+    {
+     "if": {
+      "field": "is_listed_admin",
+      "op": "eq",
+      "value": false
+     },
+     "label": "Requester is not a listed admin",
+     "then": [
+      {
+       "id": "s3",
+       "reply": "Ask a listed admin to open the request. Share no account details."
+      }
+     ],
+     "else": [
+      {
+       "id": "s4",
+       "do": "Verify identity by calling back the phone number on file.",
+       "evidence": 10
+      },
+      {
+       "if": {
+        "field": "idp",
+        "op": "eq",
+        "value": "okta"
+       },
+       "label": "Identity provider is Okta",
+       "then": [
+        {
+         "id": "s6",
+         "check": "Check the SAML signing certificate expiry in SSO settings and send the renewal steps.",
+         "evidence": 2
+        }
+       ],
+       "else": [
+        {
+         "id": "s7",
+         "escalate": "Move to the Tier 2 Identity queue with the IdP metadata attached.",
+         "owner": "Tier 2 Identity",
+         "evidence": 8
+        }
+       ]
+      }
+     ]
+    }
+   ],
+   "guardrails": [
+    "Never verify identity by email. Call back the number on file.",
+    "Never reset passwords for SSO accounts."
+   ],
+   "provenance": {
+    "tickets": 10,
+    "agents": 4,
+    "agreement": 1,
+    "confidence": 0.86,
+    "since": "2026-01-01",
+    "sources": [
+     "Call: Gong · Tier 2 training · Feb 20"
+    ]
+   },
+   "drift": {
+    "open": false
+   },
+   "helpCenter": "KB-087"
+  },
+  {
+   "ops": "0.3",
+   "id": "offboarding-export",
+   "name": "Data export for a leaving customer",
+   "version": 1,
+   "owner": "Priya N.",
+   "trigger": {
+    "signals": [
+     "export",
+     "all our data",
+     "switching providers",
+     "leaving",
+     "offboard",
+     "payroll history"
+    ]
+   },
+   "inputs": [
+    {
+     "name": "arr",
+     "source": "Salesforce"
+    }
+   ],
+   "steps": [
+    {
+     "id": "e1",
+     "check": "Look up ARR and the renewal date in Salesforce.",
+     "evidence": 9
+    },
+    {
+     "if": {
+      "field": "arr",
+      "op": "gt",
+      "value": 20000
+     },
+     "label": "ARR is over $20,000",
+     "then": [
+      {
+       "id": "e3",
+       "escalate": "Route to Retention before starting. Wait one business day for their call.",
+       "owner": "Retention",
+       "evidence": 4
+      }
+     ],
+     "else": []
+    },
+    {
+     "id": "e4",
+     "do": "Generate the full export: payroll history, tax filings and employee records. Deliver within 5 business days.",
+     "evidence": 9
+    },
+    {
+     "id": "e5",
+     "reply": "Share the secure download link and say it expires in 7 days.",
+     "evidence": 9
+    }
+   ],
+   "guardrails": [
+    "Do not start the export before Retention has had one business day."
+   ],
+   "provenance": {
+    "tickets": 9,
+    "agents": 5,
+    "agreement": 1,
+    "confidence": 0.85,
+    "since": "2026-01-01",
+    "sources": [
+     "Slack: #cx-retention · Feb 2"
+    ]
+   },
+   "drift": {
+    "open": false
+   },
+   "helpCenter": null
+  },
+  {
+   "ops": "0.3",
+   "id": "vip-brightwater",
+   "name": "Brightwater Clinics: second review on payroll changes",
+   "version": 1,
+   "owner": "Theo K.",
+   "trigger": {
+    "signals": [
+     "bonus",
+     "payroll",
+     "pay rate",
+     "off-cycle",
+     "deduction",
+     "run"
+    ],
+    "customer": "Brightwater Clinics"
+   },
+   "inputs": [
+    {
+     "name": "customer",
+     "source": "Ticket requester"
+    }
+   ],
+   "steps": [
+    {
+     "if": {
+      "field": "customer",
+      "op": "eq",
+      "value": "Brightwater Clinics"
+     },
+     "label": "Customer is Brightwater Clinics",
+     "then": [
+      {
+       "id": "v2",
+       "do": "Tag the ticket #vip-brightwater and make the change as a draft only.",
+       "evidence": 7
+      },
+      {
+       "id": "v3",
+       "escalate": "Ask a Tier 2 lead to double-check the draft before it is submitted.",
+       "owner": "Tier 2 lead",
+       "evidence": 7
+      }
+     ],
+     "else": []
+    },
+    {
+     "id": "v4",
+     "reply": "Tell the customer the change is queued for review and will be confirmed within 4 business hours.",
+     "evidence": 7
+    }
+   ],
+   "guardrails": [
+    "Never submit a Brightwater payroll change without a second reviewer (contract clause 7.2)."
+   ],
+   "provenance": {
+    "tickets": 7,
+    "agents": 5,
+    "agreement": 1,
+    "confidence": 0.81,
+    "since": "2026-01-01",
+    "sources": [
+     "Call: Gong · Brightwater QBR · Jan 14"
+    ]
+   },
+   "drift": {
+    "open": false
+   },
+   "helpCenter": null
+  },
+  {
+   "ops": "0.3",
+   "id": "duplicate-charge",
+   "name": "Duplicate card charge",
+   "version": 1,
+   "owner": "Marcus L.",
+   "trigger": {
+    "signals": [
+     "charged twice",
+     "duplicate",
+     "double charge",
+     "two charges",
+     "two identical"
+    ]
+   },
+   "inputs": [
+    {
+     "name": "amount",
+     "source": "Stripe"
+    }
+   ],
+   "steps": [
+    {
+     "id": "d1",
+     "check": "Find both captures in Stripe and confirm they belong to the same invoice.",
+     "evidence": 17
+    },
+    {
+     "if": {
+      "field": "amount",
+      "op": "lte",
+      "value": 500
+     },
+     "label": "Duplicate is $500 or less",
+     "then": [
+      {
+       "id": "d3",
+       "do": "Refund the duplicate now. No approval needed.",
+       "evidence": 9
+      }
+     ],
+     "else": [
+      {
+       "id": "d4",
+       "escalate": "Ask the billing lead to approve the refund.",
+       "owner": "Billing lead",
+       "evidence": 8
+      }
+     ]
+    },
+    {
+     "id": "d5",
+     "reply": "Say which charge was refunded and share the Stripe receipt.",
+     "evidence": 17
+    }
+   ],
+   "guardrails": [
+    "Refund the duplicate, never the original charge."
+   ],
+   "provenance": {
+    "tickets": 17,
+    "agents": 6,
+    "agreement": 0.71,
+    "confidence": 0.66,
+    "since": "2026-01-01",
+    "sources": [
+     "Slack: #billing · Aug 1"
+    ]
+   },
+   "drift": {
+    "open": true,
+    "recent_agreement": 0.38
+   },
+   "helpCenter": null
+  },
+  {
+   "ops": "0.3",
+   "id": "w2-correction",
+   "name": "W-2 correction",
+   "version": 2,
+   "owner": "Hana S.",
+   "trigger": {
+    "signals": [
+     "w-2",
+     "w2",
+     "correction",
+     "wrong ssn",
+     "tax form",
+     "box 12"
+    ]
+   },
+   "inputs": [
+    {
+     "name": "after_jan31",
+     "source": "Tax calendar"
+    },
+    {
+     "name": "plan",
+     "source": "Salesforce"
+    }
+   ],
+   "steps": [
+    {
+     "id": "w1",
+     "check": "Get the correction from the admin in writing and note the tax year.",
+     "evidence": 8
+    },
+    {
+     "if": {
+      "field": "after_jan31",
+      "op": "eq",
+      "value": true
+     },
+     "label": "Forms were already filed (after Jan 31)",
+     "then": [
+      {
+       "id": "w3",
+       "do": "File a W-2c with the SSA and send the corrected copy to the employee.",
+       "evidence": 8
+      },
+      {
+       "if": {
+        "field": "plan",
+        "op": "neq",
+        "value": "enterprise"
+       },
+       "label": "Plan is not Enterprise",
+       "then": [
+        {
+         "id": "w5",
+         "do": "Add the $45 correction fee to the next invoice.",
+         "evidence": 7
+        }
+       ],
+       "else": []
+      }
+     ],
+     "else": [
+      {
+       "id": "w6",
+       "do": "Correct the W-2 before filing and regenerate the PDF."
+      }
+     ]
+    }
+   ],
+   "guardrails": [
+    "Get the correction from the admin in writing, never from chat."
+   ],
+   "provenance": {
+    "tickets": 8,
+    "agents": 5,
+    "agreement": 1,
+    "confidence": 0.8,
+    "since": "2026-01-01",
+    "sources": []
+   },
+   "drift": {
+    "open": false
+   },
+   "helpCenter": "KB-150"
+  },
+  {
+   "ops": "0.3",
+   "id": "employee-paystub",
+   "name": "Employee can't see their paystub",
+   "version": 1,
+   "owner": "Dana M.",
+   "trigger": {
+    "signals": [
+     "paystub",
+     "pay stub",
+     "i'm an employee",
+     "employee",
+     "my pay"
+    ]
+   },
+   "inputs": [
+    {
+     "name": "role",
+     "source": "Account roles"
+    }
+   ],
+   "steps": [
+    {
+     "id": "p1",
+     "check": "Confirm from the account roles that the person is an employee, not an admin.",
+     "evidence": 12
+    },
+    {
+     "id": "p2",
+     "reply": "Explain that their employer controls access and that you have asked the admin to resend the invite.",
+     "evidence": 12
+    },
+    {
+     "id": "p3",
+     "do": "Send the company admin the one-click resend-invite link for that employee.",
+     "evidence": 12
+    }
+   ],
+   "guardrails": [
+    "Never change employee credentials or share pay data with an employee directly. The employer controls access."
+   ],
+   "provenance": {
+    "tickets": 12,
+    "agents": 6,
+    "agreement": 1,
+    "confidence": 0.89,
+    "since": "2026-01-01",
+    "sources": [
+     "Slack: #support-leads · Jan 22"
+    ]
+   },
+   "drift": {
+    "open": false
+   },
+   "helpCenter": "KB-031"
+  },
+  {
+   "ops": "0.3",
+   "id": "wage-garnishment",
+   "name": "Wage garnishment order received",
+   "version": 1,
+   "owner": "Owen B.",
+   "trigger": {
+    "signals": [
+     "garnish",
+     "court order",
+     "child support",
+     "levy",
+     "withholding order"
+    ]
+   },
+   "inputs": [],
+   "steps": [
+    {
+     "id": "g1",
+     "escalate": "Forward the order to the Compliance queue within 1 business day. Compliance sets up the deduction.",
+     "owner": "Compliance",
+     "evidence": 6
+    },
+    {
+     "id": "g2",
+     "reply": "Acknowledge receipt and say Compliance will confirm the setup. Give no legal advice.",
+     "evidence": 6
+    }
+   ],
+   "guardrails": [
+    "Do not give legal advice or estimate deduction amounts."
+   ],
+   "provenance": {
+    "tickets": 6,
+    "agents": 3,
+    "agreement": 1,
+    "confidence": 0.75,
+    "since": "2026-01-01",
+    "sources": []
+   },
+   "drift": {
+    "open": false
+   },
+   "helpCenter": null
+  },
+  {
+   "ops": "0.3",
+   "id": "state-registration",
+   "name": "Registering payroll tax in a new state",
+   "version": 1,
+   "owner": "Hana S.",
+   "trigger": {
+    "signals": [
+     "new state",
+     "registration",
+     "register",
+     "state tax",
+     "hired someone in",
+     "moved to"
+    ]
+   },
+   "inputs": [
+    {
+     "name": "state",
+     "source": "Ticket or employee address"
+    }
+   ],
+   "steps": [
+    {
+     "id": "t1",
+     "check": "Check which states already have registrations on the account.",
+     "evidence": 9
+    },
+    {
+     "if": {
+      "field": "state",
+      "op": "in",
+      "value": [
+       "CA",
+       "NY"
+      ]
+     },
+     "label": "New state is California or New York",
+     "then": [
+      {
+       "id": "t3",
+       "reply": "Ask the customer to register with the state themselves and send us the employer account number.",
+       "evidence": 5
+      }
+     ],
+     "else": [
+      {
+       "id": "t4",
+       "do": "File the registration for the customer and set expectations of 2 to 3 weeks.",
+       "evidence": 4
+      }
+     ]
+    }
+   ],
+   "guardrails": [],
+   "provenance": {
+    "tickets": 9,
+    "agents": 5,
+    "agreement": 1,
+    "confidence": 0.82,
+    "since": "2026-01-01",
+    "sources": []
+   },
+   "drift": {
+    "open": false
+   },
+   "helpCenter": null
+  }
+ ]
+}

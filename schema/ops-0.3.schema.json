@@ -1,0 +1,82 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "tacit-ops/0.3",
+  "title": "Open Procedure Schema (OPS) 0.3",
+  "description": "A portable, executable description of how a company handles a situation: when it applies, the facts it needs, the steps with their conditions, the guardrails, and the evidence behind it. Produced by Tacit, executable by any agent.",
+  "type": "object",
+  "required": ["ops", "procedures"],
+  "properties": {
+    "ops": { "const": "0.3" },
+    "company": { "type": "string" },
+    "generated": { "type": "string", "description": "ISO date the bundle was produced." },
+    "procedures": { "type": "array", "items": { "$ref": "#/$defs/procedure" } }
+  },
+  "$defs": {
+    "procedure": {
+      "type": "object",
+      "required": ["ops", "id", "name", "version", "trigger", "steps", "provenance"],
+      "properties": {
+        "ops": { "const": "0.3" },
+        "id": { "type": "string", "pattern": "^[a-z0-9][a-z0-9-]*$" },
+        "name": { "type": "string" },
+        "version": { "type": "integer", "minimum": 1 },
+        "owner": { "type": "string", "description": "The person who confirms changes." },
+        "trigger": {
+          "type": "object",
+          "required": ["signals"],
+          "properties": {
+            "signals": { "type": "array", "items": { "type": "string" }, "description": "Phrases that route a ticket here." },
+            "customer": { "type": "string", "description": "Only applies to this customer." }
+          }
+        },
+        "inputs": {
+          "type": "array",
+          "items": { "type": "object", "required": ["name"], "properties": { "name": { "type": "string" }, "source": { "type": "string" } } }
+        },
+        "steps": { "type": "array", "items": { "$ref": "#/$defs/step" } },
+        "guardrails": { "type": "array", "items": { "type": "string" } },
+        "provenance": {
+          "type": "object",
+          "required": ["tickets", "confidence"],
+          "properties": {
+            "tickets": { "type": "integer", "minimum": 0 },
+            "agents": { "type": "integer", "minimum": 0 },
+            "agreement": { "type": "number", "minimum": 0, "maximum": 1 },
+            "confidence": { "type": "number", "minimum": 0, "maximum": 1, "description": "Agents should hand off below 0.60." },
+            "since": { "type": "string" },
+            "sources": { "type": "array", "items": { "type": "string" } }
+          }
+        },
+        "drift": { "type": "object", "properties": { "open": { "type": "boolean" }, "recent_agreement": { "type": "number" } } },
+        "helpCenter": { "type": ["string", "null"] }
+      }
+    },
+    "condition": {
+      "type": "object",
+      "required": ["field", "op", "value"],
+      "properties": {
+        "field": { "type": "string" },
+        "op": { "enum": ["eq", "neq", "lte", "lt", "gt", "in"] },
+        "value": {}
+      }
+    },
+    "step": {
+      "oneOf": [
+        {
+          "type": "object",
+          "required": ["if", "then"],
+          "properties": {
+            "if": { "$ref": "#/$defs/condition" },
+            "label": { "type": "string" },
+            "then": { "type": "array", "items": { "$ref": "#/$defs/step" } },
+            "else": { "type": "array", "items": { "$ref": "#/$defs/step" } }
+          }
+        },
+        { "type": "object", "required": ["id", "check"], "properties": { "id": { "type": "string" }, "check": { "type": "string" }, "evidence": { "type": "integer" } } },
+        { "type": "object", "required": ["id", "do"], "properties": { "id": { "type": "string" }, "do": { "type": "string" }, "evidence": { "type": "integer" } } },
+        { "type": "object", "required": ["id", "escalate"], "properties": { "id": { "type": "string" }, "escalate": { "type": "string" }, "owner": { "type": "string" }, "evidence": { "type": "integer" } } },
+        { "type": "object", "required": ["id", "reply"], "properties": { "id": { "type": "string" }, "reply": { "type": "string" }, "evidence": { "type": "integer" } } }
+      ]
+    }
+  }
+}

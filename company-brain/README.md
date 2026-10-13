@@ -4,6 +4,12 @@ A working prototype of YC Request for Startups #17, "Company Brain". Tacit reads
 
 > Demo build. Quillfield, a payroll company, and all of its customers and tickets are fictional. The 118 tickets are generated from a fixed seed, so every load is identical.
 
+## The core loop (what makes Tacit different)
+1. **Extract procedures, not documents.** The engine learns steps, conditions and thresholds from resolved tickets (see *The live engine* below).
+2. **Keep it current.** Go to **Drift → Keep the brain current**. In your workspace, upload tickets resolved since the last export. Tacit matches each one to an existing procedure using the workspace's own vocabulary, re-checks agreement, and flags drift with the new rule and the date it first mattered. Tickets that match nothing are clustered into **new situations** you can add to the library. In the demo, **Read the next two weeks of tickets** shows it catching the refund window moving from 30 to 45 days, and spotting "Switch to unlimited PTO", a situation nobody had written down.
+3. **Emit an executable format.** Procedures export as **OPS 0.3** (`schema/ops-0.3.schema.json`, a published JSON Schema) and as SKILL.md. On the Tacit server, agents call **`POST /api/v1/resolve`** with a workspace API key and get back the procedure, the facts still missing, a step-by-step plan, who to escalate to and the guardrails. With `draft_reply: true`, the response also includes a Claude-drafted reply. **Export → Connect your agent** has a console that runs the same runtime (`server/ops-runtime.mjs`, copied into the page by `tools/sync-runtime.mjs`), a curl example, a Claude tool definition, and key management.
+4. **Confidence and provenance.** Every step shows its tickets, people and confidence. Below 0.60 the API returns `handoff`, and a missing fact returns `ask` instead of a guess.
+
 ## Real components
 The same page runs in two places:
 

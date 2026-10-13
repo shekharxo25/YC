@@ -4,6 +4,7 @@ COPY server/package.json server/package-lock.json ./server/
 RUN cd server && npm ci --omit=dev
 COPY server ./server
 COPY company-brain/index.html ./company-brain/index.html
+COPY schema ./schema
 ENV PORT=8787 TACIT_DB=/data/tacit.db
 VOLUME /data
 EXPOSE 8787
