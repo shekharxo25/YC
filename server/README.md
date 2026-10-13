@@ -10,6 +10,7 @@ This server runs the full Tacit product. The page is the same one published at t
 | **Zendesk import** | `POST /api/connectors/zendesk/import` reads solved tickets, their comments, assignees and custom fields through the Zendesk API with an API token. The token is used once and never stored. |
 | **Agent API** | `POST /api/v1/resolve` and `GET /api/v1/procedures[/:id]` run the workspace's published OPS bundle through `ops-runtime.mjs`. They're authenticated by workspace API keys (`tk_…`, stored hashed, revocable, rate-limited to 120 calls a minute per key) and allow cross-origin calls. |
 | **OPS schema** | `GET /schema/ops-0.3.json` serves the published JSON Schema for procedure bundles. |
+| **Automatic sync** | Connect Zendesk once and the server checks for newly solved tickets on a schedule (every 6 hours by default). New tickets are appended to the workspace, tickets already synced are skipped, and the app shows drift and new situations on the next open. The token is stored encrypted with AES-256-GCM, keyed from `TACIT_SECRET`; sync is off without it. You can also press **Sync now** on the Drift page. |
 | **Lead capture** | `POST /api/waitlist` stores "Book a pilot" requests and connector waitlist sign-ups. |
 
 It uses one dependency (`@anthropic-ai/sdk`) and needs Node 22.13 or later.
@@ -33,6 +34,7 @@ Open http://localhost:8787, create an account, then upload a CSV or import from 
 | `TACIT_AI_DAILY_LIMIT` | `200` | AI requests per user per day |
 | `TACIT_DB` | `server/data/tacit.db` | SQLite file |
 | `COOKIE_SECURE` | – | Set to `1` behind HTTPS |
+| `TACIT_SECRET` | – | Long random string. It encrypts stored Zendesk tokens and turns on automatic sync. |
 
 ## Deploy
 
@@ -49,7 +51,7 @@ This works on any container host with a persistent volume, such as Fly.io, Rende
 npm test
 ```
 
-This starts a stand-in Anthropic API and the server on random ports, then runs 23 checks: sign-up and login, sessions, workspace storage, the request-forgery guard, the AI request shape (model, fallback), JSON parsing, refusal handling, metering, Zendesk input validation and the waitlist. It also checks that the exported bundle validates against the OPS schema, that the runtime resolves, asks, escalates and hands off correctly, that the app's copy of the runtime is in sync, and that the agent API works with keys, CORS and revocation. It needs no API key or network.
+This starts a stand-in Anthropic API and the server on random ports, then runs 25 checks: sign-up and login, sessions, workspace storage, the request-forgery guard, the AI request shape (model, fallback), JSON parsing, refusal handling, metering, Zendesk input validation and the waitlist. It also checks that the exported bundle validates against the OPS schema, that the runtime resolves, asks, escalates and hands off correctly, that the app's copy of the runtime is in sync, that the agent API works with keys, CORS and revocation, and that Zendesk import and automatic sync work against a stand-in for Zendesk's API: named columns, a rejected token, encrypted storage, only new tickets pulled, and synced tickets surviving a browser's stale save. It needs no API key or network.
 
 ## API
 
@@ -82,6 +84,10 @@ POST   /api/v1/resolve                   { message, subject?, facts?, procedure_
 GET    /api/v1/procedures                the OPS 0.3 bundle
 GET    /api/v1/procedures/:id            one procedure
 GET    /schema/ops-0.3.json              the schema (public)
+GET    /api/workspaces/:id/connector     automatic-sync status (the token is never returned)
+POST   /api/workspaces/:id/connector     { subdomain, email, token, interval_h? }  (checks the credentials, then stores them encrypted)
+POST   /api/workspaces/:id/connector/sync   sync now
+DELETE /api/workspaces/:id/connector     turn sync off and delete the token
 ```
 
 Example:
@@ -91,9 +97,22 @@ curl https://your-tacit-server/api/v1/resolve -H "Authorization: Bearer tk_..." 
   -d '{"message":"We renewed 20 days ago and want a refund","facts":{"plan":"growth","days_since_renewal":20,"amount":900}}'
 ```
 
+### Browser end-to-end test
+
+```bash
+NODE_PATH=$(npm root -g) node test/e2e-zendesk.mjs     # needs Playwright and Chromium
+```
+
+This drives a real browser through the whole loop against the Zendesk stand-in (`test/mock-zendesk.mjs`, built from Zendesk's documented search, comments, users and ticket-fields responses):
+1. Sign up and import 125 tickets; Tacit learns 10 procedures.
+2. New solved tickets arrive, and **Sync now** pulls them in.
+3. Tacit flags the refund rule moving from 30 to 45 days and learns "Switch to unlimited PTO".
+4. A second sync pulls no duplicates, and the scheduler syncs on its own.
+5. After the drift is accepted, the agent API answers from the updated procedure.
+
 ## Not built yet
 
 - Email verification and password reset (these need an email provider)
 - Team workspaces shared between several users, and roles
-- Scheduled re-sync from Zendesk (today it's a one-time import you can repeat)
+- Verification against a live Zendesk account and the real Anthropic API. Both are exercised against stand-ins that follow their documented APIs; the first real run needs your credentials.
 - Intercom and Freshdesk connectors (use their CSV exports for now)

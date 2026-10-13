@@ -20,7 +20,10 @@ const MAX_CSV_BYTES = 5 * 1024 * 1024;
 const MAX_STATE_BYTES = 1024 * 1024;
 const MAX_AI_INPUT = 64 * 1024;
 const SESSION_DAYS = 30;
-const VERSION = "0.5.0";
+const VERSION = "0.6.0";
+const SECRET = process.env.TACIT_SECRET || "";            // encrypts stored connector credentials; auto-sync is off without it
+const ZENDESK_BASE = process.env.TACIT_ZENDESK_BASE || ""; // tests only: point the importer at a stand-in
+const SYNC_TICK_MS = Number(process.env.TACIT_SYNC_TICK_MS || 5 * 60_000);
 const SCHEMA_FILE = path.join(here, "..", "schema", "ops-0.3.schema.json");
 
 /* ---------------- database ---------------- */
@@ -40,6 +43,9 @@ db.exec(`
     input_tokens INTEGER NOT NULL DEFAULT 0, output_tokens INTEGER NOT NULL DEFAULT 0, PRIMARY KEY (user_id, day));
   CREATE TABLE IF NOT EXISTS api_keys (key_hash TEXT PRIMARY KEY, prefix TEXT UNIQUE NOT NULL, workspace_id TEXT NOT NULL,
     user_id TEXT NOT NULL, name TEXT, created TEXT NOT NULL, last_used TEXT, calls INTEGER NOT NULL DEFAULT 0);
+  CREATE TABLE IF NOT EXISTS connectors (workspace_id TEXT PRIMARY KEY, user_id TEXT NOT NULL, kind TEXT NOT NULL,
+    subdomain TEXT NOT NULL, email TEXT NOT NULL, token_enc TEXT NOT NULL, interval_h INTEGER NOT NULL DEFAULT 6,
+    last_sync TEXT, last_status TEXT, last_rows INTEGER, seen_ids TEXT NOT NULL DEFAULT '[]', created TEXT NOT NULL);
   CREATE TABLE IF NOT EXISTS waitlist (id INTEGER PRIMARY KEY AUTOINCREMENT, email TEXT NOT NULL, name TEXT,
     company TEXT, team_size TEXT, helpdesk TEXT, source TEXT, created TEXT NOT NULL);
 `);
@@ -47,6 +53,19 @@ const q = (sql) => db.prepare(sql);
 const now = () => new Date().toISOString();
 const newId = (p) => p + crypto.randomBytes(9).toString("base64url");
 const sha256 = (s) => crypto.createHash("sha256").update(s).digest("hex");
+
+/* ---------------- secrets at rest (AES-256-GCM) ---------------- */
+const secretKey = () => crypto.createHash("sha256").update("tacit-connector:" + SECRET).digest();
+function seal(text) {
+  const iv = crypto.randomBytes(12); const c = crypto.createCipheriv("aes-256-gcm", secretKey(), iv);
+  const enc = Buffer.concat([c.update(text, "utf8"), c.final()]);
+  return [iv, c.getAuthTag(), enc].map((b) => b.toString("base64url")).join(".");
+}
+function unseal(box) {
+  const [iv, tag, enc] = box.split(".").map((x) => Buffer.from(x, "base64url"));
+  const d = crypto.createDecipheriv("aes-256-gcm", secretKey(), iv); d.setAuthTag(tag);
+  return Buffer.concat([d.update(enc), d.final()]).toString("utf8");
+}
 
 /* ---------------- passwords & sessions ---------------- */
 function hashPassword(pw, salt) {
@@ -172,10 +191,10 @@ async function runAI(user, body) {
 
 /* ---------------- Zendesk importer ---------------- */
 function csvEscape(v) { v = String(v ?? "").replace(/\r?\n/g, " ").trim(); return /[",]/.test(v) ? `"${v.replace(/"/g, '""')}"` : v; }
-async function zendeskImport({ subdomain, email, token, limit }) {
+async function zendeskImport({ subdomain, email, token, limit, since, skipIds }) {
   if (!/^[a-z0-9][a-z0-9-]{0,62}$/i.test(subdomain)) throw new HttpError(400, "Use just your Zendesk subdomain, like 'acme' from acme.zendesk.com.", "bad_subdomain");
   if (!validEmail(email) || !token) throw new HttpError(400, "Add the agent email and API token from Zendesk Admin Center.", "bad_credentials");
-  const base = `https://${subdomain}.zendesk.com/api/v2`;
+  const base = ZENDESK_BASE ? `${ZENDESK_BASE}/${subdomain}/api/v2` : `https://${subdomain}.zendesk.com/api/v2`;
   const auth = "Basic " + Buffer.from(`${email}/token:${token}`).toString("base64");
   const zget = async (url) => {
     const r = await fetch(url, { headers: { Authorization: auth, Accept: "application/json" } });
@@ -186,10 +205,16 @@ async function zendeskImport({ subdomain, email, token, limit }) {
   };
   const max = Math.min(Math.max(Number(limit) || 200, 20), 1000);
   const tickets = [];
-  let url = `${base}/search.json?query=${encodeURIComponent("type:ticket status:solved")}&sort_by=updated_at&sort_order=desc&per_page=100`;
-  while (url && tickets.length < max) { const page = await zget(url); tickets.push(...(page.results || [])); url = page.next_page; }
+  const skip = new Set((skipIds || []).map(String));
+  let url = `${base}/search.json?query=${encodeURIComponent("type:ticket status:solved" + (since ? " updated>" + since : ""))}&sort_by=updated_at&sort_order=desc&per_page=100`;
+  while (url && tickets.length < max) { const page = await zget(url); tickets.push(...(page.results || []).filter((t) => !skip.has(String(t.id)))); url = page.next_page; }
   tickets.length = Math.min(tickets.length, max);
-  if (tickets.length < 4) throw new HttpError(400, "We found fewer than 4 solved tickets in that Zendesk account.", "too_few");
+  if (!since && tickets.length < 4) throw new HttpError(400, "We found fewer than 4 solved tickets in that Zendesk account.", "too_few");
+  if (!tickets.length) return { csv: "", rows: 0, ids: [] };
+  // Name custom-field columns after their Zendesk titles, so rules read "days since renewal", not "field 360004".
+  const titles = new Map();
+  try { let fu = `${base}/ticket_fields.json`; while (fu) { const f = await zget(fu); (f.ticket_fields || []).forEach((x) => titles.set(x.id, x.title)); fu = f.next_page; } } catch (e) { if (e.code === "zendesk_auth") throw e; }
+  const colOf = (id) => { const t = titles.get(id); const slug = t ? t.toLowerCase().replace(/[^a-z0-9]+/g, "_").replace(/^_|_$/g, "") : ""; return slug && !["ticket_id", "created", "agent", "subject", "message", "internal_note", "priority", "channel"].includes(slug) ? slug : "field_" + id; };
   const comments = new Map();
   for (let i = 0; i < tickets.length; i += 5) {
     await Promise.all(tickets.slice(i, i + 5).map(async (t) => { const c = await zget(`${base}/tickets/${t.id}/comments.json`); comments.set(t.id, c.comments || []); }));
@@ -198,7 +223,7 @@ async function zendeskImport({ subdomain, email, token, limit }) {
   const names = new Map();
   for (let i = 0; i < userIds.length; i += 100) { const u = await zget(`${base}/users/show_many.json?ids=${userIds.slice(i, i + 100).join(",")}`); (u.users || []).forEach((x) => names.set(x.id, x.name)); }
   const fieldIds = [...new Set(tickets.flatMap((t) => (t.custom_fields || []).filter((f) => f.value !== null && f.value !== "" && typeof f.value !== "object").map((f) => f.id)))].slice(0, 20);
-  const head = ["ticket_id", "created", "agent", "subject", "message", "internal_note", "priority", "channel", ...fieldIds.map((id) => "field_" + id)];
+  const head = ["ticket_id", "created", "agent", "subject", "message", "internal_note", "priority", "channel", ...fieldIds.map(colOf)];
   const lines = [head.join(",")];
   for (const t of tickets) {
     const cs = comments.get(t.id) || [];
@@ -208,8 +233,42 @@ async function zendeskImport({ subdomain, email, token, limit }) {
     const fv = new Map((t.custom_fields || []).map((f) => [f.id, f.value]));
     lines.push([t.id, (t.created_at || "").slice(0, 10), names.get(t.assignee_id) || "", t.subject, (t.description || "").slice(0, 1500), note, t.priority || "", t.via?.channel || "", ...fieldIds.map((id) => fv.get(id) ?? "")].map(csvEscape).join(","));
   }
-  return { csv: lines.join("\n"), rows: tickets.length };
+  return { csv: lines.join("\n"), rows: tickets.length, ids: tickets.map((t) => t.id) };
 }
+
+/* ---------------- automatic sync: pull newly solved tickets into the workspace ---------------- */
+function appendUpdate(workspaceId, csv, rows, name) {
+  const w = q("SELECT state FROM workspaces WHERE id = ?").get(workspaceId);
+  const state = w && w.state ? JSON.parse(w.state) : {};
+  state.updates = (state.updates || []).concat([{ date: now().slice(0, 10), csv, name, rows, source: "zendesk" }]);
+  q("UPDATE workspaces SET state = ?, updated = ? WHERE id = ?").run(JSON.stringify(state), now(), workspaceId);
+}
+async function syncConnector(c) {
+  const seen = JSON.parse(c.seen_ids || "[]");
+  try {
+    const since = (c.last_sync || c.created).slice(0, 10);
+    const r = await zendeskImport({ subdomain: c.subdomain, email: c.email, token: unseal(c.token_enc), limit: 1000, since: addDaysISO(since, -1), skipIds: seen });
+    if (r.rows) appendUpdate(c.workspace_id, r.csv, r.rows, `Zendesk sync ${now().slice(0, 10)}`);
+    const keep = seen.concat(r.ids || []).slice(-20000);
+    q("UPDATE connectors SET last_sync = ?, last_status = ?, last_rows = ?, seen_ids = ? WHERE workspace_id = ?").run(now(), "ok", r.rows, JSON.stringify(keep), c.workspace_id);
+    return { ok: true, rows: r.rows };
+  } catch (e) {
+    q("UPDATE connectors SET last_sync = ?, last_status = ? WHERE workspace_id = ?").run(now(), "error: " + (e.message || "sync failed"), c.workspace_id);
+    return { ok: false, error: e.message || "Sync failed." };
+  }
+}
+const addDaysISO = (d, n) => { const x = new Date(d + "T00:00:00Z"); x.setUTCDate(x.getUTCDate() + n); return x.toISOString().slice(0, 10); };
+let syncing = false;
+async function syncDue() {
+  if (syncing || !SECRET) return; syncing = true;
+  try {
+    for (const c of q("SELECT * FROM connectors").all()) {
+      const due = !c.last_sync || Date.now() - Date.parse(c.last_sync) >= c.interval_h * 3600_000;
+      if (due) await syncConnector(c);
+    }
+  } finally { syncing = false; }
+}
+const publicConnector = (c) => c && ({ kind: c.kind, subdomain: c.subdomain, email: c.email, interval_h: c.interval_h, last_sync: c.last_sync, last_status: c.last_status, last_rows: c.last_rows, synced_tickets: JSON.parse(c.seen_ids || "[]").length });
 
 /* ---------------- app page ---------------- */
 function appHtml() {
@@ -273,7 +332,7 @@ async function handle(req, res) {
   // Mutating API calls must carry a custom header, which cross-site forms can't send.
   if (m !== "GET" && req.headers["x-tacit"] !== "1") throw new HttpError(403, "Missing request header.", "csrf");
 
-  if (m === "GET" && p === "/api/health") return send(res, 200, { ok: true, ai: aiConfigured(), model: MODEL, version: VERSION, zendesk: true, waitlist: true });
+  if (m === "GET" && p === "/api/health") return send(res, 200, { ok: true, ai: aiConfigured(), model: MODEL, version: VERSION, zendesk: true, waitlist: true, autosync: !!SECRET });
 
   if (m === "POST" && p === "/api/waitlist") {
     if (limited("wl:" + ip(req), 10, 3600_000)) throw new HttpError(429, "Too many sign-ups from here. Try later.", "rate_limited");
@@ -329,6 +388,8 @@ async function handle(req, res) {
     return send(res, 200, { user: publicUser(q("SELECT * FROM users WHERE id = ?").get(user.id)) });
   }
   if (m === "DELETE" && p === "/api/me") {
+    q("DELETE FROM connectors WHERE user_id = ?").run(user.id);
+    q("DELETE FROM api_keys WHERE user_id = ?").run(user.id);
     q("DELETE FROM workspaces WHERE user_id = ?").run(user.id);
     q("DELETE FROM sessions WHERE user_id = ?").run(user.id);
     q("DELETE FROM ai_usage WHERE user_id = ?").run(user.id);
@@ -346,7 +407,34 @@ async function handle(req, res) {
     q("UPDATE users SET onboarded = 1 WHERE id = ?").run(user.id);
     return send(res, 201, { id, name });
   }
-  const km = /^\/api\/workspaces\/([A-Za-z0-9_-]+)\/keys(?:\/([A-Za-z0-9_]+))?$/.exec(p);
+  const cm = /^\/api\/workspaces\/([A-Za-z0-9_-]+)\/connector(\/sync)?$/.exec(p);
+  if (cm) {
+    const w = q("SELECT id FROM workspaces WHERE id = ? AND user_id = ?").get(cm[1], user.id);
+    if (!w) throw new HttpError(404, "That workspace doesn't exist, or it isn't yours.", "not_found");
+    const c = q("SELECT * FROM connectors WHERE workspace_id = ?").get(w.id);
+    if (m === "GET" && !cm[2]) return send(res, 200, { connector: publicConnector(c) || null, autosync: !!SECRET });
+    if (m === "POST" && !cm[2]) {
+      if (!SECRET) throw new HttpError(503, "Automatic sync is off on this server. Set TACIT_SECRET (any long random string) and restart.", "autosync_off");
+      const b = await readBody(req, 10_000);
+      const sub = str(b.subdomain, 63).toLowerCase(), em = str(b.email).toLowerCase(), tk = str(b.token, 200);
+      const ids = Array.isArray(b.seen_ids) ? b.seen_ids.map(String).slice(0, 20000) : [];
+      // Prove the credentials work before storing them.
+      await zendeskImport({ subdomain: sub, email: em, token: tk, limit: 20, since: now().slice(0, 10), skipIds: [] });
+      const interval = Math.min(Math.max(Number(b.interval_h) || 6, 1), 168);
+      q(`INSERT INTO connectors (workspace_id,user_id,kind,subdomain,email,token_enc,interval_h,last_sync,last_status,last_rows,seen_ids,created)
+         VALUES (?,?,?,?,?,?,?,?,?,?,?,?) ON CONFLICT(workspace_id) DO UPDATE SET subdomain=excluded.subdomain, email=excluded.email,
+         token_enc=excluded.token_enc, interval_h=excluded.interval_h`).run(w.id, user.id, "zendesk", sub, em, seal(tk), interval, now(), "connected", 0, JSON.stringify(ids), now());
+      return send(res, 201, { connector: publicConnector(q("SELECT * FROM connectors WHERE workspace_id = ?").get(w.id)) });
+    }
+    if (m === "POST" && cm[2]) {
+      if (!c) throw new HttpError(404, "Connect Zendesk to this workspace first.", "no_connector");
+      if (limited("sync:" + w.id, 10, 3600_000)) throw new HttpError(429, "Too many manual syncs this hour.", "rate_limited");
+      const r = await syncConnector(c);
+      return send(res, r.ok ? 200 : 502, { ...r, connector: publicConnector(q("SELECT * FROM connectors WHERE workspace_id = ?").get(w.id)) });
+    }
+    if (m === "DELETE" && !cm[2]) { q("DELETE FROM connectors WHERE workspace_id = ?").run(w.id); return send(res, 200, { ok: true }); }
+  }
+  const km = /^\/api\/workspaces\/([A-Za-z0-9_-]+)\/keys(?:\/([A-Za-z0-9_-]+))?$/.exec(p);
   if (km) {
     const w = q("SELECT id FROM workspaces WHERE id = ? AND user_id = ?").get(km[1], user.id);
     if (!w) throw new HttpError(404, "That workspace doesn't exist, or it isn't yours.", "not_found");
@@ -368,11 +456,18 @@ async function handle(req, res) {
     if (m === "GET" && !wm[2]) return send(res, 200, { id: w.id, name: w.name, csv: w.csv, rows: w.rows, source: w.source, state: w.state ? JSON.parse(w.state) : null, created: w.created });
     if (m === "PUT" && wm[2]) {
       const b = await readBody(req, MAX_STATE_BYTES);
-      q("UPDATE workspaces SET state = ?, updated = ? WHERE id = ?").run(JSON.stringify(b.state ?? null), now(), w.id);
+      const incoming = b.state && typeof b.state === "object" ? b.state : null;
+      const stored = w.state ? JSON.parse(w.state) : null;
+      if (incoming && stored && Array.isArray(stored.updates)) {
+        const key = (u) => u.date + "|" + u.name + "|" + u.rows;
+        const have = new Set((incoming.updates || []).map(key));
+        incoming.updates = (incoming.updates || []).concat(stored.updates.filter((u) => u.source === "zendesk" && !have.has(key(u))));
+      }
+      q("UPDATE workspaces SET state = ?, updated = ? WHERE id = ?").run(JSON.stringify(incoming), now(), w.id);
       return send(res, 200, { ok: true });
     }
     if (m === "PATCH" && !wm[2]) { const b = await readBody(req, 10_000); q("UPDATE workspaces SET name = ?, updated = ? WHERE id = ?").run(str(b.name, 80) || w.name, now(), w.id); return send(res, 200, { ok: true }); }
-    if (m === "DELETE" && !wm[2]) { q("DELETE FROM workspaces WHERE id = ?").run(w.id); q("DELETE FROM api_keys WHERE workspace_id = ?").run(w.id); return send(res, 200, { ok: true }); }
+    if (m === "DELETE" && !wm[2]) { q("DELETE FROM workspaces WHERE id = ?").run(w.id); q("DELETE FROM api_keys WHERE workspace_id = ?").run(w.id); q("DELETE FROM connectors WHERE workspace_id = ?").run(w.id); return send(res, 200, { ok: true }); }
   }
 
   if (m === "POST" && p === "/api/ai") {
@@ -383,8 +478,8 @@ async function handle(req, res) {
   if (m === "POST" && p === "/api/connectors/zendesk/import") {
     if (limited("zd:" + user.id, 5, 3600_000)) throw new HttpError(429, "Too many imports this hour.", "rate_limited");
     const b = await readBody(req, 10_000);
-    const { csv, rows } = await zendeskImport({ subdomain: str(b.subdomain, 63).toLowerCase(), email: str(b.email).toLowerCase(), token: str(b.token, 200), limit: b.limit });
-    return send(res, 200, { csv, rows }); // credentials are used once and never stored
+    const r = await zendeskImport({ subdomain: str(b.subdomain, 63).toLowerCase(), email: str(b.email).toLowerCase(), token: str(b.token, 200), limit: b.limit });
+    return send(res, 200, r); // credentials are used once here; they're stored (encrypted) only if you turn on automatic sync
   }
 
   throw new HttpError(404, "Not found.", "not_found");
@@ -399,4 +494,5 @@ const server = http.createServer((req, res) => {
 });
 // Expired sessions are cleaned up hourly.
 setInterval(() => q("DELETE FROM sessions WHERE expires < ?").run(Date.now()), 3600_000).unref();
-server.listen(PORT, () => console.log(`Tacit ${VERSION} on http://localhost:${PORT}  model=${MODEL}  ai=${aiConfigured() ? "on" : "off (set ANTHROPIC_API_KEY)"}`));
+setInterval(() => syncDue().catch((e) => console.error("sync", e)), SYNC_TICK_MS).unref();
+server.listen(PORT, () => console.log(`Tacit ${VERSION} on http://localhost:${PORT}  model=${MODEL}  ai=${aiConfigured() ? "on" : "off (set ANTHROPIC_API_KEY)"}  autosync=${SECRET ? "on" : "off (set TACIT_SECRET)"}`));

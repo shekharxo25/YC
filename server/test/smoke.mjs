@@ -9,6 +9,8 @@ import { fileURLToPath } from "node:url";
 import assert from "node:assert/strict";
 import { execFileSync } from "node:child_process";
 import { opsResolve } from "../ops-runtime.mjs";
+import { startMockZendesk } from "./mock-zendesk.mjs";
+import { DatabaseSync } from "node:sqlite";
 
 const here = path.dirname(fileURLToPath(import.meta.url));
 const tmp = fs.mkdtempSync(path.join(os.tmpdir(), "tacit-"));
@@ -23,9 +25,10 @@ const mock = http.createServer((req, res) => {
   });
 }).listen(0);
 await new Promise((r) => mock.once("listening", r));
+const zd = await startMockZendesk({ rows: Array.from({ length: 8 }, (_, i) => ({ ticket_id: "#" + (500 + i), created: "2026-09-0" + (i + 1), agent: "Theo K.", subject: "Refund after renewal", message: "We renewed 20 days ago, refund please", internal_note: "Checked invoice; Full refund, RNW-30", plan: "growth", days_since_renewal: "20", amount: "900" })) });
 const port = 20000 + Math.floor(Math.random() * 20000);
 const srv = spawn(process.execPath, ["--disable-warning=ExperimentalWarning", path.join(here, "..", "server.mjs")], {
-  env: { ...process.env, PORT: String(port), TACIT_DB: path.join(tmp, "t.db"), ANTHROPIC_API_KEY: "sk-test", ANTHROPIC_BASE_URL: `http://127.0.0.1:${mock.address().port}` },
+  env: { ...process.env, PORT: String(port), TACIT_DB: path.join(tmp, "t.db"), ANTHROPIC_API_KEY: "sk-test", ANTHROPIC_BASE_URL: `http://127.0.0.1:${mock.address().port}`, TACIT_SECRET: "smoke-secret-0123456789", TACIT_ZENDESK_BASE: zd.base, TACIT_SYNC_TICK_MS: "600000" },
   stdio: ["ignore", "pipe", "inherit"],
 });
 await new Promise((r) => srv.stdout.once("data", r));
@@ -118,6 +121,27 @@ await check("agent API: CORS preflight, bad key, revoked key", async () => {
   assert.equal((await fetch(base + "/api/v1/procedures", { headers: { Authorization: "Bearer " + apiKey } })).status, 401);
 });
 
+await check("Zendesk import names columns from field titles", async () => {
+  const r = await call("POST", "/api/connectors/zendesk/import", { subdomain: "acme", email: "agent@acme.io", token: "zd-token" });
+  assert.equal(r.status, 200); assert.equal(r.json.rows, 8); assert.match(r.json.csv.split("\n")[0], /days_since_renewal/); assert.match(r.json.csv, /Full refund, RNW-30/);
+  const bad = await call("POST", "/api/connectors/zendesk/import", { subdomain: "acme", email: "agent@acme.io", token: "wrong" }); assert.equal(bad.status, 400); assert.equal(bad.json.code, "zendesk_auth");
+});
+await check("auto-sync: connect stores the token encrypted, sync pulls only new tickets", async () => {
+  assert.equal((await call("POST", "/api/workspaces/wsmoke1/connector", { subdomain: "acme", email: "agent@acme.io", token: "wrong" })).status, 400);
+  const c = await call("POST", "/api/workspaces/wsmoke1/connector", { subdomain: "acme", email: "agent@acme.io", token: "zd-token", seen_ids: ["500", "501", "502", "503", "504", "505", "506", "507"] });
+  assert.equal(c.status, 201);
+  const db = new DatabaseSync(path.join(tmp, "t.db")); const row = db.prepare("SELECT token_enc FROM connectors").get(); assert.ok(!row.token_enc.includes("zd-token"));
+  assert.equal((await call("POST", "/api/workspaces/wsmoke1/connector/sync")).json.rows, 0);
+  zd.add({ ticket_id: "#900", created: new Date().toISOString().slice(0, 10), agent: "Maya R.", subject: "Refund after renewal", message: "Renewed 40 days ago", internal_note: "Checked invoice; Full refund, RNW-30", days_since_renewal: "40" });
+  const s1 = await call("POST", "/api/workspaces/wsmoke1/connector/sync"); assert.equal(s1.json.rows, 1);
+  assert.equal((await call("POST", "/api/workspaces/wsmoke1/connector/sync")).json.rows, 0);
+  const st = (await call("GET", "/api/workspaces/wsmoke1")).json.state; assert.equal(st.updates.filter((u) => u.source === "zendesk").length, 1);
+  // a browser that hasn't seen the sync yet saves its state: the synced tickets must survive
+  await call("PUT", "/api/workspaces/wsmoke1/state", { state: { procs: [], ops: bundle } });
+  assert.equal((await call("GET", "/api/workspaces/wsmoke1")).json.state.updates.length, 1);
+  assert.equal((await call("DELETE", "/api/workspaces/wsmoke1/connector")).status, 200);
+});
+
 await check("logout ends the session", async () => { await call("POST", "/api/auth/logout"); const r = await call("GET", "/api/me"); assert.equal(r.status, 401); });
 await check("login with wrong password fails, right one works", async () => {
   assert.equal((await call("POST", "/api/auth/login", { email: "ana@acme.io", password: "nope" })).status, 401);
@@ -125,6 +149,6 @@ await check("login with wrong password fails, right one works", async () => {
   assert.equal((await call("GET", "/api/me")).json.workspaces.length, 1);
 });
 
-srv.kill(); mock.close(); fs.rmSync(tmp, { recursive: true, force: true });
+srv.kill(); mock.close(); zd.server.close(); fs.rmSync(tmp, { recursive: true, force: true });
 console.log(failures ? `\n${failures} check(s) failed` : "\nAll checks passed");
 process.exit(failures ? 1 : 0);

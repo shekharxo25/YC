@@ -1,3 +1,4 @@
+<meta charset="utf-8">
 <title>Tacit Company Brain</title>
 <meta name="description" content="Tacit turns resolved support tickets, escalation threads and call notes into executable procedures for AI agents, with provenance, confidence and drift detection.">
 <link rel="preconnect" href="https://fonts.googleapis.com">
@@ -1023,7 +1024,7 @@ const PEOPLE={
  'Marcus L.':{role:'Billing lead',c:5},'Hana S.':{role:'Tax Ops lead',c:6},'Owen B.':{role:'Compliance',c:4}
 };
 const firstName=n=>String(n||'').split(' ')[0];
-function initials(n){return String(n||'?').replace(/[^A-Za-zÀ-ÿ ]/g,'').split(' ').filter(Boolean).map(w=>w[0]).join('').slice(0,2).toUpperCase()}
+function initials(n){return String(n||'?').replace(/[^A-Za-z\u00C0-\u00FF ]/g,'').split(' ').filter(Boolean).map(w=>w[0]).join('').slice(0,2).toUpperCase()}
 function av(n,size){const c=(PEOPLE[n]&&PEOPLE[n].c)||(String(n).length%6)+1;return `<span class="av ${size||''} c${c}" title="${esc(n)}">${esc(initials(n))}</span>`}
 function roleOf(n){return (PEOPLE[n]&&PEOPLE[n].role)||''}
 
@@ -2732,7 +2733,7 @@ RENDER.onboard=function(){
     <div id="onbZd" ${ONB.choice==='zendesk'?'':'hidden'} class="stack">
       <div class="grid2"><div class="field"><label for="zdSub">Zendesk subdomain</label><input type="text" id="zdSub" placeholder="acme (from acme.zendesk.com)"></div><div class="field"><label for="zdEmail">Agent email</label><input type="text" id="zdEmail" placeholder="you@company.com"></div></div>
       <div class="grid2"><div class="field"><label for="zdToken">API token</label><input type="text" id="zdToken" placeholder="From Admin Center → Apps and integrations → Zendesk API" autocomplete="off"></div><div class="field"><label for="zdLimit">How many solved tickets</label><select id="zdLimit"><option>200</option><option selected>500</option><option>1000</option></select></div></div>
-      <p class="small muted">Tacit reads solved tickets and their comments. Your token is used once for this import and never saved.</p>
+      ${SERVER.health&&SERVER.health.autosync?`<label class="small" style="display:flex;gap:8px;align-items:center"><input type="checkbox" id="zdAuto" checked> Keep this workspace current: check for newly solved tickets every 6 hours</label><p class="small muted">Tacit reads solved tickets and their comments, read-only. With automatic sync on, your token is stored encrypted (AES-256-GCM) so the server can check for new tickets; turn it off any time.</p>`:'<p class="small muted">Tacit reads solved tickets and their comments, read-only. Your token is used once for this import and never saved.</p>'}
     </div>
     <div id="onbErr"></div>
     <div class="btn-row"><button class="btn primary" id="onbGo">${ONB.choice==='csv'?'Build my workspace':ONB.choice==='zendesk'?'Import and build my workspace':'Open the demo workspace'}</button><button class="btn ghost" id="onbSkip">Skip for now</button></div>
@@ -2751,7 +2752,9 @@ RENDER.onboard=function(){
       if(!sub||!em||!tk){$('#onbErr').innerHTML='<div class="form-err" role="alert">Add your subdomain, agent email and API token.</div>';return}
       $('#onbGo').disabled=true;$('#onbGo').textContent='Reading your Zendesk tickets…';
       api('POST','/api/connectors/zendesk/import',{subdomain:sub,email:em,token:tk,limit:+$('#zdLimit').value}).then(r=>{
-        try{const b=createWs(name,r.csv,'zendesk');ONB.csv='';ONB.name='';location.hash='#overview';toast(`Imported ${r.rows} tickets. Tacit learned ${b.procs.length} situations.`)}
+        try{const auto=$('#zdAuto')&&$('#zdAuto').checked;const b=createWs(name,r.csv,'zendesk');const wsId=session().active;
+          if(auto)LAST_WS_POST.then(()=>api('POST','/api/workspaces/'+wsId+'/connector',{subdomain:sub,email:em,token:tk,interval_h:6,seen_ids:r.ids||[]})).then(()=>toast('Automatic sync is on. Tacit checks Zendesk every 6 hours.')).catch(e=>toast('Imported, but automatic sync could not be turned on: '+e.message));
+          ONB.csv='';ONB.name='';location.hash='#overview';toast(`Imported ${r.rows} tickets. Tacit learned ${b.procs.length} situations.`)}
         catch(e){$('#onbErr').innerHTML=`<div class="form-err" role="alert">${esc(e.message||String(e))}</div>`;$('#onbGo').disabled=false;$('#onbGo').textContent='Import and build my workspace'}
       }).catch(e=>{$('#onbErr').innerHTML=`<div class="form-err" role="alert">${esc(e.message)}</div>`;$('#onbGo').disabled=false;$('#onbGo').textContent='Import and build my workspace'});
       return;
@@ -2766,11 +2769,12 @@ RENDER.onboard=function(){
     },60);
   };
 };
+let LAST_WS_POST=Promise.resolve();
 function createWs(name,csv,source){
   const se=session();const id='w'+Date.now().toString(36);const b=buildWorkspace(csv);WS_CACHE[id]=b;
   const a=accounts();const acc=a[se.key];acc.workspaces=(acc.workspaces||[]).concat([{id,name,type:'csv',csv,created:new Date().toISOString(),rows:b.rows,source:source||'csv',server:!!se.server}]);acc.active=id;acc.onboarded=true;
   store(ACC_KEY,a);CUR_WS=null;
-  if(se.server) serverCall(api('POST','/api/workspaces',{id,name,csv,source:source||'csv'}));
+  if(se.server){LAST_WS_POST=api('POST','/api/workspaces',{id,name,csv,source:source||'csv'});serverCall(LAST_WS_POST)}
   return b;
 }
 function markOnboarded(){const se=session();if(!se||se.guest)return;const a=accounts();a[se.key].onboarded=true;store(ACC_KEY,a);if(se.server)serverCall(api('PATCH','/api/me',{onboarded:true}))}
@@ -3158,9 +3162,24 @@ function liveCardHTML(){
       <div class="btn-row"><button class="btn primary sm" data-addnew="${esc(c.proc.id)}">Add to the library</button><button class="btn sm ghost" data-ignorenew="${esc(c.proc.id)}">Not useful</button></div></div>
       <ol class="flow">${c.proc.steps.map(s=>stepHTML(c.proc,s)).join('')}</ol>
       <div class="who-line"><span class="avs">${[...new Set(c.tickets.map(t=>t.agent))].slice(0,4).map(a=>av(a,'sm')).join('')}</span><span>Learned from ${[...new Set(c.tickets.map(t=>firstName(t.agent)))].slice(0,3).map(esc).join(', ')}.</span></div></div>`).join('');
-  return `<div class="card pad stack"><div style="display:flex;justify-content:space-between;gap:10px;flex-wrap:wrap;align-items:baseline"><h3 style="font-size:19px">Keep the brain current</h3>${last?`<span class="small dim">Last read ${fd(NOW)}</span>`:''}</div>${ctl}${summary}<div id="liveErr"></div></div>${cands}`;
+  const conn=LIVE.kind==='csv'&&SERVER.on&&activeWs(session()).server?'<div id="liveConn" class="stack"></div>':'';
+  return `<div class="card pad stack"><div style="display:flex;justify-content:space-between;gap:10px;flex-wrap:wrap;align-items:baseline"><h3 style="font-size:19px">Keep the brain current</h3>${last?`<span class="small dim">Last read ${fd(NOW)}</span>`:''}</div>${conn}${ctl}${summary}<div id="liveErr"></div></div>${cands}`;
+}
+function renderConnector(){
+  const el=$('#liveConn');if(!el)return;const ws=activeWs(session());
+  api('GET','/api/workspaces/'+ws.id+'/connector').then(r=>{
+    const c=r.connector;
+    if(c){el.innerHTML=`<div class="quote" style="border-color:${/^error/.test(c.last_status||'')?'var(--drift)':'var(--ok)'}"><div class="src-l">Automatic sync · Zendesk ${esc(c.subdomain)}</div>Checks for newly solved tickets every ${c.interval_h} hours. Last checked ${c.last_sync?esc(new Date(c.last_sync).toLocaleString()):'never'}${c.last_rows!=null?`, ${c.last_rows} new tickets`:''}. ${c.synced_tickets} tickets synced so far.${/^error/.test(c.last_status||'')?`<br><b>${esc(c.last_status)}</b>`:''}</div>
+      <div class="btn-row"><button class="btn primary sm" id="connSync">Sync now</button><button class="btn sm ghost" id="connOff">Turn off automatic sync</button></div>`;
+      $('#connSync').onclick=async()=>{const b=$('#connSync');b.disabled=true;b.textContent='Checking Zendesk…';try{const x=await api('POST','/api/workspaces/'+ws.id+'/connector/sync');await serverSync();CUR_WS=null;route();toast(x.rows?`Synced ${x.rows} new tickets from Zendesk. ${refreshBadge().brainDrift.length} drift flags, ${pendingNew().length} new situations.`:'No new solved tickets since the last check.')}catch(e){toast(e.message);b.disabled=false;b.textContent='Sync now'}};
+      $('#connOff').onclick=()=>api('DELETE','/api/workspaces/'+ws.id+'/connector').then(()=>{toast('Automatic sync is off. Your token was deleted.');renderConnector()}).catch(e=>toast(e.message));
+    } else if(r.autosync){el.innerHTML=`<p class="small muted">Connect Zendesk and Tacit checks for newly solved tickets on its own.</p><div class="grid2"><div class="field"><label for="cnSub">Zendesk subdomain</label><input type="text" id="cnSub" placeholder="acme"></div><div class="field"><label for="cnEmail">Agent email</label><input type="text" id="cnEmail"></div></div><div class="field"><label for="cnTok">API token</label><input type="text" id="cnTok" autocomplete="off"></div><div class="btn-row"><button class="btn sm" id="cnGo">Turn on automatic sync</button></div>`;
+      $('#cnGo').onclick=()=>api('POST','/api/workspaces/'+ws.id+'/connector',{subdomain:$('#cnSub').value.trim(),email:$('#cnEmail').value.trim(),token:$('#cnTok').value.trim(),interval_h:6}).then(()=>{toast('Automatic sync is on');renderConnector()}).catch(e=>toast(e.message));
+    } else el.innerHTML='<p class="small dim">Automatic Zendesk sync is off on this server (TACIT_SECRET isn\'t set).</p>';
+  }).catch(()=>{el.innerHTML=''});
 }
 function wireLive(){
+  renderConnector();
   const go=()=>{CUR_WS=null;route()};
   const d=$('#liveDemo');if(d)d.onclick=()=>{S.demoWeek=true;save();go();const w=demoWeekTickets();toast(`Read ${w.rows} new tickets. ${refreshBadge().brainDrift.length} procedures drifted, ${pendingNew().length} new situation spotted.`)};
   const u=$('#liveUndo');if(u)u.onclick=()=>{if(LIVE.kind==='demo'){S.demoWeek=false;S.procs=S.procs.filter(p=>!p.isNew)}else{S.updates=(S.updates||[]).slice(0,-1)}save();go();toast('Undone')};
